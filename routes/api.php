@@ -1,6 +1,5 @@
 <?php
 
-<<<<<<< HEAD
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -18,15 +17,12 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-=======
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\HistoryPointController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\RankController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 // Route mặc định
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -87,4 +83,3 @@ Route::prefix('admin')->group(function () {
 Route::prefix('client')->group(function () {
 
 });
->>>>>>> f9365bd (Khởi tạo dự án và thêm toàn bộ code)
