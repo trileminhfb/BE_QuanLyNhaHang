@@ -6,24 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create("categories", function (Blueprint $table) {
+        Schema::create('rates', function (Blueprint $table) {
             $table->id();
-            $table->integer("status");
-            $table->string("name");
+            $table->foreignId('id_food')->constrained('food')->onDelete('cascade');
+            $table->integer('star')->default(5);
+            $table->text('detail')->nullable();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('category');
+        Schema::dropIfExists('rates');
     }
 };
