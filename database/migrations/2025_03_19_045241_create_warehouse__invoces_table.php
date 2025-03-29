@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('warehouse__invoces', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('id_ingredient')->constrained('ingredients')->onDelete('cascade');
+            $table->integer('id_ingredient');
             $table->integer('quantity');
             $table->integer('price');
             $table->timestamps();
