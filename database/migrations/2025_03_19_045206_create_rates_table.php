@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('rates', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('id_food')->constrained('food')->onDelete('cascade');
+            $table->integer('id_food');
             $table->integer('star')->default(5);
             $table->text('detail')->nullable();
             $table->timestamps();
