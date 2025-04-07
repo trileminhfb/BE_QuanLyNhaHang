@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Review_Management extends Model
+class ReviewManagement extends Model
 {
+    use HasFactory;
     protected $table = 'review_management';
-
     protected $fillable = [
         'id_rate',
-        'comment',
         'id_user',
+        'comment',
     ];
 
 }
