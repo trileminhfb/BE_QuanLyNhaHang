@@ -3,14 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Warehouse_Invoce extends Model
+class WarehouseInvoice extends Model
 {
+    use HasFactory;
     protected $table = 'warehouse_invoices';
-
     protected $fillable = [
         'id_ingredient',
         'quantity',
         'price',
     ];
 }
+ 

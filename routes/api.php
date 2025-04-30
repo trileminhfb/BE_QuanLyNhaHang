@@ -6,8 +6,15 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\HistoryPointController;
+use App\Http\Controllers\IngredientController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\RankController;
+use App\Http\Controllers\RateController;
+use App\Http\Controllers\ReviewManagementController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\WarehouseController;
+use App\Http\Controllers\WarehouseInvoiceController;
+
 // Route mặc định
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -62,7 +69,52 @@ Route::prefix('admin')->group(function () {
         Route::put('/{id}', [RankController::class, 'update']);
         Route::delete('/{id}', [RankController::class, 'destroy']);
     });
+
+    Route::prefix('ingredients')->group(function () {
+        Route::get('/', [IngredientController::class, 'getData']);
+        Route::get('/{id}', [IngredientController::class, 'getById']);
+        Route::post('/', [IngredientController::class, 'store']);
+        Route::put('/{id}', [IngredientController::class, 'update']);
+        Route::delete('/{id}', [IngredientController::class, 'destroy']);
+    });
+
+    Route::prefix('warehouses')->group(function () {
+        Route::get('/', [WarehouseController::class, 'getData']);
+        Route::post('/', [WarehouseController::class, 'store']);
+        Route::put('/{id}', [WarehouseController::class, 'update']);
+        Route::delete('/{id}', [WarehouseController::class, 'destroy']);
+    });
+
+    Route::prefix('warehouse-invoices')->group(function () {
+        Route::get('/', [WarehouseInvoiceController::class, 'getData']);
+        Route::post('/', [WarehouseInvoiceController::class, 'store']);
+        Route::put('/{id}', [WarehouseInvoiceController::class, 'update']);
+        Route::delete('/{id}', [WarehouseInvoiceController::class, 'destroy']);
+        Route::get('/search', [WarehouseInvoiceController::class, 'search']);
+    });
+
+    Route::prefix('review-management')->group(function () {
+        Route::get('/', [ReviewManagementController::class, 'getData']);
+        Route::post('/', [ReviewManagementController::class, 'store']);
+        Route::put('/{id}', [ReviewManagementController::class, 'update']);
+        Route::delete('/{id}', [ReviewManagementController::class, 'destroy']);
+    });
+
+    Route::prefix('users')->group(function () {
+        Route::get('/', [UserController::class, 'getData']);
+        Route::get('/{id}', [UserController::class, 'getById']);
+        Route::post('/', [UserController::class, 'store']);
+        Route::put('/{id}', [UserController::class, 'update']);
+        Route::delete('/{id}', [UserController::class, 'destroy']);
+    });
 });
 
 // Nhóm route cho CLIENT
-Route::prefix('client')->group(function () {});
+Route::prefix('client')->group(function () {
+    Route::prefix('rates')->group(function () {
+        Route::get('/', [RateController::class, 'getData']);
+        Route::post('/', [RateController::class, 'store']);
+        Route::put('/{id}', [RateController::class, 'update']);
+        Route::delete('/{id}', [RateController::class, 'destroy']);
+    });
+});
