@@ -39,7 +39,7 @@ class InvoiceController extends Controller
     }
 
     // Cập nhật hóa đơn
-    public function update(InvoiceRequest $request, $id)
+    public function update(Request $request, $id)
     {
         $invoice = Invoice::find($id);
 
@@ -47,13 +47,19 @@ class InvoiceController extends Controller
             return response()->json(['message' => 'Invoice not found'], 404);
         }
 
-        $invoice->update($request->validated());
+        $invoice->update([
+            'id_booking' => $request->id_booking,
+            'timeEnd'    => $request->timeEnd,
+            'total'      => $request->total,
+            'id_user'    => $request->id_user,
+        ]);
 
         return response()->json([
             'message' => 'Invoice updated successfully',
             'invoice' => $invoice
         ], 200);
     }
+
 
     // Xoá hóa đơn
     public function delete($id)
