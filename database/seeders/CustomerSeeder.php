@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 class CustomerSeeder extends Seeder
 {
     public function run(): void
-    { 
+    {
         $names = [
             'Nguyễn Văn An',
             'Trần Thị Bích',
@@ -27,9 +27,9 @@ class CustomerSeeder extends Seeder
 
         for ($i = 0; $i < 10; $i++) {
             $customers[] = [
-                'std' => '09' . rand(0,9) . rand(0,9) . rand(1000000, 9999999),
+                'std' => '09' . rand(0, 9) . rand(0, 9) . rand(1000000, 9999999),
                 'FullName' => $names[$i],
-                'image' => 'https://khothietke.net/wp-content/uploads/2021/04/Khovector-007-298x300.jpg',
+                'image' => 'user' . rand(1, 7) . '.png',
                 'otp' => rand(0, 1) ? rand(100000, 999999) : null,
                 'point' => rand(50, 500),
                 'id_rank' => rand(1, 4),
