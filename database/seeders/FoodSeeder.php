@@ -13,7 +13,7 @@ class FoodSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('food')->insert([
+        DB::table('foods')->insert([
             [
                 'name' => 'Gà rán truyền thống',
                 'id_type' => 1,

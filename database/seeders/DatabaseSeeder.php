@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             IngredientSeeder::class,
             WarehouseSeeder::class,
             TablesSeeder::class,
+            UserSeeder::class,
         ]);
     }
 }
