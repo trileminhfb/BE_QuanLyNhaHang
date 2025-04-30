@@ -27,10 +27,11 @@ class CustomerSeeder extends Seeder
 
         for ($i = 0; $i < 10; $i++) {
             $customers[] = [
-                'std' => '09' . rand(0,9) . rand(0,9) . rand(1000000, 9999999), // Ví dụ: 0934567890
+                'std' => '09' . rand(0,9) . rand(0,9) . rand(1000000, 9999999),
                 'FullName' => $names[$i],
-                'otp' => rand(0, 1) ? rand(100000, 999999) : null, // 50% có otp
-                'point' => rand(50, 500), // từ 50 đến 500 điểm
+                'image' => 'https://khothietke.net/wp-content/uploads/2021/04/Khovector-007-298x300.jpg',
+                'otp' => rand(0, 1) ? rand(100000, 999999) : null,
+                'point' => rand(50, 500),
                 'id_rank' => rand(1, 4),
                 'created_at' => now(),
                 'updated_at' => now(),

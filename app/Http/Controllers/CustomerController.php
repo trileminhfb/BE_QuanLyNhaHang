@@ -9,11 +9,17 @@ class CustomerController extends Controller
 {
     public function index()
     {
-        $customers = Customer::all();
-        return response()->json([
-            "customers" => $customers
-        ]);
-    }
+        try {
+            $customers = Customer::with(['rank:id,nameRank,necessaryPoint,saleRank'])->get();
+            return response()->json([
+                "customers" => $customers
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                "error" => $e->getMessage()
+            ], 500);
+        }
+    }    
     public function store(Request $request)
     {
         $customer = new Customer();
@@ -71,20 +77,19 @@ class CustomerController extends Controller
         ], 200);
     }
     public function delete($id)
-{
-    $customer = Customer::find($id);
+    {
+        $customer = Customer::find($id);
 
-    if (!$customer) {
+        if (!$customer) {
+            return response()->json([
+                'message' => 'Customer not found'
+            ], 404);
+        }
+
+        $customer->delete();
+
         return response()->json([
-            'message' => 'Customer not found'
-        ], 404);
+            'message' => 'Customer deleted successfully'
+        ], 200);
     }
-
-    $customer->delete();
-
-    return response()->json([
-        'message' => 'Customer deleted successfully'
-    ], 200);
-}
-
 }
