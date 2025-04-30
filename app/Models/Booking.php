@@ -14,12 +14,12 @@ class Booking extends Model
         'timeBooking',
         'id_food',
         'quantity',
-        'id_cutomer',
+        'id_customer',
     ];
 
     public function customer()
     {
-        return $this->belongsTo(Customer::class, 'id_cutomer');
+        return $this->belongsTo(Customer::class, 'id_customer');
     }
 
     public function food()
