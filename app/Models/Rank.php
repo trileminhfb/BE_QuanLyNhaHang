@@ -8,10 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 class Rank extends Model
 {
     use HasFactory;
+    
     protected $table = "ranks";
+    
     protected $fillable = [
         "nameRank",
         "necessaryPoint",
         "saleRank",
+        "image",  // Add this to allow mass-assignment
     ];
 }
