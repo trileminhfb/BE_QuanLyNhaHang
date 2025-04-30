@@ -8,9 +8,9 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('warehouse__invoces', function (Blueprint $table) {
+        Schema::create('warehouse__invoices', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('id_ingredient')->constrained('ingredients')->onDelete('cascade');
+            $table->integer('id_ingredient');
             $table->integer('quantity');
             $table->integer('price');
             $table->timestamps();
@@ -19,6 +19,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('warehouse__invoces');
+        Schema::dropIfExists('warehouse__invoices');
     }
 };
