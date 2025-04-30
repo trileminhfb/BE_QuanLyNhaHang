@@ -36,7 +36,7 @@ Route::prefix('admin')->group(function () {
     });
 
     Route::prefix('bookings')->group(function () {
-        Route::get('/', [BookingController::class, 'index']);
+        Route::get('/', [BookingController::class, 'indexWithDetails']);
         Route::post('/create', [BookingController::class, 'store']);
         Route::get('/{id}', [BookingController::class, 'show']);
         Route::put('/{id}', [BookingController::class, 'update']);

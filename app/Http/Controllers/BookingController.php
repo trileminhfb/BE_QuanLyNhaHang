@@ -1,17 +1,53 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Booking;
+use Illuminate\Support\Facades\DB;
 
 class BookingController extends Controller
 {
-    // Lấy danh sách tất cả các đặt bàn
-    public function index()
+    public function indexWithDetails()
     {
-        $bookings = Booking::all();
-        return response()->json($bookings, 200);
+        try {
+            $bookings = DB::table('bookings')
+                ->leftJoin('customers', 'bookings.id_cutomer', '=', 'customers.id')
+                ->leftJoin('food', 'bookings.id_food', '=', 'food.id')
+                ->leftJoin('tables', 'bookings.id_table', '=', 'tables.id')
+                ->select(
+                    'bookings.id',
+                    'bookings.timeBooking',
+                    'bookings.quantity',
+                    'customers.FullName as customer_name',
+                    'food.name as food_name',
+                    'tables.number as table_number',
+                    'bookings.created_at',
+                    'bookings.updated_at'
+                )
+                ->get();
+
+            return response()->json(['data' => $bookings], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
+    // public function indexWithDetails()
+    // {
+    //     try {
+    //         $bookings = DB::table('bookings')
+    //             ->join('customers', 'bookings.id_cutomer', '=', 'customers.id')
+    //             ->select('bookings.*', 'customers.FullName')
+    //             ->get();
+    //         return response()->json($bookings, 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'error' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
 
     // Tạo mới một đặt bàn
     public function store(Request $request)
