@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 class InvoiceSeeder extends Seeder
 {
     public function run(): void
-    {
+    { 
         $invoices = [];
         for ($i = 1; $i <= 10; $i++) {
             $invoices[] = [
