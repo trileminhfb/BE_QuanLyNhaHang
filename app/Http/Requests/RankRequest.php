@@ -11,12 +11,14 @@ class RankRequest extends FormRequest
         return true;
     }
 
-    public function rules(): array
+    public function rules()
     {
         return [
-            'nameRank' => 'required|string|unique:ranks,nameRank',
-            'necessaryPoint' => 'required|integer|min:0',
-            'saleRank' => 'required|integer|min:0|max:100',
+            'nameRank' => 'required|string|max:255',
+            'necessaryPoint' => 'required|integer',
+            'saleRank' => 'required|integer',
+            'image' => 'nullable|string',  // Optional for the image
         ];
     }
+    
 }

@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create("ranks", function (Blueprint $table) {
@@ -16,15 +13,12 @@ return new class extends Migration
             $table->string("nameRank");
             $table->integer("necessaryPoint");
             $table->integer("saleRank");
+            $table->string("image")->nullable(); // Thêm dòng này
             $table->timestamps();
         });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
+    }    
     public function down(): void
     {
-        //
+        Schema::dropIfExists("ranks"); // Thêm dòng này để có thể rollback
     }
 };

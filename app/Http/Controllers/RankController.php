@@ -17,11 +17,25 @@ class RankController extends Controller
     {
         $rank = Rank::create($request->validated());
 
+        // Set the image based on the nameRank
+        if ($rank->nameRank == 'Bạc') {
+            $rank->image = 'rank_bac.png';
+        } elseif ($rank->nameRank == 'Đồng') {
+            $rank->image = 'rank_dong.png';
+        } elseif ($rank->nameRank == 'Kim Cương') {
+            $rank->image = 'rank_kimcuong.png';
+        } elseif ($rank->nameRank == 'Vàng') {
+            $rank->image = 'rank_vang.png';
+        }
+
+        $rank->save();
+
         return response()->json([
             'message' => 'Rank created successfully',
             'data' => $rank
         ], 201);
     }
+
 
     public function show($id)
     {
@@ -35,20 +49,33 @@ class RankController extends Controller
     }
 
     public function update(RankRequest $request, $id)
-    {
-        $rank = Rank::find($id);
+{
+    $rank = Rank::find($id);
 
-        if (!$rank) {
-            return response()->json(['message' => 'Rank not found'], 404);
-        }
-
-        $rank->update($request->validated());
-
-        return response()->json([
-            'message' => 'Rank updated successfully',
-            'data' => $rank
-        ], 200);
+    if (!$rank) {
+        return response()->json(['message' => 'Rank not found'], 404);
     }
+
+    $rank->update($request->validated());
+
+    // Set the image based on the nameRank
+    if ($rank->nameRank == 'Bạc') {
+        $rank->image = 'rank_bac.png';
+    } elseif ($rank->nameRank == 'Đồng') {
+        $rank->image = 'rank_dong.png';
+    } elseif ($rank->nameRank == 'Kim Cương') {
+        $rank->image = 'rank_kimcuong.png';
+    } elseif ($rank->nameRank == 'Vàng') {
+        $rank->image = 'rank_vang.png';
+    }
+
+    $rank->save();
+
+    return response()->json([
+        'message' => 'Rank updated successfully',
+        'data' => $rank
+    ], 200);
+}
 
     public function destroy($id)
     {
