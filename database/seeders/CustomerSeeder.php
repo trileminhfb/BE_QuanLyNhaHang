@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 class CustomerSeeder extends Seeder
 {
     public function run(): void
-    {
+    { 
         $names = [
             'Nguyễn Văn An',
             'Trần Thị Bích',

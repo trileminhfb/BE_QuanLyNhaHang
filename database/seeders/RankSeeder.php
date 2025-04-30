@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 class RankSeeder extends Seeder
 {
     public function run(): void
-    {
+    { 
         DB::table('ranks')->insert([
             ['nameRank' => 'Bronze',   'necessaryPoint' => 0,    'saleRank' => 0,  'created_at' => now(), 'updated_at' => now()],
             ['nameRank' => 'Silver',   'necessaryPoint' => 100,  'saleRank' => 5,  'created_at' => now(), 'updated_at' => now()],

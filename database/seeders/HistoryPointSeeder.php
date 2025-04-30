@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 class HistoryPointSeeder extends Seeder
 {
     public function run(): void
-    {
+    { 
         $history = [];
         for ($i = 1; $i <= 10; $i++) {
             $history[] = [
