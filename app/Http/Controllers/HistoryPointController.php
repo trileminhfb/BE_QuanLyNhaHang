@@ -11,7 +11,9 @@ class HistoryPointController extends Controller
     // Lấy danh sách tất cả lịch sử điểm
     public function index()
     {
-        return response()->json(HistoryPoint::all(), 200);
+        $historyPoints = HistoryPoint::with('customer')->get();
+
+        return response()->json($historyPoints);
     }
 
     // Tạo mới lịch sử điểm

@@ -5,14 +5,31 @@ namespace App\Http\Controllers;
 use App\Http\Requests\InvoiceRequest;
 use Illuminate\Http\Request;
 use App\Models\Invoice;
+use Illuminate\Support\Facades\DB;
 
 class InvoiceController extends Controller
 {
     // Lấy danh sách hóa đơn
     public function index()
     {
-        $invoices = Invoice::all();
-        return response()->json($invoices, 200);
+        $invoices = DB::table('invoices')
+            ->join('bookings', 'invoices.id_booking', '=', 'bookings.id')
+            ->join('users', 'invoices.id_user', '=', 'users.id')
+            ->select(
+                'invoices.*',
+                'bookings.id_table',
+                'bookings.timeBooking',
+                'bookings.id_food',
+                'bookings.quantity',
+                'bookings.id_cutomer',
+                'users.name as user_name',
+                'users.role',
+                'users.phone_number',
+                'users.email'   
+            )
+            ->get();
+
+        return response()->json($invoices);
     }
 
     // Tạo hóa đơn mới với InvoiceRequest
