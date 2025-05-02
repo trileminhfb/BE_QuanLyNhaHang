@@ -4,62 +4,65 @@ namespace App\Http\Controllers;
 
 use App\Models\Rate;
 use Illuminate\Http\Request;
+use App\Http\Requests\RateRequest;
 
 class RateController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function getData()
     {
-        //
+        $rates = Rate::all();
+        return response()->json($rates);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function store(RateRequest $request)
     {
-        //
+        $rate = Rate::create([
+            'id_food' => $request->id_food,
+            'star'    => $request->star,
+            'detail'  => $request->detail,
+        ]);
+
+        return response()->json([
+            'message' => 'Đánh giá đã được thêm thành công.',
+            'data'    => $rate
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function update(RateRequest $request)
     {
-        //
+        $rate = Rate::where('id', $request->id)->first();
+
+        if (!$rate) {
+            return response()->json(['message' => 'Không tìm thấy đánh giá.'], 404);
+        }
+
+        $rate->update([
+            'id_food' => $request->id_food,
+            'star'    => $request->star,
+            'detail'  => $request->detail,
+        ]);
+
+        return response()->json([
+            'message' => 'Đánh giá đã được cập nhật.',
+            'data'    => $rate
+        ]);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Rate $rate)
+    public function destroy(Request $request)
     {
-        //
+        $deleted = Rate::where('id', $request->id)->delete();
+
+        if ($deleted) {
+            return response()->json(['message' => 'Đánh giá đã được xóa.']);
+        } else {
+            return response()->json(['message' => 'Không tìm thấy đánh giá.'], 404);
+        }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Rate $rate)
+    public function search(Request $request)
     {
-        //
-    }
+        $rates = Rate::where('id_food', 'like', '%' . $request->keyword . '%')->get();
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Rate $rate)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Rate $rate)
-    {
-        //
+        return response()->json($rates);
     }
 }

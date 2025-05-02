@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('warehouse__invoces', function (Blueprint $table) {
+        Schema::create('warehouse__invoices', function (Blueprint $table) {
             $table->id();
             $table->integer('id_ingredient');
             $table->integer('quantity');
@@ -19,6 +19,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('warehouse__invoces');
+        Schema::dropIfExists('warehouse__invoices');
     }
 };
