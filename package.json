@@ -9,9 +9,17 @@
         "axios": "^1.6.4",
         "laravel-vite-plugin": "^1.0.0",
 <<<<<<< HEAD
+<<<<<<< HEAD
         "vite": "^6.3.3"
 =======
         "vite": "^6.2.4"
 >>>>>>> 3ae4d2a (trileminh update)
+=======
+        "vite": "^6.2.4",
+        "vite-plugin-full-reload": "^1.2.0"
+    },
+    "dependencies": {
+        "openai": "^4.96.2"
+>>>>>>> 97b48e8 (update package)
     }
 }
