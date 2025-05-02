@@ -8,12 +8,18 @@ use App\Http\Requests\RateRequest;
 
 class RateController extends Controller
 {
+    // Lấy danh sách đánh giá
     public function getData()
     {
         $rates = Rate::all();
-        return response()->json($rates);
+
+        return response()->json([
+            'status' => 1,
+            'data' => $rates
+        ]);
     }
 
+    // Thêm đánh giá mới
     public function store(RateRequest $request)
     {
         $rate = Rate::create([
@@ -23,17 +29,22 @@ class RateController extends Controller
         ]);
 
         return response()->json([
+            'status'  => 1,
             'message' => 'Đánh giá đã được thêm thành công.',
             'data'    => $rate
         ]);
     }
 
-    public function update(RateRequest $request)
+    // Cập nhật đánh giá theo ID
+    public function update(RateRequest $request, $id)
     {
-        $rate = Rate::where('id', $request->id)->first();
+        $rate = Rate::find($id);
 
         if (!$rate) {
-            return response()->json(['message' => 'Không tìm thấy đánh giá.'], 404);
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Không tìm thấy đánh giá.'
+            ]);
         }
 
         $rate->update([
@@ -43,26 +54,29 @@ class RateController extends Controller
         ]);
 
         return response()->json([
+            'status'  => 1,
             'message' => 'Đánh giá đã được cập nhật.',
             'data'    => $rate
         ]);
     }
 
-    public function destroy(Request $request)
+    // Xóa đánh giá theo ID
+    public function destroy($id)
     {
-        $deleted = Rate::where('id', $request->id)->delete();
+        $rate = Rate::find($id);
 
-        if ($deleted) {
-            return response()->json(['message' => 'Đánh giá đã được xóa.']);
-        } else {
-            return response()->json(['message' => 'Không tìm thấy đánh giá.'], 404);
+        if (!$rate) {
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Không tìm thấy đánh giá.'
+            ]);
         }
-    }
 
-    public function search(Request $request)
-    {
-        $rates = Rate::where('id_food', 'like', '%' . $request->keyword . '%')->get();
+        $rate->delete();
 
-        return response()->json($rates);
+        return response()->json([
+            'status'  => 1,
+            'message' => 'Đánh giá đã được xóa.'
+        ]);
     }
 }

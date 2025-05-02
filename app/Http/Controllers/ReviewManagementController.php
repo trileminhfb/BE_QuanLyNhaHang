@@ -8,12 +8,14 @@ use App\Http\Requests\ReviewManagementRequest;
 
 class ReviewManagementController extends Controller
 {
+    // Lấy danh sách tất cả bình luận
     public function getData()
     {
         $reviews = ReviewManagement::all();
         return response()->json($reviews);
     }
 
+    // Thêm bình luận
     public function store(ReviewManagementRequest $request)
     {
         $review = ReviewManagement::create([
@@ -23,17 +25,22 @@ class ReviewManagementController extends Controller
         ]);
 
         return response()->json([
+            'status' => 1,
             'message' => 'Thêm bình luận thành công.',
-            'data'    => $review
+            'data' => $review
         ]);
     }
 
+    // Cập nhật bình luận
     public function update(ReviewManagementRequest $request)
     {
-        $review = ReviewManagement::where('id', $request->id)->first();
+        $review = ReviewManagement::find($request->id);
 
         if (!$review) {
-            return response()->json(['message' => 'Không tìm thấy bình luận.'], 404);
+            return response()->json([
+                'status' => 0,
+                'message' => 'Không tìm thấy bình luận.'
+            ]);
         }
 
         $review->update([
@@ -43,26 +50,29 @@ class ReviewManagementController extends Controller
         ]);
 
         return response()->json([
+            'status' => 1,
             'message' => 'Cập nhật bình luận thành công.',
-            'data'    => $review
+            'data' => $review
         ]);
     }
 
+    // Xóa bình luận
     public function destroy(Request $request)
     {
-        $deleted = ReviewManagement::where('id', $request->id)->delete();
+        $review = ReviewManagement::find($request->id);
 
-        if ($deleted) {
-            return response()->json(['message' => 'Xóa bình luận thành công.']);
-        } else {
-            return response()->json(['message' => 'Không tìm thấy bình luận.'], 404);
+        if (!$review) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Không tìm thấy bình luận.'
+            ]);
         }
-    }
 
-    public function search(Request $request)
-    {
-        $reviews = ReviewManagement::where('comment', 'like', '%' . $request->keyword . '%')->get();
+        $review->delete();
 
-        return response()->json($reviews);
+        return response()->json([
+            'status' => 1,
+            'message' => 'Xóa bình luận thành công.'
+        ]);
     }
 }
