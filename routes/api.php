@@ -14,6 +14,11 @@ use App\Http\Controllers\FoodController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SaleFoodController;
 use App\Http\Controllers\TypeController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\FoodController;
+use App\Http\Controllers\SaleController;
+use App\Http\Controllers\SaleFoodController;
+use App\Http\Controllers\TypeController;
 use App\Http\Controllers\RateController;
 use App\Http\Controllers\ReviewManagementController;
 use App\Http\Controllers\UserController;
@@ -88,6 +93,42 @@ Route::prefix('admin')->group(function () {
         Route::put('/{id}', [CategoryController::class, 'update']);
         Route::delete('/{id}', [CategoryController::class, 'destroy']);
     });
+    Route::prefix('foods')->group(function () {
+        Route::get('/', [FoodController::class, 'index']);
+        Route::post('/create', [FoodController::class, 'store']);
+        Route::get('/{id}', [FoodController::class, 'show']);
+        Route::put('/{id}', [FoodController::class, 'update']);
+        Route::delete('/{id}', [FoodController::class, 'destroy']);
+    });
+    Route::prefix('sales')->group(function () {
+        Route::get('/', [SaleController::class, 'index']);
+        Route::post('/create', [SaleController::class, 'store']);
+        Route::get('/{id}', [SaleController::class, 'show']);
+        Route::put('/{id}', [SaleController::class, 'update']);
+        Route::delete('/{id}', [SaleController::class, 'destroy']);
+    });
+    Route::prefix('sale_foods')->group(function () {
+        Route::get('/', [SaleFoodController::class, 'index']);
+        Route::post('/create', [SaleFoodController::class, 'store']);
+        Route::get('/{id}', [SaleFoodController::class, 'show']);
+        Route::put('/{id}', [SaleFoodController::class, 'update']);
+        Route::delete('/{id}', [SaleFoodController::class, 'destroy']);
+    });
+    Route::prefix('types')->group(function () {
+        Route::get('/', [TypeController::class, 'index']);
+        Route::post('/create', [TypeController::class, 'store']);
+        Route::get('/{id}', [TypeController::class, 'show']);
+        Route::put('/{id}', [TypeController::class, 'update']);
+        Route::delete('/{id}', [TypeController::class, 'destroy']);
+    });
+    Route::prefix('carts')->group(function () {
+        Route::get('/', [CartController::class, 'index']);
+        Route::post('/create', [CartController::class, 'store']);
+        Route::get('/{id}', [CartController::class, 'show']);
+        Route::put('/{id}', [CartController::class, 'update']);
+        Route::delete('/{id}', [CartController::class, 'destroy']);
+    });
+
     Route::prefix('foods')->group(function () {
         Route::get('/', [FoodController::class, 'index']);
         Route::post('/create', [FoodController::class, 'store']);
