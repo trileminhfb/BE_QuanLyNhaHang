@@ -11,17 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('food', function (Blueprint $table) {
+        Schema::create('foods', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->integer('id_type');
-
-            $table->integer('id_category');
+            $table->unsignedBigInteger('id_type');
+            $table->unsignedBigInteger('id_category');
             $table->integer('bestSeller')->default(0);
             $table->integer('cost');
             $table->string('detail');
             $table->integer('status');
             $table->timestamps();
+
+            // Thêm khóa ngoại
+            $table->foreign('id_type')->references('id')->on('types')->onDelete('cascade');
+            $table->foreign('id_category')->references('id')->on('categories')->onDelete('cascade');
         });
     }
 
@@ -30,6 +33,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('food');
+        Schema::dropIfExists('foods');
     }
+
 };

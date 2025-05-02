@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Category;
 
 class Food extends Model
 {
@@ -12,7 +13,7 @@ class Food extends Model
     protected $table = 'foods';
 
     protected $fillable = [
-        'name', 'type', 'id_category', 'cost', 'detail', 'status','bestSeller'
+        'name', 'id_type', 'id_category', 'cost', 'detail', 'status', 'bestSeller'
     ];
 
      public function sales()
@@ -25,13 +26,15 @@ class Food extends Model
     {
         return $this->hasMany(Cart::class, 'id_food');
     }
-    public function category()
-    {
-        return $this->belongsTo(Category::class, 'id_category');
-    }
-
     public function type()
     {
-        return $this->belongsTo(Type::class, 'id_type');
+        return $this->belongsTo(Type::class, 'id_type'); // Quan hệ với bảng types
     }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'id_category'); // Quan hệ với bảng categories
+    }
+
+
 }

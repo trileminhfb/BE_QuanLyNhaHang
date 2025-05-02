@@ -11,9 +11,8 @@ class Cart extends Model
     protected $fillable = [
         'id_food',
         'id_table',
-        'quantity',
+        'quantity'
     ];
-
     public function food()
     {
         return $this->belongsTo(Food::class, 'id_food');

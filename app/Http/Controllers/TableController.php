@@ -3,63 +3,68 @@
 namespace App\Http\Controllers;
 
 use App\Models\Table;
-use Illuminate\Http\Request;
+use App\Http\Requests\TableRequest;
 
 class TableController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // Lấy danh sách tất cả các bàn
     public function index()
     {
-        //
+        $tables = Table::all();
+        return response()->json($tables, 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    // Tạo mới một bàn
+    public function store(TableRequest $request)
     {
-        //
+        $table = Table::create($request->validated());
+
+        return response()->json([
+            'message' => 'Table created successfully',
+            'table'   => $table
+        ], 201);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    // Hiển thị chi tiết bàn theo ID
+    public function show($id)
     {
-        //
+        $table = Table::find($id);
+
+        if (!$table) {
+            return response()->json(['message' => 'Table not found'], 404);
+        }
+
+        return response()->json($table, 200);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Table $table)
+    // Cập nhật thông tin bàn
+    public function update(TableRequest $request, $id)
     {
-        //
+        $table = Table::find($id);
+
+        if (!$table) {
+            return response()->json(['message' => 'Table not found'], 404);
+        }
+
+        $table->update($request->validated());
+
+        return response()->json([
+            'message' => 'Table updated successfully',
+            'table'   => $table
+        ], 200);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Table $table)
+    // Xoá bàn theo ID
+    public function destroy($id)
     {
-        //
-    }
+        $table = Table::find($id);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Table $table)
-    {
-        //
-    }
+        if (!$table) {
+            return response()->json(['message' => 'Table not found'], 404);
+        }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Table $table)
-    {
-        //
+        $table->delete();
+
+        return response()->json(['message' => 'Table deleted successfully'], 200);
     }
 }
