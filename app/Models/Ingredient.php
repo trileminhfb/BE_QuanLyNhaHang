@@ -11,5 +11,6 @@ class Ingredient extends Model
     protected $table = 'ingredients';
     protected $fillable = [
         'name_ingredient',
+        'image',
     ];
 }

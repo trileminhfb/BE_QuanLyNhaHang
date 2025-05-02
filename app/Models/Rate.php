@@ -14,4 +14,9 @@ class Rate extends Model
         'star',
         'detail',
     ];
+
+    public function food()
+    {
+        return $this->belongsTo(Food::class, 'id_food');
+    }
 }

@@ -23,7 +23,7 @@ class RateRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'id_food.required' => 'Món ăn là bắt buộc.',
+            'id_food.required' => 'ID món ăn là bắt buộc.',
             'id_food.integer'  => 'ID món ăn phải là số nguyên.',
             'id_food.min'      => 'ID món ăn không hợp lệ.',
 
