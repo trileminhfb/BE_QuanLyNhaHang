@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\BoongkingFoodController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CategoryFoodController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\HistoryPointController;
 use App\Http\Controllers\IngredientController;
@@ -53,6 +54,14 @@ Route::prefix('admin')->group(function () {
         Route::get('/{id}', [CategoryController::class, 'show']);
         Route::put('/{id}', [CategoryController::class, 'update']);
         Route::delete('/{id}', [CategoryController::class, 'destroy']);
+    });
+
+    Route::prefix('category-foods')->group(function () {
+        Route::get('/', [CategoryFoodController::class, 'getData']);
+        Route::post('/create', [CategoryFoodController::class, 'store']);
+        Route::get('/{id}', [CategoryFoodController::class, 'findById']);
+        Route::put('/{id}', [CategoryFoodController::class, 'update']);
+        Route::delete('/{id}', [CategoryFoodController::class, 'destroy']);
     });
 
     Route::prefix('history-points')->group(function () {
