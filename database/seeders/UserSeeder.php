@@ -98,5 +98,21 @@ class UserSeeder extends Seeder
 //             'created_at' => now(),
 //             'updated_at' => now(),
 //         ]);
+        // Thêm một người dùng mẫu
+        DB::table('users')->updateOrInsert(
+            ['phone_number' => '0931234567'], // Điều kiện tồn tại
+            [
+                'name' => 'John Doe',
+                'role' => 'admin',
+                'email' => 'john@example.com',
+                'status' => 'active',
+                'birth' => '1990-01-01',
+                'email_verified_at' => now(),
+                'password' => Hash::make('password123'),
+                'remember_token' => Str::random(10),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
     }
 }

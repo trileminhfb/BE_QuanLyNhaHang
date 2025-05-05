@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\BoongkingFoodController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\HistoryPointController;
@@ -106,6 +107,13 @@ Route::prefix('admin')->group(function () {
         Route::post('/', [UserController::class, 'store']);
         Route::put('/{id}', [UserController::class, 'update']);
         Route::delete('/{id}', [UserController::class, 'destroy']);
+    });
+    Route::prefix('booking-food')->group(function () {
+        Route::get('/', [BoongkingFoodController::class, 'index']);
+        Route::post('/', [BoongkingFoodController::class, 'store']);
+        Route::get('/{id}', [BoongkingFoodController::class, 'show']);
+        Route::put('/{id}', [BoongkingFoodController::class, 'update']);
+        Route::delete('/{id}', [BoongkingFoodController::class, 'destroy']);
     });
 });
 

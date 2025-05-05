@@ -14,11 +14,25 @@ class BookingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id_table' => 'required|integer',
+            'id_table' => 'required|integer|exists:tables,id',
             'timeBooking' => 'required|date',
-            'id_food' => 'required|integer',
             'quantity' => 'required|integer|min:1',
-            'id_cutomer' => 'required|exists:customers,id',
+            'id_customer' => 'required|exists:customers,id',  // Sửa đúng tên trường là 'id_customer'
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'id_table.required' => 'Vui lòng chọn bàn.',
+            'id_table.exists' => 'Bàn không tồn tại.',
+            'timeBooking.required' => 'Vui lòng chọn thời gian đặt bàn.',
+            'timeBooking.date' => 'Thời gian đặt bàn không đúng định dạng.',
+            'quantity.required' => 'Vui lòng nhập số lượng.',
+            'quantity.integer' => 'Số lượng phải là số nguyên.',
+            'quantity.min' => 'Số lượng tối thiểu là 1.',
+            'id_customer.required' => 'Vui lòng chọn khách hàng.',
+            'id_customer.exists' => 'Khách hàng không tồn tại.',
         ];
     }
 }
