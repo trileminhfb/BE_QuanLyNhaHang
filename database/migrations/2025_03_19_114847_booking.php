@@ -15,13 +15,11 @@ return new class extends Migration
             $table->id();
             $table->integer("id_table");
             $table->dateTime("timeBooking");
-            $table->integer("id_food");
             $table->integer("quantity");
             $table->integer("id_customer");
             $table->timestamps();
         });
     }
-
     /**
      * Reverse the migrations.
      */

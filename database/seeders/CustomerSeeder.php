@@ -27,7 +27,7 @@ class CustomerSeeder extends Seeder
 
         for ($i = 0; $i < 10; $i++) {
             $customers[] = [
-                'std' => '09' . rand(0, 9) . rand(0, 9) . rand(1000000, 9999999),
+                'phoneNumber' => '09' . rand(0, 9) . rand(0, 9) . rand(1000000, 9999999),
                 'FullName' => $names[$i],
                 'image' => 'user' . rand(1, 7) . '.png',
                 'otp' => rand(0, 1) ? rand(100000, 999999) : null,

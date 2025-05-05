@@ -12,7 +12,6 @@ class Booking extends Model
     protected $fillable = [
         'id_table',
         'timeBooking',
-        'id_food',
         'quantity',
         'id_customer',
     ];
@@ -21,12 +20,6 @@ class Booking extends Model
     {
         return $this->belongsTo(Customer::class, 'id_customer');
     }
-
-    public function food()
-    {
-        return $this->belongsTo(Food::class, 'id_food');
-    }
-
     public function table()
     {
         return $this->belongsTo(Table::class, 'id_table');
