@@ -17,6 +17,7 @@ class InvoiceController extends Controller
             $invoices = DB::table('invoices')
                 ->leftJoin('tables', 'invoices.id_table', '=', 'tables.id')
                 ->leftJoin('users', 'invoices.id_user', '=', 'users.id')
+
                 ->leftJoin('customers', 'invoices.id_customer', '=', 'customers.id')
                 ->select(
                     'invoices.*',
@@ -35,7 +36,6 @@ class InvoiceController extends Controller
             return response()->json(['error' => 'Lỗi khi lấy danh sách hóa đơn'], 500);
         }
     }
-
     // Tạo hóa đơn mới
     public function store(InvoiceRequest $request)
     {
@@ -77,7 +77,6 @@ class InvoiceController extends Controller
         }
     }
 
-    // Cập nhật hóa đơn
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
@@ -107,7 +106,6 @@ class InvoiceController extends Controller
         }
     }
 
-    // Xoá hóa đơn
     public function delete($id)
     {
         try {
@@ -119,7 +117,6 @@ class InvoiceController extends Controller
 
             $invoice->delete();
 
-            return response()->json(['message' => 'Hóa đơn đã được xóa thành công'], 200);
         } catch (\Exception $e) {
             Log::error('Lỗi xóa hóa đơn: ' . $e->getMessage());
             return response()->json(['error' => 'Lỗi xóa hóa đơn'], 500);

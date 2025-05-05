@@ -36,6 +36,7 @@ class BookingController extends Controller
     }
     public function store(BookingRequest $request)
     {
+
         try {
             // Lưu đặt bàn vào cơ sở dữ liệu
             $booking = Booking::create($request->validated());
@@ -67,6 +68,7 @@ class BookingController extends Controller
     {
         // Tìm booking theo ID
         $booking = Booking::find($id);
+
     
         // Nếu không tìm thấy
         if (!$booking) {

@@ -2,64 +2,61 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Cart;
 use Illuminate\Http\Request;
+use App\Models\Cart;
 
 class CartController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // Lấy toàn bộ giỏ hàng
     public function index()
     {
-        //
+        return response()->json(Cart::all(), 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
+    // Tạo mới 1 giỏ hàng
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'id_food' => 'required|integer',
+            'id_table' => 'required|integer',
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        $cart = Cart::create($request->all());
+        return response()->json($cart, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Cart $cart)
+    // Lấy thông tin chi tiết một cart
+    public function show($id)
     {
-        //
+        $cart = Cart::find($id);
+        if (!$cart) {
+            return response()->json(['message' => 'Cart not found'], 404);
+        }
+        return response()->json($cart);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Cart $cart)
+    // Cập nhật một cart
+    public function update(Request $request, $id)
     {
-        //
+        $cart = Cart::find($id);
+        if (!$cart) {
+            return response()->json(['message' => 'Cart not found'], 404);
+        }
+
+        $cart->update($request->all());
+        return response()->json($cart);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Cart $cart)
+    // Xóa một cart
+    public function destroy($id)
     {
-        //
-    }
+        $cart = Cart::find($id);
+        if (!$cart) {
+            return response()->json(['message' => 'Cart not found'], 404);
+        }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Cart $cart)
-    {
-        //
+        $cart->delete();
+        return response()->json(['message' => 'Deleted successfully']);
     }
 }

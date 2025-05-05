@@ -19,7 +19,7 @@ class CustomerController extends Controller
                 "error" => $e->getMessage()
             ], 500);
         }
-    }    
+    }
     public function store(Request $request)
     {
         $customer = new Customer();
