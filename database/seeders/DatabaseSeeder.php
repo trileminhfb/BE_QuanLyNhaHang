@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
 
             RankSeeder::class,
             CategorySeeder::class,
+            CategoryFoodSeeder::class,
             CustomerSeeder::class,
             HistoryPointSeeder::class,
             BookingSeeder::class,
