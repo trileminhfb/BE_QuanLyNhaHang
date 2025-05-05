@@ -65,27 +65,31 @@ class BookingController extends Controller
 
     public function update(Request $request, $id)
     {
+        // Tìm booking theo ID
         $booking = Booking::find($id);
-
+    
+        // Nếu không tìm thấy
         if (!$booking) {
             return response()->json(['message' => 'Booking not found'], 404);
         }
     
-        // Cập nhật booking
-        $booking->update([
-            'id_table'    => $request->id_table,
-            'timeBooking' => $request->timeBooking,
-            'quantity'    => $request->quantity,
-            'id_customer' => $request->id_customer,
+        // Validate dữ liệu đầu vào
+        $validated = $request->validate([
+            'id_table'    => 'required|integer|exists:tables,id', // giả sử bảng tables có id
+            'timeBooking' => 'required|date_format:Y-m-d H:i:s',
+            'quantity'    => 'required|integer|min:1',
+            'id_customer' => 'required|integer|exists:customers,id', // giả sử bảng customers có id
         ]);
     
-        // Trả về thông tin booking sau khi cập nhật
+        // Cập nhật booking
+        $booking->update($validated);
+    
+        // Trả về kết quả
         return response()->json([
             'message' => 'Booking updated successfully',
             'booking' => $booking
         ], 200);
     }
-
     public function delete($id)
     {
         $booking = Booking::find($id);
