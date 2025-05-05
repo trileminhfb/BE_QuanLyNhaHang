@@ -23,7 +23,7 @@ class CustomerController extends Controller
     public function store(Request $request)
     {
         $customer = new Customer();
-        $customer->std = $request->std;
+        $customer->phoneNumber = $request->phoneNumber;
         $customer->FullName = $request->FullName;
         $customer->otp = $request->otp;
         $customer->point = $request->point ?? 0; // Mặc định là 0 nếu không có giá trị
@@ -62,7 +62,7 @@ class CustomerController extends Controller
         }
 
         // Cập nhật dữ liệu từ request
-        $customer->std = $request->std ?? $customer->std;
+        $customer->phoneNumber = $request->phoneNumber ?? $customer->phoneNumber;
         $customer->FullName = $request->FullName ?? $customer->FullName;
         $customer->otp = $request->otp ?? $customer->otp;
         $customer->point = $request->point ?? $customer->point;

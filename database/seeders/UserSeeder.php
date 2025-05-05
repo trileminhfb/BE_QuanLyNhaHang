@@ -3,16 +3,16 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
+        // Danh sách người dùng mẫu
         $users = [
             [
                 'image' => 'manager.jpg',
@@ -22,7 +22,11 @@ class UserSeeder extends Seeder
                 'email' => 'manager@example.com',
                 'status' => 'active',
                 'birth' => '1985-05-15',
+                'email_verified_at' => now(),
                 'password' => Hash::make('password123'),
+                'remember_token' => Str::random(10),
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
                 'image' => 'chef.jpg',
@@ -32,7 +36,11 @@ class UserSeeder extends Seeder
                 'email' => 'chef@example.com',
                 'status' => 'active',
                 'birth' => '1990-08-20',
+                'email_verified_at' => now(),
                 'password' => Hash::make('password123'),
+                'remember_token' => Str::random(10),
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
                 'image' => 'staff1.jpg',
@@ -42,7 +50,11 @@ class UserSeeder extends Seeder
                 'email' => 'staff1@example.com',
                 'status' => 'active',
                 'birth' => '1995-03-10',
+                'email_verified_at' => now(),
                 'password' => Hash::make('password123'),
+                'remember_token' => Str::random(10),
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
                 'image' => 'staff2.jpg',
@@ -52,7 +64,11 @@ class UserSeeder extends Seeder
                 'email' => 'staff2@example.com',
                 'status' => 'active',
                 'birth' => '1997-11-25',
+                'email_verified_at' => now(),
                 'password' => Hash::make('password123'),
+                'remember_token' => Str::random(10),
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
                 'image' => 'admin.jpg',
@@ -62,41 +78,34 @@ class UserSeeder extends Seeder
                 'email' => 'admin@example.com',
                 'status' => 'active',
                 'birth' => '1980-01-01',
+                'email_verified_at' => now(),
                 'password' => Hash::make('admin123'),
+                'remember_token' => Str::random(10),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'image' => 'default.jpg',
+                'name' => 'John Doe',
+                'role' => 'admin',
+                'phone_number' => '0931234567',
+                'email' => 'john@example.com',
+                'status' => 'active',
+                'birth' => '1990-01-01',
+                'email_verified_at' => now(),
+                'password' => Hash::make('password123'),
+                'remember_token' => Str::random(10),
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
         ];
 
+        // Chèn dữ liệu
         foreach ($users as $user) {
-            User::create($user);
+            User::updateOrCreate(
+                ['phone_number' => $user['phone_number']],
+                $user
+            );
         }
-//         // Thêm một người dùng mẫu
-//         DB::table('users')->insert([
-//             'name' => 'John Doe',
-//             'role' => 'admin',
-//             'phone_number' => '0931234567',
-//             'email' => 'john@example.com',
-//             'status' => 'active',
-//             'birth' => '1990-01-01',
-//             'email_verified_at' => now(),
-//             'password' => Hash::make('password123'), // Mật khẩu đã mã hóa
-//             'remember_token' => Str::random(10),
-//             'created_at' => now(),
-//             'updated_at' => now(),
-//         ]);
-
-//         // Thêm nhiều người dùng mẫu
-//         DB::table('users')->insert([
-//             'name' => 'Jane Smith',
-//             'role' => 'user',
-//             'phone_number' => '0939876543',
-//             'email' => 'jane@example.com',
-//             'status' => 'active',
-//             'birth' => '1995-05-15',
-//             'email_verified_at' => now(),
-//             'password' => Hash::make('password123'), // Mật khẩu đã mã hóa
-//             'remember_token' => Str::random(10),
-//             'created_at' => now(),
-//             'updated_at' => now(),
-//         ]);
     }
 }

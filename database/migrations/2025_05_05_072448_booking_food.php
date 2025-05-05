@@ -11,20 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create("invoices", function (Blueprint $table) {
+        Schema::create('boongking_foods', function (Blueprint $table) {
             $table->id();
-            $table->integer("id_table");
-            $table->dateTime("timeEnd");
-            $table->integer("total");
-            $table->integer("id_user");
-            $table->integer("id_customer");
+            $table->integer('id_foods');
+            $table->integer('quantity');
+            $table->integer('id_booking');
             $table->timestamps();
         });
     }
-
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         //

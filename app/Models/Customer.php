@@ -13,7 +13,7 @@ class Customer extends Model
     protected $table = "customers";
 
     protected $fillable = [
-        "std",
+        "phoneNumber",
         "FullName",
         "image",
         "otp",
