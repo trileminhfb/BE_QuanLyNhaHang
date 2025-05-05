@@ -18,7 +18,7 @@ class InvoiceController extends Controller
                 ->leftJoin('users', 'invoices.id_user', '=', 'users.id')
                 ->leftJoin('foods', 'bookings.id_food', '=', 'foods.id')
                 ->leftJoin('tables', 'bookings.id_table', '=', 'tables.id')
-                ->leftJoin('customers', 'bookings.id_customer', '=', 'customers.id') // Đã sửa tên cột thành `id_customer`
+                ->leftJoin('customers', 'bookings.id_customer', '=', 'customers.id')
                 ->select(
                     'invoices.id as invoice_id',
                     'invoices.total',
@@ -29,7 +29,7 @@ class InvoiceController extends Controller
                     'bookings.id_table',
                     'bookings.timeBooking',
                     'bookings.quantity',
-                    'bookings.id_customer', // Sửa từ `id_cutomer` thành `id_customer`
+                    'bookings.id_customer',
                     'foods.name as food_name',
                     'foods.cost as food_cost',
                     'foods.detail as food_detail',
@@ -43,34 +43,26 @@ class InvoiceController extends Controller
             return response()->json(['error' => 'Server error: ' . $e->getMessage()], 500);
         }
     }
+
     public function store(Request $request)
     {
-        // Validate input
         $validated = $request->validate([
             'id_booking' => 'required|exists:bookings,id',
             'id_user' => 'required|exists:users,id',
             'total' => 'required|numeric',
             'timeEnd' => 'required|date',
-            'id_customer' => 'required|exists:customers,id',  // Chú ý đã sửa thành id_customer
+            'id_customer' => 'required|exists:customers,id',
         ]);
 
         try {
-            // Tạo hóa đơn mới
-            $invoice = Invoice::create([
-                'id_booking' => $validated['id_booking'],
-                'id_user' => $validated['id_user'],
-                'total' => $validated['total'],
-                'timeEnd' => $validated['timeEnd'],
-                'id_customer' => $validated['id_customer'],  // Chú ý đã sửa thành id_customer
-            ]);
+            $invoice = Invoice::create($validated);
 
-            // Lấy thông tin thêm từ bảng liên quan
             $invoiceData = DB::table('invoices')
                 ->leftJoin('bookings', 'invoices.id_booking', '=', 'bookings.id')
                 ->leftJoin('users', 'invoices.id_user', '=', 'users.id')
                 ->leftJoin('foods', 'bookings.id_food', '=', 'foods.id')
                 ->leftJoin('tables', 'bookings.id_table', '=', 'tables.id')
-                ->leftJoin('customers', 'bookings.id_customer', '=', 'customers.id')  // Sửa tên cột thành id_customer
+                ->leftJoin('customers', 'bookings.id_customer', '=', 'customers.id')
                 ->select(
                     'invoices.id as invoice_id',
                     'invoices.total',
@@ -87,7 +79,7 @@ class InvoiceController extends Controller
                     'customers.FullName as customer_name'
                 )
                 ->where('invoices.id', $invoice->id)
-                ->first();  // Lấy một bản ghi duy nhất
+                ->first();
 
             return response()->json([
                 'message' => 'Invoice created successfully',
@@ -97,16 +89,16 @@ class InvoiceController extends Controller
             return response()->json(['error' => 'Server error: ' . $e->getMessage()], 500);
         }
     }
+
     public function show($id)
     {
         try {
-            // Lấy thông tin hóa đơn theo ID
             $invoice = DB::table('invoices')
                 ->leftJoin('bookings', 'invoices.id_booking', '=', 'bookings.id')
                 ->leftJoin('users', 'invoices.id_user', '=', 'users.id')
                 ->leftJoin('foods', 'bookings.id_food', '=', 'foods.id')
                 ->leftJoin('tables', 'bookings.id_table', '=', 'tables.id')
-                ->leftJoin('customers', 'bookings.id_cutomer', '=', 'customers.id')
+                ->leftJoin('customers', 'bookings.id_customer', '=', 'customers.id')
                 ->select(
                     'invoices.id as invoice_id',
                     'invoices.total',
@@ -123,9 +115,8 @@ class InvoiceController extends Controller
                     'customers.FullName as customer_name'
                 )
                 ->where('invoices.id', $id)
-                ->first(); // Lấy một bản ghi duy nhất
+                ->first();
 
-            // Kiểm tra nếu không có hóa đơn
             if (!$invoice) {
                 return response()->json(['message' => 'Invoice not found'], 404);
             }
@@ -135,42 +126,32 @@ class InvoiceController extends Controller
             return response()->json(['error' => 'Server error: ' . $e->getMessage()], 500);
         }
     }
-    // Cập nhật hóa đơn
+
     public function update(Request $request, $id)
     {
-        // Validate input
         $validated = $request->validate([
             'id_booking' => 'required|exists:bookings,id',
             'id_user' => 'required|exists:users,id',
             'total' => 'required|numeric',
             'timeEnd' => 'required|date',
-            'id_customer' => 'required|exists:customers,id',  // Chú ý đã sửa thành id_customer
+            'id_customer' => 'required|exists:customers,id',
         ]);
 
         try {
-            // Tìm hóa đơn cần cập nhật
             $invoice = Invoice::find($id);
 
             if (!$invoice) {
                 return response()->json(['message' => 'Invoice not found'], 404);
             }
 
-            // Cập nhật thông tin hóa đơn
-            $invoice->update([
-                'id_booking' => $validated['id_booking'],
-                'id_user' => $validated['id_user'],
-                'total' => $validated['total'],
-                'timeEnd' => $validated['timeEnd'],
-                'id_customer' => $validated['id_customer'],  // Chú ý đã sửa thành id_customer
-            ]);
+            $invoice->update($validated);
 
-            // Lấy thông tin hóa đơn sau khi cập nhật
             $invoiceData = DB::table('invoices')
                 ->leftJoin('bookings', 'invoices.id_booking', '=', 'bookings.id')
                 ->leftJoin('users', 'invoices.id_user', '=', 'users.id')
                 ->leftJoin('foods', 'bookings.id_food', '=', 'foods.id')
                 ->leftJoin('tables', 'bookings.id_table', '=', 'tables.id')
-                ->leftJoin('customers', 'bookings.id_customer', '=', 'customers.id')  // Sửa tên cột thành id_customer
+                ->leftJoin('customers', 'bookings.id_customer', '=', 'customers.id')
                 ->select(
                     'invoices.id as invoice_id',
                     'invoices.total',
@@ -187,7 +168,7 @@ class InvoiceController extends Controller
                     'customers.FullName as customer_name'
                 )
                 ->where('invoices.id', $invoice->id)
-                ->first();  // Lấy một bản ghi duy nhất
+                ->first();
 
             return response()->json([
                 'message' => 'Invoice updated successfully',
@@ -197,22 +178,18 @@ class InvoiceController extends Controller
             return response()->json(['error' => 'Server error: ' . $e->getMessage()], 500);
         }
     }
-    // Xoá hóa đơn
+
     public function delete($id)
     {
         try {
-            // Tìm hóa đơn cần xóa
             $invoice = Invoice::find($id);
 
-            // Kiểm tra nếu hóa đơn không tồn tại
             if (!$invoice) {
                 return response()->json(['message' => 'Invoice not found'], 404);
             }
 
-            // Xóa hóa đơn
             $invoice->delete();
 
-            // Trả về thông báo thành công
             return response()->json(['message' => 'Invoice deleted successfully'], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Server error: ' . $e->getMessage()], 500);

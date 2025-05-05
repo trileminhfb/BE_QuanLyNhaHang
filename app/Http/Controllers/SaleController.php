@@ -3,63 +3,88 @@
 namespace App\Http\Controllers;
 
 use App\Models\Sale;
+use App\Http\Requests\SaleRequest;
 use Illuminate\Http\Request;
 
 class SaleController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+     // Lấy danh sách tất cả các chương trình khuyến mãi
+     public function index()
     {
-        //
+        return response()->json([
+            'status' => 1,
+            'data' => Sale::all()
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
+    // Tạo mới một chương trình khuyến mãi
     public function store(Request $request)
     {
-        //
+        $sale = Sale::create([
+            'nameSale'  => $request->nameSale,
+            'status'    => $request->status ?? 1,
+            'startTime' => $request->startTime,
+            'endTime'   => $request->endTime,
+            'percent'   => $request->percent
+        ]);
+
+        return response()->json([
+            'message' => 'Sale created successfully',
+            'sale'    => $sale
+        ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Sale $sale)
+    // Hiển thị chi tiết chương trình khuyến mãi theo ID
+    public function show($id)
     {
-        //
+        $sale = Sale::find($id);
+
+        if (!$sale) {
+            return response()->json(['message' => 'Sale not found'], 404);
+        }
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'Lấy thông tin thành công.',
+            'data' => $sale
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Sale $sale)
+    // Cập nhật thông tin chương trình khuyến mãi
+    public function update(Request $request, $id)
     {
-        //
+        $sale = Sale::find($id);
+
+        if (!$sale) {
+            return response()->json(['message' => 'Sale not found'], 404);
+        }
+
+        $sale->update([
+            'nameSale'  => $request->nameSale,
+            'status'    => $request->status ?? 1,
+            'startTime' => $request->startTime,
+            'endTime'   => $request->endTime,
+            'percent'   => $request->percent
+        ]);
+
+        return response()->json([
+            'message' => 'Sale updated successfully',
+            'sale'    => $sale
+        ], 200);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Sale $sale)
+    // Xoá chương trình khuyến mãi theo ID
+    public function destroy($id)
     {
-        //
+        $sale = Sale::find($id);
+
+        if (!$sale) {
+            return response()->json(['message' => 'Sale not found'], 404);
+        }
+
+        $sale->delete();
+
+        return response()->json(['message' => 'Sale deleted successfully'], 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Sale $sale)
-    {
-        //
-    }
 }

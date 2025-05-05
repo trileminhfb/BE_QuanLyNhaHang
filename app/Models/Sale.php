@@ -12,7 +12,11 @@ class Sale extends Model
     protected $table = 'sales';
 
     protected $fillable = [
-        'nameSale', 'status', 'startTime', 'endTime', 'percent'
+        'nameSale',
+         'status',
+         'startTime',
+          'endTime',
+           'percent'
     ];
 
 

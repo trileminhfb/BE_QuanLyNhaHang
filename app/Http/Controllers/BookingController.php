@@ -48,34 +48,34 @@ class BookingController extends Controller
             'timeBooking'   => 'required|date',
             'quantity'      => 'required|integer|min:1',
         ]);
-    
+
         // Lấy ID từ tên khách
         $customer = DB::table('customers')
             ->whereRaw('LOWER(FullName) = ?', [strtolower($request->customer_name)])
             ->first();
-    
+
         if (!$customer) {
             return response()->json(['error' => 'Customer not found'], 404);
         }
-    
+
         // Lấy ID từ số bàn
         $table = DB::table('tables')
             ->where('number', $request->table_number)
             ->first();
-    
+
         if (!$table) {
             return response()->json(['error' => 'Table not found'], 404);
         }
-    
+
         // Lấy ID từ tên món (sửa từ 'food' thành 'foods' nếu cần)
         $food = DB::table('foods')  // Đã sửa tên bảng thành 'foods'
             ->whereRaw('LOWER(name) = ?', [strtolower($request->food_name)])
             ->first();
-    
+
         if (!$food) {
             return response()->json(['error' => 'Food not found'], 404);
         }
-    
+
         // Tạo booking
         $booking = Booking::create([
             'id_table'    => $table->id,
@@ -84,7 +84,7 @@ class BookingController extends Controller
             'quantity'    => $request->quantity,
             'id_customer' => $customer->id,
         ]);
-    
+
         return response()->json([
             'message' => 'Booking created successfully',
             'booking' => $booking
@@ -94,12 +94,12 @@ class BookingController extends Controller
     {
         // Tìm booking theo ID
         $booking = Booking::find($id);
-    
+
         // Kiểm tra xem booking có tồn tại không
         if (!$booking) {
             return response()->json(['message' => 'Booking not found'], 404);
         }
-    
+
         // Validate request input
         $request->validate([
             'customer_name' => 'required|string',
@@ -108,16 +108,16 @@ class BookingController extends Controller
             'timeBooking'   => 'required|date',
             'quantity'      => 'required|integer|min:1',
         ]);
-    
+
         // Lấy ID từ tên khách
         $customer = DB::table('customers')
             ->whereRaw('LOWER(FullName) = ?', [strtolower($request->customer_name)])
             ->first();
-    
+
         if (!$customer) {
             return response()->json(['error' => 'Customer not found'], 404);
         }
-    
+
         // Lấy ID từ số bàn
         $table = DB::table('tables')
             ->where('number', $request->table_number)
@@ -125,7 +125,7 @@ class BookingController extends Controller
         if (!$table) {
             return response()->json(['error' => 'Table not found'], 404);
         }
-    
+
         // Lấy ID từ tên món
         $food = DB::table('foods')  // Đã sửa tên bảng thành 'foods'
             ->whereRaw('LOWER(name) = ?', [strtolower($request->food_name)])
@@ -133,7 +133,7 @@ class BookingController extends Controller
         if (!$food) {
             return response()->json(['error' => 'Food not found'], 404);
         }
-    
+
         // Cập nhật booking
         $booking->update([
             'id_table'    => $table->id,
@@ -142,7 +142,7 @@ class BookingController extends Controller
             'quantity'    => $request->quantity,
             'id_customer' => $customer->id,
         ]);
-    
+
         // Trả về thông tin booking sau khi cập nhật
         return response()->json([
             'message' => 'Booking updated successfully',
