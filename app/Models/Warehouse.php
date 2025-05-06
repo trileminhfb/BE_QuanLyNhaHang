@@ -13,4 +13,8 @@ class Warehouse extends Model
         'id_ingredient',
         'quantity',
     ];
+    public function ingredient()
+    {
+        return $this->belongsTo(Ingredient::class, 'id_ingredient');
+    }
 }

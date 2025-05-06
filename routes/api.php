@@ -23,6 +23,7 @@ use App\Http\Controllers\SaleFoodController;
 use App\Http\Controllers\TableController;
 use App\Http\Controllers\TypeController;
 
+
 // Route mặc định
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

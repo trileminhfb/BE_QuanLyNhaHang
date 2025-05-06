@@ -11,7 +11,7 @@ class WarehouseController extends Controller
     // Lấy danh sách kho
     public function getData()
     {
-        $warehouses = Warehouse::all();
+        $warehouses = Warehouse::with(['ingredient:id,image,name_ingredient'])->get();
 
         return response()->json([
             'status' => 1,
