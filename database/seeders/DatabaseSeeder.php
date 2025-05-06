@@ -32,5 +32,4 @@ class DatabaseSeeder extends Seeder
             BookingFoodsSeeder::class,
         ]);
     }
-
 }
