@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('sales', function (Blueprint $table) {
             $table->id();
-            $table->string('nameSale');
+            $table->string('nameSale')->unique();
             $table->boolean('status')->default(1);
             $table->dateTime('startTime');
             $table->dateTime('endTime');

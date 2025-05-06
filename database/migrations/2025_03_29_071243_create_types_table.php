@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->integer('id_category');
             $table->integer('status');
-            $table->string('name');
-            $table->timestamps(); 
+            $table->string('name')->unique();
+            $table->timestamps();
         });
     }
 
