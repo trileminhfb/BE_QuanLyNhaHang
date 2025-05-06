@@ -13,6 +13,7 @@ class WarehouseInvoice extends Model
         'id_ingredient',
         'quantity',
         'price',
+        'stock_in_date',
     ];
     public function ingredient()
     {

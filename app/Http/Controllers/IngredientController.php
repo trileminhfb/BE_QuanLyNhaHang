@@ -25,6 +25,7 @@ class IngredientController extends Controller
         $ingredient = Ingredient::create([
             'name_ingredient' => $request->name_ingredient,
             'image'           => $request->image,
+            'unit'            => $request->unit,
         ]);
 
         return response()->json([
@@ -49,6 +50,7 @@ class IngredientController extends Controller
         $ingredient->update([
             'name_ingredient' => $request->name_ingredient,
             'image'           => $request->image,
+            'unit'            => $request->unit,
         ]);
 
         return response()->json([

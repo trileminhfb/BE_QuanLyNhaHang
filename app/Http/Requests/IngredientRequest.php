@@ -16,6 +16,7 @@ class IngredientRequest extends FormRequest
         return [
             'name_ingredient' => 'required|string|min:2|max:100|unique:ingredients,name_ingredient',
             'image'           => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            'unit'            => 'required|string|max:50',
         ];
     }
 
@@ -32,6 +33,10 @@ class IngredientRequest extends FormRequest
             'image.image'    => 'File tải lên phải là hình ảnh.',
             'image.mimes'    => 'Ảnh phải có định dạng jpg, jpeg hoặc png.',
             'image.max'      => 'Ảnh không được lớn hơn 2MB.',
+
+            'unit.required'  => 'Phải nhập đơn vị cho nguyên liệu.',
+            'unit.string'    => 'Đơn vị phải là chuỗi.',
+            'unit.max'       => 'Đơn vị không được vượt quá 50 ký tự.',
         ];
     }
 }

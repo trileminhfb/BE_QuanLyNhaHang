@@ -11,14 +11,14 @@ class WarehouseInvoiceController extends Controller
     // Lấy danh sách hóa đơn kho
     public function getData()
     {
-        $invoices = WarehouseInvoice::with(['ingredient:id,image,name_ingredient'])->get();
+        $invoices = WarehouseInvoice::with(['ingredient:id,image,name_ingredient,unit'])->get();
         return response()->json([
             'status' => 1,
             'data' => $invoices
         ]);
     }
 
-    //Lấy hóa đơn kho theo ID
+    // Lấy hóa đơn kho theo ID
     public function show($id)
     {
         $invoice = WarehouseInvoice::with('ingredient')->find($id);
@@ -43,6 +43,7 @@ class WarehouseInvoiceController extends Controller
             'id_ingredient' => $request->id_ingredient,
             'quantity'      => $request->quantity,
             'price'         => $request->price,
+            'stock_in_date' => $request->stock_in_date,
         ]);
 
         return response()->json([
@@ -65,6 +66,7 @@ class WarehouseInvoiceController extends Controller
             'id_ingredient' => $request->id_ingredient,
             'quantity'      => $request->quantity,
             'price'         => $request->price,
+            'stock_in_date' => $request->stock_in_date,
         ]);
 
         return response()->json([
