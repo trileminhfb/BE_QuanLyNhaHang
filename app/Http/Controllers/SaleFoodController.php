@@ -72,19 +72,17 @@ public function update(Request $request, $id)
         ], 404);
     }
 
-    $validated = $request->validate([
+    $saleFood->update($request->validate([
         'id_food' => 'required|exists:foods,id',
         'id_sale' => 'required|exists:sales,id',
-        'status'  => 'required|boolean',
-    ]);
 
-    $saleFood->update($validated);
+    ]));
 
     return response()->json([
         'status' => 1,
         'message' => 'Cập nhật món ăn khuyến mãi thành công.',
         'data' => $saleFood
-    ], 200);
+    ]);
 }
 
 // Xóa món ăn khuyến mãi
