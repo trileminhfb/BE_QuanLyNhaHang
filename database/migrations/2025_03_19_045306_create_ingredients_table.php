@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('name_ingredient')->unique();
             $table->string('image');
+            $table->string('unit');
             $table->timestamps();
         });
     }

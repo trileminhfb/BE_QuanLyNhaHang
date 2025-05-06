@@ -13,6 +13,7 @@ return new class extends Migration
             $table->integer('id_ingredient');
             $table->integer('quantity');
             $table->integer('price');
+            $table->date('stock_in_date');
             $table->timestamps();
         });
     }
