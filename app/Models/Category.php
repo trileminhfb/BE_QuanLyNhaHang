@@ -11,6 +11,7 @@ class category extends Model
     protected $table = 'categories';
 
     protected $fillable = [
+        'id_type',
         'name',
         'status',
     ];
@@ -25,5 +26,8 @@ class category extends Model
     {
         return $this->hasMany(Food::class, 'id_categories');
     }
-
+    public function categoryFoods()
+    {
+        return $this->hasMany(CategoryFood::class, 'id_category');
+    }
 }

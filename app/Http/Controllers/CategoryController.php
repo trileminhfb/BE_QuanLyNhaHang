@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CategoryRequest;
 use Illuminate\Http\Request;
 use App\Models\Category;
 
@@ -10,23 +11,27 @@ class CategoryController extends Controller
     // Lấy danh sách danh mục
     public function index()
     {
-        return response()->json(Category::all(), 200);
+        $categories = Category::with(['categoryFoods.food'])->get();
+
+        return response()->json($categories, 200);
     }
 
     // Tạo mới danh mục
-    public function store(Request $request)
+    public function store(CategoryRequest $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
             'status' => 'required|integer',
+            'id_type' => 'nullable|integer',
         ]);
 
         $category = Category::create([
             'name' => $request->name,
             'status' => $request->status,
+            'id_type' => $request->id_type,
         ]);
 
-        return response()->json(['message' => 'Category created', 'category' => $category], 201);
+        return response()->json(['message' => 'Danh mục đã được tạo', 'category' => $category], 201);
     }
 
     // Lấy danh mục theo ID
@@ -34,26 +39,27 @@ class CategoryController extends Controller
     {
         $category = Category::find($id);
         if (!$category) {
-            return response()->json(['message' => 'Category not found'], 404);
+            return response()->json(['message' => 'Danh mục không tìm thấy'], 404);
         }
         return response()->json($category, 200);
     }
 
     // Cập nhật danh mục
-    public function update(Request $request, $id)
+    public function update(CategoryRequest $request, $id)
     {
         $category = Category::find($id);
         if (!$category) {
-            return response()->json(['message' => 'Category not found'], 404);
+            return response()->json(['message' => 'Danh mục không tìm thấy'], 404);
         }
 
         $request->validate([
             'name' => 'string|max:255',
             'status' => 'integer',
+            'id_type' => 'nullable|integer',
         ]);
 
-        $category->update($request->only('name', 'status'));
-        return response()->json(['message' => 'Category updated', 'category' => $category], 200);
+        $category->update($request->only('name', 'status', 'id_type'));
+        return response()->json(['message' => 'Danh mục đã được cập nhật', 'category' => $category], 200);
     }
 
     // Xóa danh mục
@@ -61,10 +67,10 @@ class CategoryController extends Controller
     {
         $category = Category::find($id);
         if (!$category) {
-            return response()->json(['message' => 'Category not found'], 404);
+            return response()->json(['message' => 'Danh mục không tìm thấy'], 404);
         }
 
         $category->delete();
-        return response()->json(['message' => 'Category deleted'], 200);
+        return response()->json(['message' => 'Danh mục đã bị xóa'], 200);
     }
 }
