@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create("ranks", function (Blueprint $table) {
             $table->id();
-            $table->string("nameRank");
+            $table->string("nameRank")->unique();
             $table->integer("necessaryPoint");
             $table->integer("saleRank");
             $table->string("image")->nullable(); // Thêm dòng này
