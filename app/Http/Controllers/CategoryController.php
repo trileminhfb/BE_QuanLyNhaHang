@@ -11,11 +11,10 @@ class CategoryController extends Controller
     // Lấy danh sách danh mục
     public function index()
     {
-        $categories = Category::with(['types', 'categoryFoods.food'])->get();
+        $categories = Category::with(['categoryFoods.food'])->get();
 
         return response()->json($categories, 200);
     }
-
 
     // Tạo mới danh mục
     public function store(CategoryRequest $request)

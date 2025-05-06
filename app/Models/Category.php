@@ -17,9 +17,9 @@ class category extends Model
     ];
 
 
-    public function type()
+    public function types()
     {
-        return $this->belongsTo(Type::class, 'id_type'); // 1 category thuộc về 1 type
+        return $this->hasMany(Type::class, 'id_category');
     }
 
     public function foods()

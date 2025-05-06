@@ -11,14 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('categories', function (Blueprint $table) {
+        Schema::create("categories", function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
-            $table->unsignedBigInteger('id_type')->unique(); // 1-1 relationship
-            $table->boolean('status');
+            $table->integer("id_type");
+            $table->integer("status");
+            $table->string("name")->unique();
             $table->timestamps();
-
-            $table->foreign('id_type')->references('id')->on('types')->onDelete('cascade');
         });
     }
 
