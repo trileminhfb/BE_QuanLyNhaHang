@@ -7,8 +7,8 @@ use Illuminate\Http\Request;
 
 class TypeController extends Controller
 {
-     // Lấy danh sách tất cả loại món ăn
-     public function index()
+    // Lấy danh sách tất cả loại món ăn
+    public function index()
     {
         return response()->json([
             'status' => 1,
@@ -18,27 +18,27 @@ class TypeController extends Controller
 
     // Tạo mới một loại món ăn
     public function store(Request $request)
-{
-    try {
-        $type = Type::create([
-            'id_category' => $request->id_category,
-            'status'      => $request->status ?? 1, // Nếu không có giá trị, mặc định là 1
-            'name'        => $request->name,
-        ]);
+    {
+        try {
+            $type = Type::create([
+                'id_category' => $request->id_category,
+                'status'      => $request->status ?? 1, // Nếu không có giá trị, mặc định là 1
+                'name'        => $request->name,
+            ]);
 
-        return response()->json([
-            'status'  => 1,
-            'message' => 'Tạo loại món ăn thành công.',
-            'data'    => $type
-        ], 201);
-    } catch (\Exception $e) {
-        return response()->json([
-            'status'  => 0,
-            'message' => 'Đã xảy ra lỗi khi tạo loại món ăn.',
-            'error'   => $e->getMessage()
-        ], 500);
+            return response()->json([
+                'status'  => 1,
+                'message' => 'Tạo loại món ăn thành công.',
+                'data'    => $type
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Đã xảy ra lỗi khi tạo loại món ăn.',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
     }
-}
 
 
 
@@ -60,45 +60,43 @@ class TypeController extends Controller
 
     // Cập nhật thông tin loại món ăn
     public function update(Request $request, $id)
-{
-    $type = Type::find($id);
+    {
+        $type = Type::find($id);
 
-    if (!$type) {
-        return response()->json(['message' => 'Type not found'], 404);
+        if (!$type) {
+            return response()->json(['message' => 'Type not found'], 404);
+        }
+
+        try {
+            $type->update([
+                'status'      => $request->status ?? 1,
+                'name'        => $request->name,
+            ]);
+
+            return response()->json([
+                'message' => 'Type updated successfully',
+                'type'    => $type
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error updating type',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
     }
-
-    try {
-        $type->update([
-            'id_category' => $request->id_category,
-            'status'      => $request->status ?? 1,
-            'name'        => $request->name,
-        ]);
-
-        return response()->json([
-            'message' => 'Type updated successfully',
-            'type'    => $type
-        ], 200);
-    } catch (\Exception $e) {
-        return response()->json([
-            'message' => 'Error updating type',
-            'error'   => $e->getMessage()
-        ], 500);
-    }
-}
 
 
     // Xóa loại món ăn theo ID
     public function destroy($id)
-{
-    $type = Type::find($id);
+    {
+        $type = Type::find($id);
 
-    if (!$type) {
-        return response()->json(['message' => 'Type not found'], 404);
+        if (!$type) {
+            return response()->json(['message' => 'Type not found'], 404);
+        }
+
+        $type->delete();
+
+        return response()->json(['message' => 'Type deleted successfully'], 200);
     }
-
-    $type->delete();
-
-    return response()->json(['message' => 'Type deleted successfully'], 200);
-}
-
 }
