@@ -14,5 +14,8 @@ class CategoryFood extends Model
         'id_category',
         'id_food',
     ];
+    public function food()
+    {
+        return $this->belongsTo(Food::class, 'id_food');
+    }
 }
-
