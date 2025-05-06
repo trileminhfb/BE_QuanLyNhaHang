@@ -16,7 +16,6 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             RateSeeder::class,
             ReviewManagementSeeder::class,
-
             RankSeeder::class,
             CategorySeeder::class,
             CategoryFoodSeeder::class,
@@ -26,13 +25,11 @@ class DatabaseSeeder extends Seeder
             InvoiceSeeder::class,
             SaleFoodSeeder::class,
             SaleSeeder::class,
-            TypeSeeder::class,
             FoodSeeder::class,
             TypeSeeder::class,
             TablesSeeder::class,
             CartSeeder::class,
             BoongkingFoodsSeeder::class,
-
         ]);
     }
 

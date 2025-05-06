@@ -19,7 +19,7 @@ class category extends Model
 
     public function types()
     {
-        return $this->hasMany(Type::class, 'id_categories');
+        return $this->hasMany(Type::class, 'id_category');
     }
 
     public function foods()

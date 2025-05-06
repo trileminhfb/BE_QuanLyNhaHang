@@ -27,4 +27,3 @@ class Type extends Model
         return $this->hasMany(Food::class, 'id_type');
     }
 }
-
