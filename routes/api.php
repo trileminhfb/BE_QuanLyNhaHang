@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookingController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\WarehouseInvoiceController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\FoodController;
+use App\Http\Controllers\MailController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SaleFoodController;
 use App\Http\Controllers\TableController;
@@ -182,10 +184,8 @@ Route::prefix('admin')->group(function () {
 
 // Nhóm route cho CLIENT
 Route::prefix('client')->group(function () {
-    Route::prefix('rates')->group(function () {
-        Route::get('/', [RateController::class, 'getData']);
-        Route::post('/', [RateController::class, 'store']);
-        Route::put('/{id}', [RateController::class, 'update']);
-        Route::delete('/{id}', [RateController::class, 'destroy']);
-    });
+    Route::post('/send-otp', [MailController::class, 'sendOtp']);
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
+    Route::post('/login', [AuthController::class, 'loginWithOtp']);
 });
