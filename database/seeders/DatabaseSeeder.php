@@ -29,7 +29,7 @@ class DatabaseSeeder extends Seeder
             TablesSeeder::class,
             CartSeeder::class,
             BoongkingFoodsSeeder::class,
+            TypeSeeder::class,
         ]);
     }
-
 }
