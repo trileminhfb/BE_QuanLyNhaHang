@@ -5,9 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class category extends Model
+class Category extends Model
 {
     use HasFactory;
+
     protected $table = 'categories';
 
     protected $fillable = [
@@ -15,19 +16,16 @@ class category extends Model
         'name',
         'status',
     ];
-
-
-    public function types()
+    public function type()
     {
-        return $this->hasMany(Type::class, 'id_category');
-    }
-
-    public function foods()
-    {
-        return $this->hasMany(Food::class, 'id_categories');
+        return $this->belongsTo(Type::class, 'id_type');
     }
     public function categoryFoods()
     {
         return $this->hasMany(CategoryFood::class, 'id_category');
+    }
+    public function foods()
+    {
+        return $this->hasMany(Food::class, 'id_category');
     }
 }

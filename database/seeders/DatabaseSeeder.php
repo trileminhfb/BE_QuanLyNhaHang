@@ -27,9 +27,9 @@ class DatabaseSeeder extends Seeder
             SaleSeeder::class,
             FoodSeeder::class,
             TablesSeeder::class,
-            CartSeeder::class,
-            BoongkingFoodsSeeder::class,
             TypeSeeder::class,
+            CartSeeder::class,
+            BookingFoodsSeeder::class,
         ]);
     }
 }
