@@ -28,7 +28,6 @@ class DatabaseSeeder extends Seeder
             SaleSeeder::class,
             TypeSeeder::class,
             FoodSeeder::class,
-            TypeSeeder::class,
             TablesSeeder::class,
             CartSeeder::class,
             BoongkingFoodsSeeder::class,

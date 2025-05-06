@@ -14,7 +14,7 @@ class WarehouseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id_ingredient' => 'required|exists:ingredients,id',
+            'id_ingredient' => 'nullable|exists:ingredients,id',
             'quantity'      => 'required|integer|min:0',
         ];
     }
