@@ -13,9 +13,8 @@ return new class extends Migration
     {
         Schema::create('types', function (Blueprint $table) {
             $table->id();
-            $table->integer('id_category');
-            $table->integer('status');
             $table->string('name')->unique();
+            $table->boolean('status');
             $table->timestamps();
         });
     }
