@@ -11,7 +11,7 @@ class WarehouseInvoiceController extends Controller
     // Lấy danh sách hóa đơn kho
     public function getData()
     {
-        $invoices = WarehouseInvoice::with('ingredient')->get();
+        $invoices = WarehouseInvoice::with(['ingredient:id,image,name_ingredient'])->get();
         return response()->json([
             'status' => 1,
             'data' => $invoices
