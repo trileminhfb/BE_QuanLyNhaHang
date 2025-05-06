@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Rate;
 use Illuminate\Http\Request;
 use App\Http\Requests\RateRequest;
+use App\Models\Food;
 
 class RateController extends Controller
 {
@@ -22,6 +23,14 @@ class RateController extends Controller
     // Thêm đánh giá mới
     public function store(RateRequest $request)
     {
+        $food = Food::find($request->id_food);
+        if (!$food) {
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Món ăn không tồn tại.'
+            ], 400);
+        }
+
         $rate = Rate::create([
             'id_food' => $request->id_food,
             'star'    => $request->star,
