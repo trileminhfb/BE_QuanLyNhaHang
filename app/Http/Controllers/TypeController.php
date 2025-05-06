@@ -21,7 +21,6 @@ class TypeController extends Controller
     {
         try {
             $type = Type::create([
-                'id_category' => $request->id_category,
                 'status'      => $request->status ?? 1, // Nếu không có giá trị, mặc định là 1
                 'name'        => $request->name,
             ]);

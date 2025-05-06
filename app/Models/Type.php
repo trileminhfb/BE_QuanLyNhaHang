@@ -12,14 +12,13 @@ class Type extends Model
     protected $table = 'types';
 
     protected $fillable = [
-        'id_category',
-        'status',
         'name',
+        'status',
     ];
 
     public function category()
     {
-        return $this->belongsTo(Category::class, 'id_category');
+        return $this->hasOne(Category::class, 'id_type'); // 1 type => 1 category
     }
 
     public function foods()
