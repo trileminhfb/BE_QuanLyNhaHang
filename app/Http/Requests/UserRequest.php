@@ -28,7 +28,6 @@ class UserRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'image.required'         => 'Phải chọn ảnh.',
             'image.image'            => 'File tải lên phải là hình ảnh.',
             'image.mimes'            => 'Ảnh phải có định dạng jpg, jpeg hoặc png.',
             'image.max'              => 'Ảnh không được lớn hơn 2MB.',

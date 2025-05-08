@@ -162,7 +162,7 @@ Route::prefix('admin')->group(function () {
         Route::delete('/{id}', [CartController::class, 'destroy']);
     });
 
-    Route::prefix('foods')->group(function () {
+    Route::prefix('foods')->group(function () { 
         Route::get('/', [FoodController::class, 'index']);
         Route::post('/create', [FoodController::class, 'store']);
         Route::get('/{id}', [FoodController::class, 'show']);
