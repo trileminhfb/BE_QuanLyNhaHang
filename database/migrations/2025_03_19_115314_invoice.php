@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer("total");
             $table->integer("id_user");
             $table->integer("id_customer");
+            $table->integer("id_sale");
             $table->timestamps();
         });
     }

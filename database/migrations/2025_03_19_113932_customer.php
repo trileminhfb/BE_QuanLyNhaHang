@@ -16,20 +16,19 @@ return new class extends Migration
             $table->string('phoneNumber')->unique();
             $table->string('mail')->nullable();
             $table->date('birth')->nullable();
+            $table->string('password')->nullable();
             $table->string('FullName');
             $table->string('image')->nullable();
-            $table->string('otp')->nullable();  // Thêm cột otp ở đây
+            $table->string('otp')->nullable();
             $table->integer('point')->default(0);
             $table->integer('id_rank')->default(value: 1);
-            $table->integer('isActive')->default(false);
+            $table->boolean('isActive')->default(false);  // sửa thành isActive
             $table->timestamps();
         });
     }
+
     /**
      * Reverse the migrations.
      */
-    public function down(): void
-    {
-        //
-    }
+    public function down(): void {}
 };

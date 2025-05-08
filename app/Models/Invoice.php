@@ -10,12 +10,14 @@ class Invoice extends Model
     use HasFactory;
     protected $table = "invoices";
     protected $fillable = [
-        'id_table',
-        'timeEnd',
-        'total',
-        'id_user',
-        'id_customer',
+        "id_table",
+        "timeEnd",
+        "total",
+        "id_user",
+        "id_customer",
+        "id_sale",
     ];
+
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user');
@@ -23,7 +25,7 @@ class Invoice extends Model
 
     public function customer()
     {
-        return $this->belongsTo(Customer::class, 'id_custumer');
+        return $this->belongsTo(Customer::class, 'id_customer');
     }
 
     public function table()
