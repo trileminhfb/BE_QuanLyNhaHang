@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->integer('id_type');
-
+            $table->string("image")->nullable();
             $table->integer('id_category');
             $table->integer('bestSeller')->default(0);
             $table->integer('cost');
@@ -24,10 +24,6 @@ return new class extends Migration
             $table->timestamps();
         });
     }
-
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('food');

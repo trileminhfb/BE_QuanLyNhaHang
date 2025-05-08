@@ -13,16 +13,18 @@ return new class extends Migration
     {
         Schema::create("customers", function (Blueprint $table) {
             $table->id();
-            $table->string("phoneNumber")->unique();
-            $table->string("FullName")->unique();
-            $table->string("image")->nullable();
-            $table->string("otp")->nullable();
-            $table->integer("point")->default(0);
-            $table->integer("id_rank");
+            $table->string('phoneNumber')->unique();
+            $table->string('mail')->nullable();
+            $table->date('birth')->nullable();
+            $table->string('FullName');
+            $table->string('image')->nullable();
+            $table->string('otp')->nullable();  // Thêm cột otp ở đây
+            $table->integer('point')->default(0);
+            $table->integer('id_rank')->default(value: 1);
+            $table->integer('isActive')->default(false);
             $table->timestamps();
         });
     }
-
     /**
      * Reverse the migrations.
      */

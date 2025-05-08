@@ -12,13 +12,14 @@ class Food extends Model
     protected $table = 'foods';
 
     protected $fillable = [
-        'name',        // OK
-        'id_type',     // ✅ thay vì 'type'
-        'id_category', // OK
-        'cost',        // OK
-        'detail',      // OK
-        'status',      // OK
-        'bestSeller'   // OK
+        'name',
+        'id_type',
+        'image',
+        'id_category',
+        'bestSeller',
+        'cost',
+        'detail',
+        'status',
     ];
 
 

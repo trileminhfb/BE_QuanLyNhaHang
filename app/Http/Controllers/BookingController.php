@@ -88,55 +88,55 @@ class BookingController extends Controller
 
     public function update(Request $request, $id)
     {
-        // Tìm booking theo ID
-        $booking = Booking::find($id);
+        try {
+            // Tìm booking theo ID
+            $booking = Booking::find($id);
+            if (!$booking) {
+                return response()->json(['message' => 'Booking not found'], 404);
+            }
 
-        if (!$booking) {
-            return response()->json(['message' => 'Booking not found'], 404);
-        }
+            // Validate dữ liệu đầu vào
+            $validated = $request->validate([
+                'phoneNumber'   => 'required|string|max:20',
+                'FullName'      => 'required|string|max:255',
+                'timeBooking'   => 'required|date_format:Y-m-d H:i:s',
+                'quantity'      => 'required|integer|min:1',
+            ]);
 
-        // Validate dữ liệu đầu vào
-        $validated = $request->validate([
-            'phoneNumber'   => 'required|string|max:20',
-            'FullName'      => 'required|string|max:255',
-            'image'         => 'nullable|string',
-            'timeBooking'   => 'required|date_format:Y-m-d H:i:s',
-            'quantity'      => 'required|integer|min:1',
-        ]);
+            // Tìm hoặc tạo Customer
+            $customer = Customer::firstOrCreate(
+                ['phoneNumber' => $validated['phoneNumber']],
+                [
+                    'FullName' => $validated['FullName'],
+                    'otp'      => null,
+                    'point'    => 0,
+                    'id_rank'  => 1,
+                ]
+            );
 
-        // Tìm hoặc tạo Customer
-        $customer = Customer::firstOrCreate(
-            ['phoneNumber' => $validated['phoneNumber']],
-            [
+            // Cập nhật thông tin Customer (nếu đã tồn tại)
+            $customer->update([
                 'FullName' => $validated['FullName'],
-                'image'    => $validated['image'] ?? null,
-                'otp'      => null,
-                'point'    => 0,
-                'id_rank'  => 1,
-            ]
-        );
+            ]);
 
-        // Nếu customer đã tồn tại => cập nhật lại tên + ảnh (nếu cần)
-        $customer->update([
-            'FullName' => $validated['FullName'],
-            'image'    => $validated['image'] ?? $customer->image,
-        ]);
+            // Cập nhật thông tin Booking
+            $booking->update([
+                'id_customer'  => $customer->id,
+                'timeBooking'  => $validated['timeBooking'],
+                'quantity'     => $validated['quantity'],
+            ]);
 
-        // Cập nhật lại booking
-        $booking->update([
-            'id_customer'  => $customer->id,
-            'id_table'     => $validated['id_table'],
-            'timeBooking'  => $validated['timeBooking'],
-            'quantity'     => $validated['quantity'],
-        ]);
-
-        return response()->json([
-            'message'  => 'Booking updated successfully',
-            'booking'  => $booking,
-            'customer' => $customer
-        ], 200);
+            return response()->json([
+                'message'  => 'Cập nhật đặt bàn thành công.',
+                'booking'  => $booking,
+                'customer' => $customer,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
-
     public function delete($id)
     {
         $booking = Booking::find($id);
