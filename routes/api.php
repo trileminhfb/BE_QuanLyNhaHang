@@ -19,6 +19,7 @@ use App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\WarehouseInvoiceController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\FoodController;
+use App\Http\Controllers\InvoiceFoodController;
 use App\Http\Controllers\MailController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SaleFoodController;
@@ -202,6 +203,7 @@ Route::prefix('admin')->group(function () {
         Route::put('/{id}', [TableController::class, 'update']);
         Route::delete('/{id}', [TableController::class, 'destroy']);
     });
+
 });
 
 Route::prefix('client')->group(function () {
@@ -211,5 +213,12 @@ Route::prefix('client')->group(function () {
     Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('reset-password', [AuthController::class, 'resetPassword']);
     Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');  // Đăng xuất
-});
 
+    Route::prefix('invoice-food')->group(function () {
+        Route::get('/', [InvoiceFoodController::class, 'index']);
+        Route::post('/', [InvoiceFoodController::class, 'store']);  // Đổi /create thành /
+        Route::get('/{id}', [InvoiceFoodController::class, 'show']);
+        Route::put('/{id}', [InvoiceFoodController::class, 'update']);
+        Route::delete('/{id}', [InvoiceFoodController::class, 'destroy']);
+    });
+});

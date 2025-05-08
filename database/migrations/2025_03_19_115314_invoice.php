@@ -16,9 +16,9 @@ return new class extends Migration
             $table->integer("id_table");
             $table->dateTime("timeEnd");
             $table->integer("total");
-            $table->integer("id_user");
-            $table->integer("id_customer");
-            $table->integer("id_sale");
+            $table->integer("id_user")->nullable();
+            $table->integer("id_customer")->nullable();
+            $table->integer("id_sale")->nullable();
             $table->timestamps();
         });
     }
