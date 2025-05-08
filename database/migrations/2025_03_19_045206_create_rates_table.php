@@ -13,6 +13,8 @@ return new class extends Migration
             $table->integer('id_food');
             $table->integer('star')->default(5);
             $table->text('detail')->nullable();
+            $table->integer('id_customer');
+            $table->dateTime('time')->useCurrent();
             $table->timestamps();
         });
     }

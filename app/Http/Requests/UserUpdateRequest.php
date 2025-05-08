@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserRequest extends FormRequest
+class UserUpdateRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -13,22 +13,24 @@ class UserRequest extends FormRequest
 
     public function rules(): array
     {
+        $userId = $this->route('id');
+
         return [
+            'id'             => 'required|exists:users,id',
             'image'          => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'name'           => 'required|string|min:3|max:100',
             'role'           => 'required|string|in:admin,user,staff',
-            'phone_number'   => 'required|string|regex:/^0[0-9]{9}$/|unique:users,phone_number,' . $this->route('id', '0'),
-            'email'          => 'required|email|unique:users,email,' . $this->route('id', '0'),
+            'phone_number'   => 'required|string|regex:/^0[0-9]{9}$/|unique:users,phone_number,' . $this->route('id'),
+            'email'          => 'required|email|unique:users,email,' . $this->route('id'),
             'status'         => 'required|in:active,inactive,banned',
             'birth'          => 'required|date|before:today',
-            'password'       => 'required|min:6|max:50',
+            'password'       => 'nullable|min:6|max:50',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'image.required'         => 'Phải chọn ảnh.',
             'image.image'            => 'File tải lên phải là hình ảnh.',
             'image.mimes'            => 'Ảnh phải có định dạng jpg, jpeg hoặc png.',
             'image.max'              => 'Ảnh không được lớn hơn 2MB.',
@@ -49,13 +51,12 @@ class UserRequest extends FormRequest
             'email.unique'           => 'Email đã tồn tại.',
 
             'status.required'        => 'Trạng thái là bắt buộc.',
-            'status.in'              => 'Trạng thái phải là active hoặc inactive.',
+            'status.in'              => 'Trạng thái phải là active, inactive hoặc banned.',
 
             'birth.required'         => 'Ngày sinh là bắt buộc.',
             'birth.date'             => 'Ngày sinh không hợp lệ.',
             'birth.before'           => 'Ngày sinh phải trước ngày hiện tại.',
 
-            'password.required'      => 'Mật khẩu là bắt buộc.',
             'password.min'           => 'Mật khẩu phải có ít nhất 6 ký tự.',
             'password.max'           => 'Mật khẩu không được vượt quá 50 ký tự.',
         ];

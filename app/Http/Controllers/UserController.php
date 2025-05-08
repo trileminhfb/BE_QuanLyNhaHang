@@ -2,9 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AdminChangePasswordRequest;
+use App\Http\Requests\GetUserInforRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Requests\UserRequest;
+use App\Http\Requests\UserUpdateRequest;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -21,8 +27,13 @@ class UserController extends Controller
     // Thêm mới tài khoản
     public function store(UserRequest $request)
     {
+        // Xử lý và lưu ảnh
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('images', 'public');
+        }
+
         $user = User::create([
-            'image'         => $request->image,
+            'image'         => isset($path) ? $path : null,
             'name'          => $request->name,
             'role'          => $request->role,
             'phone_number'  => $request->phone_number,
@@ -40,7 +51,7 @@ class UserController extends Controller
     }
 
     // Cập nhật tài khoản
-    public function update(UserRequest $request, $id)
+    public function update(UserUpdateRequest $request, $id)
     {
         $user = User::find($id);
 
@@ -51,8 +62,18 @@ class UserController extends Controller
             ], 404);
         }
 
+        // Xử lý và lưu ảnh mới nếu có
+        if ($request->hasFile('image')) {
+            // Xóa ảnh cũ nếu có
+            if ($user->image && Storage::exists('public/' . $user->image)) {
+                Storage::delete('public/' . $user->image);
+            }
+
+            $path = $request->file('image')->store('images', 'public');
+        }
+
         $data = [
-            'image'         => $request->image,
+            'image'         => isset($path) ? $path : $user->image,
             'name'          => $request->name,
             'role'          => $request->role,
             'phone_number'  => $request->phone_number,
@@ -70,7 +91,7 @@ class UserController extends Controller
 
         return response()->json([
             'status' => 1,
-            'message' => 'Cập nhật người dùng thành công.',
+            'message' => 'Cập nhật thông tin thành công.',
             'data'    => $user
         ]);
     }
@@ -87,6 +108,11 @@ class UserController extends Controller
             ], 404);
         }
 
+        // Xóa ảnh nếu có
+        if ($user->image && Storage::exists('public/' . $user->image)) {
+            Storage::delete('public/' . $user->image);
+        }
+
         $user->delete();
 
         return response()->json([
@@ -95,16 +121,142 @@ class UserController extends Controller
         ]);
     }
 
-    // Tìm kiếm tài khoản theo tên
-    public function search(Request $request)
+    // Đăng nhập
+    public function login(Request $request)
     {
-        $keyword = $request->keyword;
-        $users = User::where('name', 'like', '%' . $keyword . '%')
-            ->get();
+        $user = User::where('email', $request->email)->first();
+
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        if ($user && Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'status'    => 1,
+                'message'   => 'Đăng nhập thành công',
+                'key'       => $user->createToken('key_admin')->plainTextToken,
+                'name'      => $user->name,
+            ]);
+        } else {
+            return response()->json([
+                'status'    => 0,
+                'message'   => 'Tài khoản hoặc mật khẩu không đúng'
+            ]);
+        }
+    }
+
+    // Kiểm tra đăng nhập
+    public function checkLogin(Request $request)
+    {
+        $user = Auth::guard('sanctum')->user();
+
+        if ($user && $user instanceof \App\Models\User) {
+            return response()->json([
+                'status' => 1,
+                'user'   => $user
+            ]);
+        }
 
         return response()->json([
-            'status' => 1,
-            'data' => $users
+            'status' => 0,
+            'message' => 'Chưa đăng nhập.',
+        ], 401);
+    }
+
+    // Đổi mật khẩu
+    public function changePasswordProfile(AdminChangePasswordRequest $request)
+    {
+        $user = Auth::guard('sanctum')->user();
+
+        if (!$user || !($user instanceof \App\Models\User)) {
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Người dùng không hợp lệ.',
+            ], 401);
+        }
+
+        if (!Hash::check($request->old_password, $user->password)) {
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Mật khẩu cũ không đúng.',
+            ]);
+        }
+
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return response()->json([
+            'status'  => 1,
+            'message' => 'Đổi mật khẩu thành công.',
         ]);
+    }
+
+    // Lấy thông tin người dùng
+    public function getUserInfo()
+    {
+        $user = Auth::guard('sanctum')->user();
+
+        if ($user && $user instanceof \App\Models\User) {
+            return response()->json([
+                'status' => 1,
+                'data' => $user->only(['id', 'name', 'email', 'phone_number', 'role', 'status', 'image', 'birth']),
+            ]);
+        }
+
+        return response()->json([
+            'status'  => 0,
+            'message' => 'Có lỗi xảy ra.',
+        ], 401);
+    }
+
+    // Cập nhật thông tin người dùng
+    public function updateUserInfo(GetUserInforRequest $request)
+    {
+        $user = Auth::guard('sanctum')->user();
+
+        if ($user && $user instanceof \App\Models\User) {
+            $data = $request->only(['name', 'phone_number', 'birth']);
+
+            if ($request->hasFile('image')) {
+                if ($user->image && Storage::exists('public/' . $user->image)) {
+                    Storage::delete('public/' . $user->image);
+                }
+                $path = $request->file('image')->store('images', 'public');
+                $data['image'] = $path;
+            }
+
+            $user->update($data);
+
+            return response()->json([
+                'status'  => 1,
+                'message' => 'Cập nhật thông tin thành công.',
+            ]);
+        }
+
+        return response()->json([
+            'status'  => 0,
+            'message' => 'Có lỗi xảy ra.',
+        ], 401);
+    }
+
+    // Đăng xuất
+    public function logout(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user) {
+            $user->currentAccessToken()->delete();
+
+            return response()->json([
+                'status'  => 1,
+                'message' => 'Đăng xuất thành công.',
+            ]);
+        }
+
+        return response()->json([
+            'status'  => 0,
+            'message' => 'Người dùng không hợp lệ.',
+        ], 401);
     }
 }
