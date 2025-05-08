@@ -24,7 +24,7 @@ use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SaleFoodController;
 use App\Http\Controllers\TableController;
 use App\Http\Controllers\TypeController;
-
+use App\Models\Rate;
 
 // Route mặc định
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -92,43 +92,61 @@ Route::prefix('admin')->group(function () {
 
     Route::prefix('ingredients')->group(function () {
         Route::get('/', [IngredientController::class, 'getData']);
-        Route::get('/{id}', [IngredientController::class, 'getById']);
-        Route::post('/', [IngredientController::class, 'store']);
-        Route::put('/{id}', [IngredientController::class, 'update']);
-        Route::delete('/{id}', [IngredientController::class, 'destroy']);
+        Route::post('/create', [IngredientController::class, 'store']);
+        Route::get('/show/{id}', [IngredientController::class, 'getById']);
+        Route::put('/update/{id}', [IngredientController::class, 'update']);
+        Route::delete('/delete/{id}', [IngredientController::class, 'destroy']);
     });
 
     Route::prefix('warehouses')->group(function () {
-        Route::get('/', [WarehouseController::class, 'getData']);
-        Route::post('/', [WarehouseController::class, 'store']);
-        Route::put('/{id}', [WarehouseController::class, 'update']);
-        Route::delete('/{id}', [WarehouseController::class, 'destroy']);
+        Route::get('/',                         [WarehouseController::class, 'getData']);
+        Route::post('/create',                  [WarehouseController::class, 'store']);
+        Route::get('/show/{id}',                [WarehouseController::class, 'show']);
+        Route::put('/update/{id}',              [WarehouseController::class, 'update']);
+        Route::delete('/delete/{id}',           [WarehouseController::class, 'destroy']);
+    });
+
+    Route::prefix('rates')->group(function () {
+        Route::get('/',                         [RateController::class, 'getData']);
+        Route::post('/create',                  [RateController::class, 'store']);
+        Route::get('/show/{id}',                [RateController::class, 'show']);
+        Route::put('/update/{id}',              [RateController::class, 'update']);
+        Route::delete('/delete/{id}',           [RateController::class, 'destroy']);
     });
 
     Route::prefix('warehouse-invoices')->group(function () {
-        Route::get('/', [WarehouseInvoiceController::class, 'getData']);
-        Route::post('/', [WarehouseInvoiceController::class, 'store']);
-        Route::put('/{id}', [WarehouseInvoiceController::class, 'update']);
-        Route::delete('/{id}', [WarehouseInvoiceController::class, 'destroy']);
-        Route::get('/search', [WarehouseInvoiceController::class, 'search']);
+        Route::get('/',                         [WarehouseInvoiceController::class, 'getData']);
+        Route::post('/create',                  [WarehouseInvoiceController::class, 'store']);
+        Route::get('/show/{id}',                [WarehouseInvoiceController::class, 'show']);
+        Route::put('/update/{id}',              [WarehouseInvoiceController::class, 'update']);
+        Route::delete('/delete/{id}',           [WarehouseInvoiceController::class, 'destroy']);
+        Route::get('/search',                   [WarehouseInvoiceController::class, 'search']);
     });
 
     Route::prefix('review-management')->group(function () {
-        Route::get('/', [ReviewManagementController::class, 'getData']);
-        Route::post('/', [ReviewManagementController::class, 'store']);
-        Route::put('/{id}', [ReviewManagementController::class, 'update']);
-        Route::delete('/{id}', [ReviewManagementController::class, 'destroy']);
+        Route::get('/',                         [ReviewManagementController::class, 'getData']);
+        Route::post('/create',                  [ReviewManagementController::class, 'store']);
+        Route::get('/show/{id}',                [ReviewManagementController::class, 'show']);
+        Route::put('/update/{id}',              [ReviewManagementController::class, 'update']);
+        Route::delete('/delete/{id}',           [ReviewManagementController::class, 'destroy']);
     });
 
     Route::prefix('users')->group(function () {
-        Route::get('/', [UserController::class, 'getData']);
-        Route::get('/{id}', [UserController::class, 'getById']);
-        Route::post('/', [UserController::class, 'store']);
-        Route::put('/update/{id}', [UserController::class, 'update']);
-        Route::delete('/{id}', [UserController::class, 'destroy']);
-        Route::post('/login', [UserController::class, 'login']);
-        Route::put('/change-password', [UserController::class, 'changePasswordProfile'])->middleware('checkUser');
+        Route::get('/',                         [UserController::class, 'getData']);
+        Route::post('/create',                  [UserController::class, 'store']);
+        Route::get('/show/{id}',                [UserController::class, 'getById']);
+        Route::put('/update/{id}',              [UserController::class, 'update']);
+        Route::delete('/delete/{id}',           [UserController::class, 'destroy']);
+
+        Route::post('/login',                   [UserController::class, 'login']);
+        Route::post('/check-login',             [UserController::class, 'checkLogin']);
+        Route::post('/logout',                  [UserController::class, 'logout']);
+
+        Route::get('/profile',                  [UserController::class, 'getUserInfo']);
+        Route::put('/profile-update',           [UserController::class, 'updateUserInfo']);
+        Route::put('/change-password',          [UserController::class, 'changePasswordProfile'])->middleware('checkUser');
     });
+
     Route::prefix('booking-food')->group(function () {
         Route::get('/', [BoongkingFoodController::class, 'index']);
         Route::post('/', [BoongkingFoodController::class, 'store']);
@@ -175,6 +193,7 @@ Route::prefix('admin')->group(function () {
         Route::put('/{id}', [TypeController::class, 'update']);
         Route::delete('/{id}', [TypeController::class, 'destroy']);
     });
+
     Route::prefix('tables')->group(function () {
         Route::get('/', [TableController::class, 'index']);
         Route::post('/create', [TableController::class, 'store']);
