@@ -17,6 +17,7 @@ class Customer extends Model
         'phoneNumber',
         'mail',
         'birth',
+        'password',
         'FullName',
         'image',
         'otp',
@@ -24,13 +25,11 @@ class Customer extends Model
         'id_rank',
         'isActive',
     ];
-
     protected $casts = [
         'birth' => 'date',
         'isActive' => 'boolean',
         'point' => 'integer',
     ];
-
     public function rank()
     {
         return $this->belongsTo(Rank::class, 'id_rank');

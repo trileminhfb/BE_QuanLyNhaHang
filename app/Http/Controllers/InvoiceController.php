@@ -10,15 +10,15 @@ use Illuminate\Support\Facades\Log;
 
 class InvoiceController extends Controller
 {
-    // Lấy danh sách hóa đơn
+
     public function index()
     {
         try {
             $invoices = DB::table('invoices')
                 ->leftJoin('tables', 'invoices.id_table', '=', 'tables.id')
                 ->leftJoin('users', 'invoices.id_user', '=', 'users.id')
-
                 ->leftJoin('customers', 'invoices.id_customer', '=', 'customers.id')
+                ->leftJoin('sales', 'invoices.id_sale', '=', 'sales.id')
                 ->select(
                     'invoices.*',
                     'tables.number as table_number',
@@ -26,7 +26,8 @@ class InvoiceController extends Controller
                     'users.role',
                     'users.phone_number',
                     'users.email',
-                    'customers.FullName as customer_name'
+                    'customers.FullName as customer_name',
+                    'sales.*'
                 )
                 ->get();
 
@@ -36,19 +37,35 @@ class InvoiceController extends Controller
             return response()->json(['error' => 'Lỗi khi lấy danh sách hóa đơn'], 500);
         }
     }
-    // Tạo hóa đơn mới
+
+
     public function store(InvoiceRequest $request)
     {
         $data = $request->validated();
 
-        // Nếu frontend gửi sai tên field
-        if (isset($data['id_custumer'])) {
-            $data['id_customer'] = $data['id_custumer'];
-            unset($data['id_custumer']);
+        $fieldMapping = [
+            'id_custumer' => 'id_customer',
+        ];
+        foreach ($fieldMapping as $wrongField => $correctField) {
+            if (isset($data[$wrongField])) {
+                $data[$correctField] = $data[$wrongField];
+                unset($data[$wrongField]);
+            }
         }
 
+        $total = $this->calculateTotal($data['items']);
+        $data['total'] = $total;
+
         try {
+            Log::info('Dữ liệu hóa đơn:', $data);
+
             $invoice = Invoice::create($data);
+
+            if (!$invoice) {
+                Log::error('Không thể tạo hóa đơn:', $data);
+                return response()->json(['error' => 'Lỗi tạo hóa đơn'], 500);
+            }
+
             Log::info('Hóa đơn đã được tạo:', $invoice->toArray());
 
             return response()->json([
@@ -61,7 +78,17 @@ class InvoiceController extends Controller
         }
     }
 
-    // Xem chi tiết hóa đơn
+    private function calculateTotal($items)
+    {
+        $total = 0;
+
+        foreach ($items as $item) {
+            $total += $item['quantity'] * $item['unit_price'];
+        }
+
+        return $total;
+    }
+
     public function show($id)
     {
         try {
@@ -116,7 +143,6 @@ class InvoiceController extends Controller
             }
 
             $invoice->delete();
-
         } catch (\Exception $e) {
             Log::error('Lỗi xóa hóa đơn: ' . $e->getMessage());
             return response()->json(['error' => 'Lỗi xóa hóa đơn'], 500);

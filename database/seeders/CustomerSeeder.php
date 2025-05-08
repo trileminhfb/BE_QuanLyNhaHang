@@ -4,7 +4,9 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class CustomerSeeder extends Seeder
 {
@@ -29,13 +31,14 @@ class CustomerSeeder extends Seeder
             $customers[] = [
                 'phoneNumber' => '09' . rand(1, 9) . rand(0, 9) . rand(1000000, 9999999),
                 'mail' => Str::random(10) . '@example.com',
-                'birth' => now()->subYears(rand(18, 50))->format('Y-m-d'),
+                'birth' => Carbon::now()->subYears(rand(18, 50))->format('Y-m-d'),
+                'password' => Hash::make('password123'), 
                 'FullName' => $names[$i],
                 'image' => 'user' . rand(1, 7) . '.png',
                 'otp' => rand(0, 1) ? rand(100000, 999999) : null,
                 'point' => rand(50, 500),
                 'id_rank' => rand(1, 4),
-                'isActive' => rand(0, 1), 
+                'isActive' => rand(0, 1),
                 'created_at' => now(),
                 'updated_at' => now(),
             ];

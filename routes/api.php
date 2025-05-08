@@ -34,6 +34,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // Nhóm route cho ADMIN
 Route::prefix('admin')->group(function () {
     Route::prefix('customers')->group(function () {
+        Route::post('/register', [CustomerController::class, 'register']);
         Route::get('/', [CustomerController::class, 'index']);
         Route::post('/create', [CustomerController::class, 'store']);
         Route::get('/{id}', [CustomerController::class, 'show']);
@@ -184,10 +185,12 @@ Route::prefix('admin')->group(function () {
     });
 });
 
-// Nhóm route cho CLIENT
 Route::prefix('client')->group(function () {
-    Route::post('/send-otp', [MailController::class, 'sendOtp']);
-    Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
-    Route::post('/login', [AuthController::class, 'loginWithOtp']);
+    Route::post('register', [AuthController::class, 'register']);
+    Route::post('verify-otp', [AuthController::class, 'verifyOtp']);
+    Route::post('login', [AuthController::class, 'loginWithOtp']);
+    Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('reset-password', [AuthController::class, 'resetPassword']);
+    Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');  // Đăng xuất
 });
+

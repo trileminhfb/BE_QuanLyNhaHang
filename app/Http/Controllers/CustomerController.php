@@ -2,16 +2,59 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\OtpMail;
 use App\Models\Customer;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 class CustomerController extends Controller
 {
-
-    public function __construct()
+    public function register(Request $request)
     {
-        $this->middleware('auth:sanctum');
+        $validated = Validator::make($request->all(), [
+            'email' => 'required|email|unique:customers,mail',
+            'FullName' => 'required|string|max:255',
+            'phoneNumber' => 'required|string|unique:customers,phoneNumber',
+            'password' => 'required|string|min:6|confirmed', // thêm xác nhận mật khẩu
+            'birth' => 'nullable|date',
+            'image' => 'nullable|string',
+        ]);
+
+        if ($validated->fails()) {
+            return response()->json(['errors' => $validated->errors()], 422);
+        }
+
+        $otp = rand(100000, 999999);
+
+        $customer = Customer::create([
+            'mail' => $request->email,
+            'FullName' => $request->FullName,
+            'phoneNumber' => $request->phoneNumber,
+            'birth' => $request->birth,
+            'image' => $request->image,
+            'password' => Hash::make($request->password),
+            'otp' => $otp,
+            'point' => 0,
+            'id_rank' => 1,
+            'isActive' => false,
+        ]);
+
+        // Gửi OTP qua email
+        Mail::to($request->email)->send(new OtpMail($otp, $request->FullName));
+
+        return response()->json([
+            'message' => 'Đăng ký thành công. Vui lòng xác nhận OTP được gửi qua email.',
+            'id' => $customer->id
+        ], 201);
     }
+
+
+    // public function __construct()
+    // {
+    //     $this->middleware('auth:sanctum');
+    // }
     public function index()
     {
         try {
