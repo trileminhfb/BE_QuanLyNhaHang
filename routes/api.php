@@ -37,7 +37,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/', [CustomerController::class, 'index']);
         Route::post('/create', [CustomerController::class, 'store']);
         Route::get('/{id}', [CustomerController::class, 'show']);
-        Route::put('/{id}', [CustomerController::class, 'update']);
+        Route::put('/update/{id}', [CustomerController::class, 'update']);
         Route::delete('/{id}', [CustomerController::class, 'delete']);
     });
 
@@ -123,8 +123,10 @@ Route::prefix('admin')->group(function () {
         Route::get('/', [UserController::class, 'getData']);
         Route::get('/{id}', [UserController::class, 'getById']);
         Route::post('/', [UserController::class, 'store']);
-        Route::put('/{id}', [UserController::class, 'update']);
+        Route::put('/update/{id}', [UserController::class, 'update']);
         Route::delete('/{id}', [UserController::class, 'destroy']);
+        Route::post('/login', [UserController::class, 'login']);
+        Route::put('/change-password', [UserController::class, 'changePasswordProfile'])->middleware('checkUser');
     });
     Route::prefix('booking-food')->group(function () {
         Route::get('/', [BoongkingFoodController::class, 'index']);

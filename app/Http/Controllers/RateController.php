@@ -3,44 +3,52 @@
 namespace App\Http\Controllers;
 
 use App\Models\Rate;
+use App\Models\Food;
+use App\Models\Customer;
 use Illuminate\Http\Request;
 use App\Http\Requests\RateRequest;
-use App\Models\Food;
 
 class RateController extends Controller
 {
-    // Lấy danh sách đánh giá
+    // Lấy danh sách đánh giá (có luôn thông tin food và customer)
     public function getData()
     {
-        $rates = Rate::all();
+        $rates = Rate::with(['customer:id,FullName'])->get();
 
         return response()->json([
             'status' => 1,
-            'data' => $rates
+            'data'   => $rates,
         ]);
     }
 
     // Thêm đánh giá mới
     public function store(RateRequest $request)
     {
-        $food = Food::find($request->id_food);
-        if (!$food) {
+        if (! Food::find($request->id_food)) {
             return response()->json([
                 'status'  => 0,
-                'message' => 'Món ăn không tồn tại.'
+                'message' => 'Món ăn không tồn tại.',
+            ], 400);
+        }
+
+        if (! Customer::find($request->id_customer)) {
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Khách hàng không tồn tại.',
             ], 400);
         }
 
         $rate = Rate::create([
-            'id_food' => $request->id_food,
-            'star'    => $request->star,
-            'detail'  => $request->detail,
+            'id_food'     => $request->id_food,
+            'id_customer' => $request->id_customer,
+            'star'        => $request->star,
+            'detail'      => $request->detail,
         ]);
 
         return response()->json([
             'status'  => 1,
             'message' => 'Đánh giá đã được thêm thành công.',
-            'data'    => $rate
+            'data'    => $rate->load(['food', 'customer']),
         ]);
     }
 
@@ -49,23 +57,38 @@ class RateController extends Controller
     {
         $rate = Rate::find($id);
 
-        if (!$rate) {
+        if (! $rate) {
             return response()->json([
                 'status'  => 0,
-                'message' => 'Không tìm thấy đánh giá.'
-            ]);
+                'message' => 'Không tìm thấy đánh giá.',
+            ], 404);
+        }
+
+        if (! Food::find($request->id_food)) {
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Món ăn không tồn tại.',
+            ], 400);
+        }
+
+        if (! Customer::find($request->id_customer)) {
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Khách hàng không tồn tại.',
+            ], 400);
         }
 
         $rate->update([
-            'id_food' => $request->id_food,
-            'star'    => $request->star,
-            'detail'  => $request->detail,
+            'id_food'     => $request->id_food,
+            'id_customer' => $request->id_customer,
+            'star'        => $request->star,
+            'detail'      => $request->detail,
         ]);
 
         return response()->json([
             'status'  => 1,
             'message' => 'Đánh giá đã được cập nhật.',
-            'data'    => $rate
+            'data'    => $rate->fresh()->load(['food', 'customer']),
         ]);
     }
 
@@ -74,18 +97,18 @@ class RateController extends Controller
     {
         $rate = Rate::find($id);
 
-        if (!$rate) {
+        if (! $rate) {
             return response()->json([
                 'status'  => 0,
-                'message' => 'Không tìm thấy đánh giá.'
-            ]);
+                'message' => 'Không tìm thấy đánh giá.',
+            ], 404);
         }
 
         $rate->delete();
 
         return response()->json([
             'status'  => 1,
-            'message' => 'Đánh giá đã được xóa.'
+            'message' => 'Đánh giá đã được xóa.',
         ]);
     }
 }
