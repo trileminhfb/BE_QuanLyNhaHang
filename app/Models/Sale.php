@@ -16,7 +16,7 @@ class Sale extends Model
          'status',
          'startTime',
           'endTime',
-           'percent'
+           'percent'    
     ];
 
 
