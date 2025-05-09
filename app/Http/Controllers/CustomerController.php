@@ -60,6 +60,7 @@ class CustomerController extends Controller
     {
         try {
             $customers = Customer::with(['rank:id,nameRank,necessaryPoint,saleRank'])->get();
+
             return response()->json([
                 'customers' => $customers
             ]);
@@ -69,7 +70,6 @@ class CustomerController extends Controller
             ], 500);
         }
     }
-
     public function store(Request $request)
     {
         $validated = $request->validate([
