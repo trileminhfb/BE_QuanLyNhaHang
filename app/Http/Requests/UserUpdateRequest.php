@@ -13,10 +13,7 @@ class UserUpdateRequest extends FormRequest
 
     public function rules(): array
     {
-        $userId = $this->route('id');
-
         return [
-            'id'             => 'required|exists:users,id',
             'image'          => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'name'           => 'required|string|min:3|max:100',
             'role'           => 'required|string|in:admin,manager,staff',

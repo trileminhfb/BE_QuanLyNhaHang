@@ -135,7 +135,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/',                         [UserController::class, 'getData']);
         Route::post('/create',                  [UserController::class, 'store']);
         Route::get('/show/{id}',                [UserController::class, 'getById']);
-        Route::put('/update/{id}',              [UserController::class, 'update']);
+        Route::put('/update/{id}',              [UserController::class, 'update'])->middleware('checkUser');
         Route::delete('/delete/{id}',           [UserController::class, 'destroy']);
 
         Route::post('/login',                   [UserController::class, 'login']);
