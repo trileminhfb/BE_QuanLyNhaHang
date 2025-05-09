@@ -11,50 +11,51 @@ use Illuminate\Support\Facades\Mail;
 
 class CustomerController extends Controller
 {
-    public function register(Request $request)
-    {
-        $validated = Validator::make($request->all(), [
-            'email' => 'required|email|unique:customers,mail',
-            'FullName' => 'required|string|max:255',
-            'phoneNumber' => 'required|string|unique:customers,phoneNumber',
-            'password' => 'required|string|min:6|confirmed', // thêm xác nhận mật khẩu
-            'birth' => 'nullable|date',
-            'image' => 'nullable|string',
-        ]);
+    // public function register(Request $request)
+    // {
+    //     $validated = Validator::make($request->all(), [
+    //         'email' => 'required|email|unique:customers,mail',
+    //         'FullName' => 'required|string|max:255',
+    //         'phoneNumber' => 'required|string|unique:customers,phoneNumber',
+    //         'password' => 'required|string|min:6|confirmed', // thêm xác nhận mật khẩu
+    //         'birth' => 'nullable|date',
+    //         'image' => 'nullable|string',
+    //     ]);
 
-        if ($validated->fails()) {
-            return response()->json(['errors' => $validated->errors()], 422);
-        }
+    //     if ($validated->fails()) {
+    //         return response()->json(['errors' => $validated->errors()], 422);
+    //     }
 
-        $otp = rand(100000, 999999);
+    //     $otp = rand(100000, 999999);
 
-        $customer = Customer::create([
-            'mail' => $request->email,
-            'FullName' => $request->FullName,
-            'phoneNumber' => $request->phoneNumber,
-            'birth' => $request->birth,
-            'image' => $request->image,
-            'password' => Hash::make($request->password),
-            'otp' => $otp,
-            'point' => 0,
-            'id_rank' => 1,
-            'isActive' => false,
-        ]);
+    //     $customer = Customer::create([
+    //         'mail' => $request->email,
+    //         'FullName' => $request->FullName,
+    //         'phoneNumber' => $request->phoneNumber,
+    //         'birth' => $request->birth,
+    //         'image' => $request->image,
+    //         'password' => Hash::make($request->password),
+    //         'otp' => $otp,
+    //         'point' => 0,
+    //         'id_rank' => 1,
+    //         'isActive' => false,
+    //     ]);
 
-        // Gửi OTP qua email
-        Mail::to($request->email)->send(new OtpMail($otp, $request->FullName));
+    //     // Gửi OTP qua email
+    //     Mail::to($request->email)->send(new OtpMail($otp, $request->FullName));
 
-        return response()->json([
-            'message' => 'Đăng ký thành công. Vui lòng xác nhận OTP được gửi qua email.',
-            'id' => $customer->id
-        ], 201);
-    }
+    //     return response()->json([
+    //         'message' => 'Đăng ký thành công. Vui lòng xác nhận OTP được gửi qua email.',
+    //         'id' => $customer->id
+    //     ], 201);
+    // }
 
 
     // public function __construct()
     // {
     //     $this->middleware('auth:sanctum');
     // }
+
     public function index()
     {
         try {
@@ -134,7 +135,6 @@ class CustomerController extends Controller
             'customer' => $customer
         ], 200);
     }
-
     public function delete($id)
     {
         $customer = Customer::find($id);
