@@ -17,7 +17,7 @@ class UserSeeder extends Seeder
             [
                 'image' => 'manager.jpg',
                 'name' => 'Nguyễn Văn A',
-                'role' => 'Quản lý',
+                'role' => 'manager',
                 'phone_number' => '0911111111',
                 'email' => 'manager@example.com',
                 'status' => 'active',
@@ -31,7 +31,7 @@ class UserSeeder extends Seeder
             [
                 'image' => 'chef.jpg',
                 'name' => 'Trần Thị B',
-                'role' => 'Đầu bếp',
+                'role' => 'staff',
                 'phone_number' => '0922222222',
                 'email' => 'chef@example.com',
                 'status' => 'active',
@@ -45,7 +45,7 @@ class UserSeeder extends Seeder
             [
                 'image' => 'staff1.jpg',
                 'name' => 'Lê Văn C',
-                'role' => 'Nhân viên',
+                'role' => 'staff',
                 'phone_number' => '0933333333',
                 'email' => 'staff1@example.com',
                 'status' => 'active',
@@ -59,7 +59,7 @@ class UserSeeder extends Seeder
             [
                 'image' => 'staff2.jpg',
                 'name' => 'Phạm Thị D',
-                'role' => 'Nhân viên',
+                'role' => 'staff',
                 'phone_number' => '0944444444',
                 'email' => 'staff2@example.com',
                 'status' => 'active',
@@ -73,7 +73,7 @@ class UserSeeder extends Seeder
             [
                 'image' => 'admin.jpg',
                 'name' => 'Admin',
-                'role' => 'Quản trị viên',
+                'role' => 'manager',
                 'phone_number' => '0955555555',
                 'email' => 'admin@example.com',
                 'status' => 'active',
