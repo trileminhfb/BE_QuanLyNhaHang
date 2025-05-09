@@ -22,9 +22,12 @@ class CustomerRequest extends FormRequest
         return [
             'phoneNumber' => 'required|string|unique:customers,phoneNumber',
             'FullName' => 'required|string|max:255',
-            'otp' => 'required|string|min:4|max:6',
-            'point' => 'integer|min:0',
+            'otp' => 'nullable|string|min:4|max:6',
+            'point' => 'nullable|integer|min:0',
             'id_rank' => 'required|exists:ranks,id',
+            'mail' => 'nullable|email|max:255',
+            'birth' => 'nullable|date',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ];
     }
 
@@ -42,7 +45,6 @@ class CustomerRequest extends FormRequest
             'FullName.string' => 'Họ tên phải là chuỗi ký tự.',
             'FullName.max' => 'Họ tên không được vượt quá 255 ký tự.',
 
-            'otp.required' => 'Vui lòng nhập mã OTP.',
             'otp.string' => 'Mã OTP phải là chuỗi ký tự.',
             'otp.min' => 'Mã OTP phải có ít nhất 4 ký tự.',
             'otp.max' => 'Mã OTP không được vượt quá 6 ký tự.',
@@ -52,6 +54,15 @@ class CustomerRequest extends FormRequest
 
             'id_rank.required' => 'Vui lòng chọn hạng thành viên.',
             'id_rank.exists' => 'Hạng thành viên không tồn tại.',
+
+            'mail.email' => 'Email không đúng định dạng.',
+            'mail.max' => 'Email không được vượt quá 255 ký tự.',
+
+            'birth.date' => 'Ngày sinh không hợp lệ.',
+
+            'image.image' => 'Tệp tải lên phải là ảnh.',
+            'image.mimes' => 'Ảnh phải có định dạng jpeg, png, jpg hoặc gif.',
+            'image.max' => 'Ảnh không được lớn hơn 2MB.',
         ];
     }
 }

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create("customers", function (Blueprint $table) {
             $table->id();
-            $table->string('phoneNumber')->unique();
+            $table->string('phoneNumber', 11)->unique(); 
             $table->string('mail')->nullable();
             $table->date('birth')->nullable();
             $table->string('password')->nullable();
@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('otp')->nullable();
             $table->integer('point')->default(0);
             $table->integer('id_rank')->default(value: 1);
-            $table->boolean('isActive')->default(false);  // sửa thành isActive
+            $table->boolean('isActive')->default(false);
             $table->timestamps();
         });
     }

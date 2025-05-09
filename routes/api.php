@@ -292,9 +292,10 @@ Route::prefix('client')->group(function () {
     Route::prefix('categories')->group(function () {
         Route::get('/', [CategoryController::class, 'index']);
     });
-
+    
 });
 
 Route::prefix('chat')->group(function () {
     Route::post('/send', [GeminiChatController::class, 'send']);
 });
+

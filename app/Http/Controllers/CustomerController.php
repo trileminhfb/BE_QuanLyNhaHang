@@ -2,60 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CustomerRequest;
 use App\Mail\OtpMail;
 use App\Models\Customer;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 
 class CustomerController extends Controller
 {
-    // public function register(Request $request)
-    // {
-    //     $validated = Validator::make($request->all(), [
-    //         'email' => 'required|email|unique:customers,mail',
-    //         'FullName' => 'required|string|max:255',
-    //         'phoneNumber' => 'required|string|unique:customers,phoneNumber',
-    //         'password' => 'required|string|min:6|confirmed', // thêm xác nhận mật khẩu
-    //         'birth' => 'nullable|date',
-    //         'image' => 'nullable|string',
-    //     ]);
-
-    //     if ($validated->fails()) {
-    //         return response()->json(['errors' => $validated->errors()], 422);
-    //     }
-
-    //     $otp = rand(100000, 999999);
-
-    //     $customer = Customer::create([
-    //         'mail' => $request->email,
-    //         'FullName' => $request->FullName,
-    //         'phoneNumber' => $request->phoneNumber,
-    //         'birth' => $request->birth,
-    //         'image' => $request->image,
-    //         'password' => Hash::make($request->password),
-    //         'otp' => $otp,
-    //         'point' => 0,
-    //         'id_rank' => 1,
-    //         'isActive' => false,
-    //     ]);
-
-    //     // Gửi OTP qua email
-    //     Mail::to($request->email)->send(new OtpMail($otp, $request->FullName));
-
-    //     return response()->json([
-    //         'message' => 'Đăng ký thành công. Vui lòng xác nhận OTP được gửi qua email.',
-    //         'id' => $customer->id
-    //     ], 201);
-    // }
-
-
-    // public function __construct()
-    // {
-    //     $this->middleware('auth:sanctum');
-    // }
-
     public function index()
     {
         try {
@@ -70,24 +27,52 @@ class CustomerController extends Controller
             ], 500);
         }
     }
+
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'phoneNumber' => 'required|string|unique:customers,phoneNumber',
-            'FullName' => 'required|string|max:255',
-            'otp' => 'nullable|string|max:6',
-            'point' => 'nullable|integer',
-            'id_rank' => 'nullable|integer',
-            'mail' => 'nullable|email|max:255',
-            'birth' => 'nullable|date',
-            'image' => 'nullable|string',
+        $data = $request->all();
+
+        // Xử lý ảnh base64 nếu có
+        if ($request->filled('image_base64')) {
+            $imageData = $request->image_base64;
+
+            if (preg_match('/^data:image\/(\w+);base64,/', $imageData, $type)) {
+                $image = substr($imageData, strpos($imageData, ',') + 1);
+                $image = base64_decode($image);
+                $extension = strtolower($type[1]);
+                $imageName = 'customer_' . time() . '.' . $extension;
+                Storage::disk('public')->put("customers/{$imageName}", $image);
+                $data['image'] = "customers/{$imageName}";
+            }
+        }
+
+        // Xử lý ảnh nếu upload bằng form-data (file)
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('customers', 'public');
+            $data['image'] = $imagePath;
+        }
+
+        $otp = rand(100000, 999999); // Tạo OTP
+
+        $customer = Customer::create([
+            'mail' => $request->mail,
+            'FullName' => $request->FullName,
+            'phoneNumber' => $request->phoneNumber,
+            'birth' => $request->birth,
+            'image' => $data['image'] ?? null,
+            'password' => isset($request->password) ? Hash::make($request->password) : null,
+            'otp' => $otp,
+            'point' => 0,
+            'id_rank' => 1,
+            'isActive' => false,
         ]);
 
-        $customer = Customer::create($validated);
+        // Gửi OTP qua email
+        Mail::to($request->mail)->send(new OtpMail($otp, $request->FullName));
 
         return response()->json([
-            'message' => 'Khách hàng đã được tạo thành công',
-            'customer' => $customer
+            'message' => 'Đăng ký thành công. Vui lòng xác nhận OTP được gửi qua email.',
+            'id' => $customer->id
         ], 201);
     }
 
@@ -117,6 +102,7 @@ class CustomerController extends Controller
             ], 404);
         }
 
+        // Validate dữ liệu đầu vào
         $validated = $request->validate([
             'phoneNumber' => 'nullable|string|unique:customers,phoneNumber,' . $id,
             'FullName' => 'nullable|string|max:255',
@@ -125,16 +111,51 @@ class CustomerController extends Controller
             'id_rank' => 'nullable|integer',
             'mail' => 'nullable|email|max:255',
             'birth' => 'nullable|date',
-            'image' => 'nullable|string',
+            'image' => 'nullable|string', // chỉ là đường dẫn
+            'password' => 'nullable|string|min:6|confirmed', // nếu cần cập nhật mật khẩu
         ]);
 
-        $customer->update($validated);
+        $data = $validated;
+
+        // Xử lý ảnh base64 nếu có
+        if ($request->filled('image_base64')) {
+            $imageData = $request->image_base64;
+
+            if (preg_match('/^data:image\/(\w+);base64,/', $imageData, $type)) {
+                $image = substr($imageData, strpos($imageData, ',') + 1);
+                $image = base64_decode($image);
+                $extension = strtolower($type[1]);
+                $imageName = 'customer_' . time() . '.' . $extension;
+                Storage::disk('public')->put("customers/{$imageName}", $image);
+                $data['image'] = "customers/{$imageName}";
+            }
+        }
+
+        // Xử lý nếu gửi ảnh dạng file
+        if ($request->hasFile('image')) {
+            // Xóa ảnh cũ nếu có
+            if ($customer->image) {
+                Storage::disk('public')->delete($customer->image);
+            }
+
+            $imagePath = $request->file('image')->store('customers', 'public');
+            $data['image'] = $imagePath;
+        }
+
+        // Cập nhật mật khẩu nếu có
+        if ($request->has('password')) {
+            $data['password'] = Hash::make($request->password);
+        }
+
+        // Cập nhật khách hàng
+        $customer->update($data);
 
         return response()->json([
             'message' => 'Khách hàng đã được cập nhật thành công',
             'customer' => $customer
         ], 200);
     }
+
     public function delete($id)
     {
         $customer = Customer::find($id);
@@ -143,6 +164,11 @@ class CustomerController extends Controller
             return response()->json([
                 'message' => 'Không tìm thấy khách hàng'
             ], 404);
+        }
+
+        // Xóa ảnh khi xóa khách hàng
+        if ($customer->image) {
+            Storage::disk('public')->delete($customer->image);
         }
 
         $customer->delete();
