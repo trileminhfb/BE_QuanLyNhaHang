@@ -17,7 +17,7 @@ class GetUserInforRequest extends FormRequest
             'image'         => 'nullable',
             'name'          => 'required|string|max:255',
             'phone_number'  => 'required|string|regex:/^0[0-9]{9}$/|unique:users,phone_number,' . ($this->route('user') ?? '0'),
-            'birth'         => 'nullable|date',
+            'birth'         => 'required|date',
         ];
     }
 

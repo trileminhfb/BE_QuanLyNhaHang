@@ -135,15 +135,15 @@ Route::prefix('admin')->group(function () {
         Route::get('/',                         [UserController::class, 'getData']);
         Route::post('/create',                  [UserController::class, 'store']);
         Route::get('/show/{id}',                [UserController::class, 'getById']);
-        Route::put('/update/{id}',              [UserController::class, 'update'])->middleware('checkUser');
-        Route::delete('/delete/{id}',           [UserController::class, 'destroy']);
+        Route::put('/update/{id}',              [UserController::class, 'update']);
+    Route::delete('/delete/{id}',           [UserController::class, 'destroy']);
 
         Route::post('/login',                   [UserController::class, 'login']);
         Route::post('/check-login',             [UserController::class, 'checkLogin']);
         Route::post('/logout',                  [UserController::class, 'logout']);
 
         Route::get('/profile',                  [UserController::class, 'getUserInfo']);
-        Route::put('/profile-update',           [UserController::class, 'updateUserInfo']);
+        Route::put('/profile-update/{id}',      [UserController::class, 'updateUserInfo']);
         Route::put('/change-password',          [UserController::class, 'changePasswordProfile'])->middleware('checkUser');
     });
 
@@ -292,7 +292,7 @@ Route::prefix('client')->group(function () {
     Route::prefix('categories')->group(function () {
         Route::get('/', [CategoryController::class, 'index']);
     });
-    
+
 });
 
 Route::prefix('chat')->group(function () {
