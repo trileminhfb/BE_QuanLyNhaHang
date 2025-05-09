@@ -34,4 +34,8 @@ class Customer extends Model
     {
         return $this->belongsTo(Rank::class, 'id_rank');
     }
+    public function getBirthAttribute($value)
+    {
+        return \Carbon\Carbon::parse($value)->format('Y-m-d');
+    }
 }
