@@ -19,7 +19,7 @@ class UserUpdateRequest extends FormRequest
             'id'             => 'required|exists:users,id',
             'image'          => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'name'           => 'required|string|min:3|max:100',
-            'role'           => 'required|string|in:admin,user,staff',
+            'role'           => 'required|string|in:admin,manager,staff',
             'phone_number'   => 'required|string|regex:/^0[0-9]{9}$/|unique:users,phone_number,' . $this->route('id'),
             'email'          => 'required|email|unique:users,email,' . $this->route('id'),
             'status'         => 'required|in:active,inactive,banned',
