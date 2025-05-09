@@ -31,8 +31,8 @@ class CustomerSeeder extends Seeder
             $customers[] = [
                 'phoneNumber' => '09' . rand(1, 9) . rand(0, 9) . rand(1000000, 9999999),
                 'mail' => Str::random(10) . '@example.com',
-                'birth' => Carbon::now()->subYears(rand(18, 50))->format('Y-m-d'),
-                'password' => Hash::make('password123'), 
+                'birth' => Carbon::createFromTimestamp(rand(strtotime('1970-01-01'), strtotime('2005-12-31')))->format('Y-m-d'),
+                'password' => Hash::make('password123'),
                 'FullName' => $names[$i],
                 'image' => 'user' . rand(1, 7) . '.png',
                 'otp' => rand(0, 1) ? rand(100000, 999999) : null,
