@@ -33,7 +33,7 @@ class BookingController extends Controller
             ], 500);
         }
     }
-    public function store(Request $request)
+    public function createBooking(Request $request)
     {
         try {
             // Validate request đầu vào
