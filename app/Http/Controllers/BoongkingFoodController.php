@@ -19,6 +19,7 @@ class BoongkingFoodController extends Controller
 
     /**
      * Lưu thông tin món ăn vào bảng boongking_foods.
+     * fix: khả năng là thg ni bị thừa
      */ public function store(StoreBoongkingFoodRequest $request)
     {
         try {

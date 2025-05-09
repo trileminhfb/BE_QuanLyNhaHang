@@ -6,6 +6,7 @@ use App\Http\Requests\BookingRequest;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use App\Models\Booking;
+use App\Models\BookingFood;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -33,6 +34,8 @@ class BookingController extends Controller
             ], 500);
         }
     }
+
+    // fix: như cái ni là cần nè, thêm 3 bước
     public function createBooking(Request $request)
     {
         try {
@@ -61,6 +64,14 @@ class BookingController extends Controller
                 'timeBooking'  => $validated['timeBooking'],
                 'quantity'     => $validated['quantity'],
             ]);
+
+            // foreach ($request->viDu as $key => $value) {
+            //     # code...
+            //     BookingFood::create([
+            //         'abc',
+            //         'id_food' => $booking->id
+            //     ])
+            // }
 
             return response()->json([
                 'message' => 'Đặt bàn thành công.',

@@ -37,6 +37,7 @@ class CartController extends Controller
     }
 
     // Cập nhật một cart
+    // fix: bắt điều kiện tại, lỡ như cập nhật số lượng âm
     public function update(Request $request, $id)
     {
         $cart = Cart::find($id);
