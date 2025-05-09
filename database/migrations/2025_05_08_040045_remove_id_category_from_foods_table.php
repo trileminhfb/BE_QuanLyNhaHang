@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('types', function (Blueprint $table) {
-            $table->id();
-            
-            $table->integer('status');
-            $table->string('name')->unique();
-            $table->timestamps();
+        Schema::table('foods', function (Blueprint $table) {
+            //
         });
     }
 
@@ -25,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('types');
+        Schema::table('foods', function (Blueprint $table) {
+            //
+        });
     }
 };

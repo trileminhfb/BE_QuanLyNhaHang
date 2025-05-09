@@ -14,7 +14,6 @@ class FoodSeeder extends Seeder
             [
                 'name' => 'Gà rán truyền thống',
                 'id_type' => 1,
-                'id_category' => 1,
                 'image' => 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg',
                 'bestSeller' => 1,
                 'cost' => 50000,
@@ -26,7 +25,6 @@ class FoodSeeder extends Seeder
             [
                 'name' => 'Gà sốt cay Hàn Quốc',
                 'id_type' => 2,
-                'id_category' => 1,
                 'image' => 'https://images.pexels.com/photos/4106480/pexels-photo-4106480.jpeg',
                 'bestSeller' => 0,
                 'cost' => 60000,
@@ -38,7 +36,6 @@ class FoodSeeder extends Seeder
             [
                 'name' => 'Gà chiên phô mai',
                 'id_type' => 2,
-                'id_category' => 2,
                 'image' => 'https://images.pexels.com/photos/209540/pexels-photo-209540.jpeg',
                 'bestSeller' => 0,
                 'cost' => 65000,
@@ -50,7 +47,6 @@ class FoodSeeder extends Seeder
             [
                 'name' => 'Gà nướng mật ong',
                 'id_type' => 1,
-                'id_category' => 2,
                 'image' => 'https://images.pexels.com/photos/616404/pexels-photo-616404.jpeg',
                 'bestSeller' => 1,
                 'cost' => 70000,
@@ -62,7 +58,6 @@ class FoodSeeder extends Seeder
             [
                 'name' => 'Gà quay nguyên con',
                 'id_type' => 1,
-                'id_category' => 3,
                 'image' => 'https://images.pexels.com/photos/1123252/pexels-photo-1123252.jpeg',
                 'bestSeller' => 1,
                 'cost' => 150000,
@@ -74,7 +69,6 @@ class FoodSeeder extends Seeder
             [
                 'name' => 'Gà viên chiên giòn',
                 'id_type' => 2,
-                'id_category' => 3,
                 'image' => 'https://images.pexels.com/photos/1600711/pexels-photo-1600711.jpeg',
                 'bestSeller' => 0,
                 'cost' => 40000,
@@ -86,7 +80,6 @@ class FoodSeeder extends Seeder
             [
                 'name' => 'Cánh gà chiên nước mắm',
                 'id_type' => 1,
-                'id_category' => 1,
                 'image' => 'https://images.pexels.com/photos/2091888/pexels-photo-2091888.jpeg',
                 'bestSeller' => 1,
                 'cost' => 55000,
@@ -98,7 +91,6 @@ class FoodSeeder extends Seeder
             [
                 'name' => 'Gà sốt bơ tỏi',
                 'id_type' => 2,
-                'id_category' => 2,
                 'image' => 'https://images.pexels.com/photos/1267320/pexels-photo-1267320.jpeg',
                 'bestSeller' => 0,
                 'cost' => 62000,
@@ -110,7 +102,6 @@ class FoodSeeder extends Seeder
             [
                 'name' => 'Gà rán kiểu Mỹ',
                 'id_type' => 1,
-                'id_category' => 3,
                 'image' => 'https://images.pexels.com/photos/4518651/pexels-photo-4518651.jpeg',
                 'bestSeller' => 0,
                 'cost' => 58000,
@@ -122,7 +113,6 @@ class FoodSeeder extends Seeder
             [
                 'name' => 'Gà nướng tiêu đen',
                 'id_type' => 1,
-                'id_category' => 2,
                 'image' => 'https://images.pexels.com/photos/461198/pexels-photo-461198.jpeg',
                 'bestSeller' => 0,
                 'cost' => 69000,

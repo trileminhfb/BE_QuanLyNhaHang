@@ -11,11 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('types', function (Blueprint $table) {
+
+        Schema::create('sale_report', function (Blueprint $table) {
             $table->id();
-            
-            $table->integer('status');
-            $table->string('name')->unique();
+            $table->string('report_type');
+            $table->date('report_date');
+            $table->decimal('total_revenue', 15, 2);
+            $table->integer('total_orders');
+            $table->string('top_food_name')->nullable();
+            $table->integer('top_food_quantity')->default(0);
             $table->timestamps();
         });
     }
@@ -25,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('types');
+        Schema::dropIfExists('sale_reports');
     }
 };
