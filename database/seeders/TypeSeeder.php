@@ -11,21 +11,21 @@ class TypeSeeder extends Seeder
     {
         Type::insert([
             [
-
+                
                 'status' => 1,
                 'name' => 'Món chính',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-
+                
                 'status' => 1,
                 'name' => 'Tráng miệng',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-
+                
                 'status' => 1,
                 'name' => 'Đồ uống',
                 'created_at' => now(),
