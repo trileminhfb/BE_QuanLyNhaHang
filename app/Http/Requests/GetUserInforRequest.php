@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
+
 
 class GetUserInforRequest extends FormRequest
 {
@@ -13,10 +15,11 @@ class GetUserInforRequest extends FormRequest
 
     public function rules(): array
     {
+        $userId = Auth::id();
         return [
             'image'         => 'nullable',
             'name'          => 'required|string|max:255',
-            'phone_number'  => 'required|string|regex:/^0[0-9]{9}$/|unique:users,phone_number,' . ($this->route('user') ?? '0'),
+            'unique:users,phone_number,' . $userId . ',id',
             'birth'         => 'required|date',
         ];
     }

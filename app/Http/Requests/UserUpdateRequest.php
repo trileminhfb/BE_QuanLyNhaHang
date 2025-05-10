@@ -21,7 +21,6 @@ class UserUpdateRequest extends FormRequest
             'email'          => 'required|email|unique:users,email,' . $this->route('id'),
             'status'         => 'required|in:active,inactive,banned',
             'birth'          => 'required|date|before:today',
-            'password'       => 'required|min:6|max:50',
         ];
     }
 
@@ -50,8 +49,6 @@ class UserUpdateRequest extends FormRequest
             'birth.date'             => 'Ngày sinh không hợp lệ.',
             'birth.before'           => 'Ngày sinh phải trước ngày hiện tại.',
 
-            'password.min'           => 'Mật khẩu phải có ít nhất 6 ký tự.',
-            'password.max'           => 'Mật khẩu không được vượt quá 50 ký tự.',
         ];
     }
 }
