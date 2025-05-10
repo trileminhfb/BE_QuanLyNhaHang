@@ -6,6 +6,7 @@ use App\Models\Customer;
 use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\BookingFood;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -30,44 +31,27 @@ class BookingController extends Controller
     public function createBooking(Request $request)
     {
         try {
-
-            $phoneNumber = $request->input('phoneNumber');
-            $fullName    = $request->input('FullName');
-            $timeBooking = $request->input('timeBooking');
-            $status      = $request->input('status', 1);
-
-
-            if (!$phoneNumber) {
-                return response()->json(['message' => 'Phone number is required'], 400);
+            $customer = Auth::guard('sanctum')->user(); // để dễ hiểu
+            if (!$customer) {
+                return response()->json(['message' => 'Unauthorized'], 401);
             }
 
-
-            $customer = Customer::firstOrCreate(
-                ['phoneNumber' => $phoneNumber],
-                [
-                    'FullName' => $fullName,
-                    'otp'      => null,
-                    'point'    => 0,
-                    'id_rank'  => 1,
-                ]
-            );
-
+            $status = $request->input('status', 1);
+            $timeBooking = $request->input('timeBooking');
 
             $booking = Booking::create([
-                'id_customer'  => $customer->id,
-                'timeBooking'  => $timeBooking,
-                'status'       => $status,
+                'id_customer' => $customer->id,
+                'timeBooking' => $timeBooking,
+                'status' => $status,
             ]);
 
             return response()->json([
-                'message'  => 'Booking created successfully.',
-                'booking'  => $booking,
+                'message' => 'Booking created successfully.',
+                'booking' => $booking,
                 'customer' => $customer,
             ], 201);
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage()
-            ], 500);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
