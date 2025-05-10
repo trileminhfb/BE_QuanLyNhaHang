@@ -25,8 +25,8 @@ class FoodController extends Controller
                 'status' => $food->status,
                 'created_at' => $food->created_at,
                 'updated_at' => $food->updated_at,
-                'type' => $food->type ? ['name' => $food->type->name] : null,
-                'categories' => $food->categories->map(fn($c) => ['name' => $c->name])->all()
+                'type' => $food->type ? ['id' => $food->type->id, 'name' => $food->type->name] : null,
+                'categories' => $food->categories->map(fn($c) => ['id' => $c->id, 'name' => $c->name])->all()
             ];
         });
 
@@ -113,55 +113,55 @@ class FoodController extends Controller
 
 
     public function update(Request $request, $id)
-{
-    // Tìm món ăn theo id
-    $food = Food::find($id);
+    {
+        // Tìm món ăn theo id
+        $food = Food::find($id);
 
-    if (!$food) {
-        return response()->json(['message' => 'Không tìm thấy'], 404);
-    }
+        if (!$food) {
+            return response()->json(['message' => 'Không tìm thấy'], 404);
+        }
 
-    // Lấy dữ liệu từ request
-    $data = $request->all();
+        // Lấy dữ liệu từ request
+        $data = $request->all();
 
-    // Kiểm tra nếu có file hình ảnh mới được upload
-    if ($request->hasFile('image')) {
-        $imagePath = $request->file('image')->store('images', 'public'); // Lưu file vào thư mục images trong storage/public
-        $data['image'] = $imagePath; // Cập nhật đường dẫn hình ảnh vào mảng dữ liệu
-    }
+        // Kiểm tra nếu có file hình ảnh mới được upload
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('images', 'public'); // Lưu file vào thư mục images trong storage/public
+            $data['image'] = $imagePath; // Cập nhật đường dẫn hình ảnh vào mảng dữ liệu
+        }
 
-    // Tách category_ids ra vì nó không phải cột trong bảng foods
-    $categoryIds = $data['category_ids'] ?? [];
-    unset($data['category_ids']); // Xóa category_ids khỏi mảng dữ liệu
+        // Tách category_ids ra vì nó không phải cột trong bảng foods
+        $categoryIds = $data['category_ids'] ?? [];
+        unset($data['category_ids']); // Xóa category_ids khỏi mảng dữ liệu
 
-    // Cập nhật food
-    try {
-        $food->update($data); // Cập nhật bản ghi food
-    } catch (\Exception $e) {
-        return response()->json([
-            'message' => 'Cập nhật không thành công',
-            'error' => $e->getMessage()
-        ], 500);
-    }
-
-    // Gán category nếu có
-    if (!empty($categoryIds)) {
+        // Cập nhật food
         try {
-            $food->categories()->sync($categoryIds); // Gán các category cho food
+            $food->update($data); // Cập nhật bản ghi food
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Lỗi khi gán category',
+                'message' => 'Cập nhật không thành công',
                 'error' => $e->getMessage()
             ], 500);
         }
-    }
 
-    // Trả về phản hồi JSON với dữ liệu food đã được cập nhật
-    return response()->json([
-        'message' => 'Cập nhật thành công',
-        'data' => $food->load('type:id,name', 'categories:id,name')
-    ], 200);
-}
+        // Gán category nếu có
+        if (!empty($categoryIds)) {
+            try {
+                $food->categories()->sync($categoryIds); // Gán các category cho food
+            } catch (\Exception $e) {
+                return response()->json([
+                    'message' => 'Lỗi khi gán category',
+                    'error' => $e->getMessage()
+                ], 500);
+            }
+        }
+
+        // Trả về phản hồi JSON với dữ liệu food đã được cập nhật
+        return response()->json([
+            'message' => 'Cập nhật thành công',
+            'data' => $food->load('type:id,name', 'categories:id,name')
+        ], 200);
+    }
 
 
     public function destroy($id)
