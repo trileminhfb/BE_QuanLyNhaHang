@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CategoryFood extends Model
 {
@@ -14,8 +15,12 @@ class CategoryFood extends Model
         'id_category',
         'id_food',
     ];
-    public function food()
+    public function category()
     {
-        return $this->belongsTo(Food::class, 'id_food');
+        return $this->belongsTo(Category::class, 'id_category');
+    }
+    public function foods()
+    {
+        return $this->belongsToMany(Food::class, 'category_foods', 'id_category', 'id_food');
     }
 }

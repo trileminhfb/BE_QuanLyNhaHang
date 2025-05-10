@@ -69,8 +69,8 @@ Route::prefix('admin')->group(function () {
 
     Route::prefix('category-foods')->group(function () {
         Route::get('/', [CategoryFoodController::class, 'getData']);
-        Route::post('/create', [CategoryFoodController::class, 'store']);
-        Route::get('/{id}', [CategoryFoodController::class, 'findById']);
+        Route::post('/', [CategoryFoodController::class, 'store']);
+        Route::get('/{id}', [CategoryFoodController::class, 'show']);
         Route::put('/{id}', [CategoryFoodController::class, 'update']);
         Route::delete('/{id}', [CategoryFoodController::class, 'destroy']);
     });
