@@ -15,17 +15,10 @@ class BookingController extends Controller
     public function index()
     {
         try {
-            $bookings = DB::table('bookings')
-                ->leftJoin('customers', 'bookings.id_customer', '=', 'customers.id')
-                ->select(
-                    'bookings.id',
-                    'bookings.timeBooking',
-                    'bookings.quantity',
-                    'customers.*',
-                    'bookings.created_at',
-                    'bookings.updated_at'
-                )
-                ->get();
+            $bookings = Booking::with([
+                'customer',
+                'bookingFoods.food' // eager load food từ bookingFoods
+            ])->get();
 
             return response()->json(['data' => $bookings], 200);
         } catch (\Exception $e) {
@@ -39,19 +32,17 @@ class BookingController extends Controller
     public function createBooking(Request $request)
     {
         try {
-            // Validate request đầu vào
-            $validated = $request->validate([
-                'phoneNumber'   => 'required|string|max:20',
-                'FullName'      => 'required|string|max:255',
-                'timeBooking'   => 'required|date_format:Y-m-d H:i:s',
-                'quantity'      => 'required|integer|min:1',
-            ]);
+            // Lấy dữ liệu đầu vào mà không cần validate
+            $phoneNumber = $request->input('phoneNumber');
+            $fullName    = $request->input('FullName');
+            $timeBooking = $request->input('timeBooking');
+            $status      = $request->input('status');
 
-            // Khi tạo customer:
+            // Tạo hoặc tìm Customer
             $customer = Customer::firstOrCreate(
-                ['phoneNumber' => $validated['phoneNumber']],
+                ['phoneNumber' => $phoneNumber],
                 [
-                    'FullName' => $validated['FullName'],
+                    'FullName' => $fullName,
                     'otp'      => null,
                     'point'    => 0,
                     'id_rank'  => 1,
@@ -61,21 +52,13 @@ class BookingController extends Controller
             // Tạo booking mới
             $booking = Booking::create([
                 'id_customer'  => $customer->id,
-                'timeBooking'  => $validated['timeBooking'],
-                'quantity'     => $validated['quantity'],
+                'timeBooking'  => $timeBooking,
+                'status'       => $status,
             ]);
 
-            // foreach ($request->viDu as $key => $value) {
-            //     # code...
-            //     BookingFood::create([
-            //         'abc',
-            //         'id_food' => $booking->id
-            //     ])
-            // }
-
             return response()->json([
-                'message' => 'Đặt bàn thành công.',
-                'booking' => $booking,
+                'message'  => 'Đặt bàn thành công.',
+                'booking'  => $booking,
                 'customer' => $customer,
             ], 201);
         } catch (\Exception $e) {
@@ -84,37 +67,44 @@ class BookingController extends Controller
             ], 500);
         }
     }
+
+
     public function show($id)
     {
-        // Tìm booking theo ID
-        $booking = Booking::find($id);
+        try {
+            $booking = Booking::with([
+                'customer',
+                'bookingFoods.food'
+            ])->find($id);
 
-        // Kiểm tra xem booking có tồn tại không
-        if (!$booking) {
-            return response()->json(['message' => 'Booking not found'], 404);
+            if (!$booking) {
+                return response()->json(['message' => 'Booking not found'], 404);
+            }
+
+            return response()->json(['data' => $booking], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        return response()->json($booking, 200);
     }
 
     public function update(Request $request, $id)
     {
         try {
-            // Tìm booking theo ID
             $booking = Booking::find($id);
             if (!$booking) {
                 return response()->json(['message' => 'Booking not found'], 404);
             }
 
-            // Validate dữ liệu đầu vào
             $validated = $request->validate([
                 'phoneNumber'   => 'required|string|max:20',
                 'FullName'      => 'required|string|max:255',
                 'timeBooking'   => 'required|date_format:Y-m-d H:i:s',
                 'quantity'      => 'required|integer|min:1',
+                'status'        => 'required|in:1,2,3',
             ]);
 
-            // Tìm hoặc tạo Customer
             $customer = Customer::firstOrCreate(
                 ['phoneNumber' => $validated['phoneNumber']],
                 [
@@ -125,16 +115,15 @@ class BookingController extends Controller
                 ]
             );
 
-            // Cập nhật thông tin Customer (nếu đã tồn tại)
             $customer->update([
                 'FullName' => $validated['FullName'],
             ]);
 
-            // Cập nhật thông tin Booking
             $booking->update([
                 'id_customer'  => $customer->id,
                 'timeBooking'  => $validated['timeBooking'],
                 'quantity'     => $validated['quantity'],
+                'status'       => $validated['status'],
             ]);
 
             return response()->json([
@@ -148,6 +137,7 @@ class BookingController extends Controller
             ], 500);
         }
     }
+
     public function delete($id)
     {
         $booking = Booking::find($id);

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create("bookings", function (Blueprint $table) {
             $table->id();
             $table->dateTime("timeBooking");
-            $table->integer("quantity");
+            $table->integer("status")->default(1); // 1 = Pending, 2 = Confirmed, 3 = Cancelled
             $table->integer("id_customer");
             $table->timestamps();
         });

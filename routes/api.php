@@ -45,7 +45,7 @@ Route::prefix('admin')->group(function () {
 
     Route::prefix('bookings')->group(function () {
         Route::get('/', [BookingController::class, 'index']);
-        Route::get('/{id}', [BookingController::class, 'update']);
+        Route::get('/{id}', [BookingController::class, 'show']);
         Route::put('/{id}', [BookingController::class, 'update']);
         Route::delete('/{id}', [BookingController::class, 'delete']);
     });
