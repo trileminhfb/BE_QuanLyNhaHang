@@ -91,6 +91,8 @@ class BookingController extends Controller
             $fullName    = $request->input('FullName');
             $timeBooking = $request->input('timeBooking');
             $status      = $request->input('status');
+            $autoChanged = false;
+            $diffMinutes = null;
 
             // Nếu có phoneNumber thì xử lý cập nhật hoặc tạo customer
             if ($phoneNumber) {
@@ -104,30 +106,43 @@ class BookingController extends Controller
                     ]
                 );
 
-                // Nếu có fullName thì cập nhật lại tên
                 if ($fullName) {
-                    $customer->update([
-                        'FullName' => $fullName,
-                    ]);
+                    $customer->update(['FullName' => $fullName]);
                 }
 
                 $booking->id_customer = $customer->id;
             }
 
-            // Cập nhật các trường booking nếu có truyền lên
+            // Cập nhật timeBooking nếu có
             if ($timeBooking) {
                 $booking->timeBooking = $timeBooking;
             }
 
-            if ($status) {
+            // Cập nhật status nếu có
+            if (!is_null($status)) {
                 $booking->status = $status;
+
+                // Nếu status là 2 và timeBooking quá 30 phút thì chuyển sang 4
+                if ($status == 2 && $booking->timeBooking) {
+                    $bookingTime = Carbon::parse($booking->timeBooking);
+                    $now = Carbon::now();
+                    $diffMinutes = $now->diffInMinutes($bookingTime, false); // âm nếu đã quá
+
+                    if ($diffMinutes < 0) {
+                        // timeBooking trong quá khứ → KHÔNG cập nhật status nữa
+                    } else if ($diffMinutes >= 30) {
+                        $booking->status = 4;
+                    }
+                }
             }
 
             $booking->save();
 
             return response()->json([
-                'message'  => 'Cập nhật đặt bàn thành công.',
-                'booking'  => $booking,
+                'message' => 'Cập nhật đặt bàn thành công.',
+                'auto_status_changed' => $autoChanged,
+                'time_difference_minutes' => $diffMinutes,
+                'booking' => $booking,
             ], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
