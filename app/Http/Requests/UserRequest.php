@@ -33,7 +33,7 @@ class UserRequest extends FormRequest
             'name.max'               => 'Tên không được vượt quá 100 ký tự.',
 
             'role.required'          => 'Vai trò là bắt buộc.',
-            'role.in'                => 'Vai trò không hợp lệ. Chỉ chấp nhận: admin, user, staff.',
+            'role.in'                => 'Vai trò không hợp lệ. Chỉ chấp nhận: admin, manager, staff.',
 
             'phone_number.required'  => 'Số điện thoại là bắt buộc.',
             'phone_number.regex'     => 'Số điện thoại không hợp lệ.',
