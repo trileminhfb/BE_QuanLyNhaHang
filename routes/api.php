@@ -4,7 +4,7 @@ use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookingController;
-use App\Http\Controllers\BoongkingFoodController;
+use App\Http\Controllers\BookingFoodController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CategoryFoodController;
 use App\Http\Controllers\CustomerController;
@@ -149,11 +149,11 @@ Route::prefix('admin')->group(function () {
     });
 
     Route::prefix('booking-food')->group(function () {
-        Route::get('/', [BoongkingFoodController::class, 'index']);
-        Route::post('/', [BoongkingFoodController::class, 'store']);
-        Route::get('/{id}', [BoongkingFoodController::class, 'show']);
-        Route::put('/{id}', [BoongkingFoodController::class, 'update']);
-        Route::delete('/{id}', [BoongkingFoodController::class, 'destroy']);
+        Route::get('/', [BookingFoodController::class, 'index']);
+        Route::post('/', [BookingFoodController::class, 'store']);
+        Route::get('/{id}', [BookingFoodController::class, 'show']);
+        Route::put('/{id}', [BookingFoodController::class, 'update']);
+        Route::delete('/{id}', [BookingFoodController::class, 'destroy']);
     });
     Route::prefix('carts')->group(function () {
         Route::get('/', [CartController::class, 'index']);
@@ -240,7 +240,7 @@ Route::prefix('client')->group(function () {
         });
 
         Route::prefix('booking-food')->group(function () {
-            Route::post('/', [BoongkingFoodController::class, 'store']);
+            Route::post('/', [BookingFoodController::class, 'store']);
         });
 
         Route::prefix('sales')->group(function () {

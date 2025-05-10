@@ -9,11 +9,8 @@ class booking_food extends Model
 {
     protected $table = 'booking_foods';
 
-    protected $fillable = [
-        'id_booking',
-        'id_food',
-        'quantity'
-    ];
+    protected $fillable = ['id_booking', 'id_foods', 'quantity'];
+
 
     public function food()
     {
