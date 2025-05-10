@@ -19,7 +19,6 @@ class GetUserInforRequest extends FormRequest
         return [
             'image'         => 'nullable',
             'name'          => 'required|string|max:255',
-            'unique:users,phone_number,' . $userId . ',id',
             'birth'         => 'required|date',
         ];
     }
