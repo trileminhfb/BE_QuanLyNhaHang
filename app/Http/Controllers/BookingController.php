@@ -138,13 +138,14 @@ class BookingController extends Controller
         try {
             $now = Carbon::now();
 
-            // Lấy tất cả các bản ghi cần cập nhật
+            // Lấy tất cả các bản ghi chưa có status là 4
             $bookings = Booking::where('status', '!=', 4)->get();
 
             $updatedCount = 0;
 
             foreach ($bookings as $booking) {
-                if (Carbon::parse($booking->timeBooking)->lte($now)) {
+                // Kiểm tra nếu timeBooking đã vượt quá 1 giờ so với thời điểm hiện tại
+                if (Carbon::parse($booking->timeBooking)->addHour()->lte($now)) {
                     $booking->status = 4;
                     $booking->save();
                     $updatedCount++;
@@ -159,7 +160,6 @@ class BookingController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-
 
     public function delete($id)
     {
