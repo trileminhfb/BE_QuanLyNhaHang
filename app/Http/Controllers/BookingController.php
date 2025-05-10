@@ -102,42 +102,47 @@ class BookingController extends Controller
                 return response()->json(['message' => 'Booking not found'], 404);
             }
 
-            // Gán trực tiếp các giá trị nếu tồn tại trong request
             $phoneNumber = $request->input('phoneNumber');
             $fullName    = $request->input('FullName');
             $timeBooking = $request->input('timeBooking');
             $status      = $request->input('status');
 
-            // Kiểm tra tối thiểu để tránh lỗi cơ sở dữ liệu
-            if (!$phoneNumber) return response()->json(['message' => 'Số điện thoại là bắt buộc'], 400);
-            if (!$timeBooking) return response()->json(['message' => 'Time booking is required'], 400);
-            if (!$fullName) return response()->json(['message' => 'Tên là bắt buộc'], 400);
-            if (!$status) return response()->json(['message' => 'Trạng thái là bắt buộc'], 400);
+            // Nếu có phoneNumber thì xử lý cập nhật hoặc tạo customer
+            if ($phoneNumber) {
+                $customer = Customer::firstOrCreate(
+                    ['phoneNumber' => $phoneNumber],
+                    [
+                        'FullName' => $fullName ?? '',
+                        'otp'      => null,
+                        'point'    => 0,
+                        'id_rank'  => 1,
+                    ]
+                );
 
-            $customer = Customer::firstOrCreate(
-                ['phoneNumber' => $phoneNumber],
-                [
-                    'FullName' => $fullName,
-                    'otp'      => null,
-                    'point'    => 0,
-                    'id_rank'  => 1,
-                ]
-            );
+                // Nếu có fullName thì cập nhật lại tên
+                if ($fullName) {
+                    $customer->update([
+                        'FullName' => $fullName,
+                    ]);
+                }
 
-            $customer->update([
-                'FullName' => $fullName,
-            ]);
+                $booking->id_customer = $customer->id;
+            }
 
-            $booking->update([
-                'id_customer'  => $customer->id,
-                'timeBooking'  => $timeBooking,
-                'status'       => $status,
-            ]);
+            // Cập nhật các trường booking nếu có truyền lên
+            if ($timeBooking) {
+                $booking->timeBooking = $timeBooking;
+            }
+
+            if ($status) {
+                $booking->status = $status;
+            }
+
+            $booking->save();
 
             return response()->json([
                 'message'  => 'Cập nhật đặt bàn thành công.',
                 'booking'  => $booking,
-                'customer' => $customer,
             ], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
