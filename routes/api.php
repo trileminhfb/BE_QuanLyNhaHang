@@ -132,11 +132,11 @@ Route::prefix('admin')->group(function () {
     });
 
     Route::prefix('users')->group(function () {
-        Route::get('/', [UserController::class, 'getData']);
-        Route::post('/create', [UserController::class, 'store']);
-        Route::get('/show/{id}', [UserController::class, 'getById']);
-        Route::put('/update/{id}', [UserController::class, 'update']);
-        Route::delete('/delete/{id}', [UserController::class, 'destroy']);
+        Route::get('/',                         [UserController::class, 'getData']);
+        Route::post('/create',                  [UserController::class, 'store']);
+        Route::get('/show/{id}',                [UserController::class, 'getById']);
+        Route::put('/update/{id}',              [UserController::class, 'update']);
+        Route::delete('/delete/{id}',           [UserController::class, 'destroy']);
 
         Route::post('/login', [UserController::class, 'login']);
         Route::post('/check-login', [UserController::class, 'checkLogin']);
