@@ -42,26 +42,27 @@ class CategoryController extends Controller
     }
 
     public function update(Request $request, $id)
-    {
-        $category = Category::find($id);
+{
+    $category = Category::find($id);
 
-        if (!$category) {
-            return response()->json(['message' => '❌ Không tìm thấy danh mục!'], 404);
-        }
-
-        $data = $request->validate([
-            'name'     => 'sometimes|string|max:255',
-            'status'   => 'sometimes|integer',
-            'id_type'  => 'nullable|integer',
-        ]);
-
-        $category->update($data);
-
-        return response()->json([
-            'message'  => '✅ Danh mục đã được cập nhật!',
-            'category' => $category,
-        ], 200);
+    if (!$category) {
+        return response()->json(['message' => '❌ Không tìm thấy danh mục!'], 404);
     }
+
+    $data = $request->validate([
+        'name'     => 'sometimes|string|max:255',
+        'status'   => 'sometimes|integer',
+        'id_type'  => 'nullable|integer', // phải là nullable nếu cột trong DB cho phép null
+    ]);
+
+    $category->update($data);
+
+    return response()->json([
+        'message'  => '✅ Danh mục đã được cập nhật!',
+        'category' => $category,
+    ], 200);
+}
+
 
     public function destroy($id)
     {
