@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use App\Models\Booking;
@@ -132,6 +133,33 @@ class BookingController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+    public function autoUpdateStatus()
+    {
+        try {
+            $now = Carbon::now();
+
+            // Lấy tất cả các bản ghi cần cập nhật
+            $bookings = Booking::where('status', '!=', 4)->get();
+
+            $updatedCount = 0;
+
+            foreach ($bookings as $booking) {
+                if (Carbon::parse($booking->timeBooking)->lte($now)) {
+                    $booking->status = 4;
+                    $booking->save();
+                    $updatedCount++;
+                }
+            }
+
+            return response()->json([
+                'message' => 'Cập nhật thành công.',
+                'updated_count' => $updatedCount,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
 
     public function delete($id)
     {
