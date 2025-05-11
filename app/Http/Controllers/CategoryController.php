@@ -12,6 +12,7 @@ class CategoryController extends Controller
     {
 
         $categories = Category::with(['type', 'categoryFoods.food'])->get();
+
         return response()->json($categories, 200);
     }
 

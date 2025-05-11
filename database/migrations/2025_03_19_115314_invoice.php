@@ -11,14 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create("invoices", function (Blueprint $table) {
+        Schema::create('invoices', function (Blueprint $table) {
             $table->id();
-            $table->integer("id_table");
-            $table->dateTime("timeEnd");
-            $table->integer("total");
-            $table->integer("id_user")->nullable();
-            $table->integer("id_customer")->nullable();
-            $table->integer("id_sale")->nullable();
+            $table->integer('id_table');
+            $table->dateTime('timeEnd');
+            $table->integer('total');
+            $table->integer('id_user')->nullable();
+            $table->integer('id_customer')->nullable();
+            $table->integer('id_sale')->nullable();
+            $table->integer('status')->default(1); // Add the status column with default value 1
             $table->timestamps();
         });
     }
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('invoices');
     }
 };
