@@ -19,8 +19,8 @@ class CategoryFood extends Model
     {
         return $this->belongsTo(Category::class, 'id_category');
     }
-    public function foods()
+    public function food()
     {
-        return $this->belongsToMany(Food::class, 'category_foods', 'id_category', 'id_food');
+        return $this->belongsTo(Food::class, 'food_id');
     }
 }

@@ -16,4 +16,8 @@ class booking_food extends Model
     {
         return $this->belongsTo(Food::class, 'id_foods');
     }
+        public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'customer_id');
+    }
 }

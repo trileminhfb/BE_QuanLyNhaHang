@@ -18,55 +18,23 @@ class InvoiceController extends Controller
     public function index()
     {
         try {
-            $invoices = DB::table('invoices')
-                ->leftJoin('tables', 'invoices.id_table', '=', 'tables.id')
-                ->leftJoin('users', 'invoices.id_user', '=', 'users.id')
-                ->leftJoin('customers', 'invoices.id_customer', '=', 'customers.id')
-                ->leftJoin('sales', 'invoices.id_sale', '=', 'sales.id')
-                ->leftJoin('invoice_food', 'invoices.id', '=', 'invoice_food.id_invoice')
-                ->leftJoin('foods', 'invoice_food.id_food', '=', 'foods.id')
-                ->select(
-                    'invoices.id',
-                    'invoices.id_table',
-                    'invoices.timeEnd',
-                    'invoices.total',
-                    'invoices.id_user',
-                    'invoices.id_customer',
-                    'invoices.id_sale',
-                    'tables.number as table_number',
-                    'users.name as user_name',
-                    'users.role',
-                    'users.phone_number',
-                    'users.email',
-                    'customers.FullName as customer_name',
-                    'sales.*',
-                    'invoice_food.id_food',
-                    'invoice_food.quantity',
-                    'foods.name as food_name'
-                )
-                ->get();
+            $invoices = Invoice::with([
+                'user',
+                'customer',
+                'table',
+                'sale',
+                'invoiceFoods.food'
+            ])->get(); // ngắn gọn
 
-            $groupedInvoices = $invoices->groupBy('id');
-            $result = $groupedInvoices->map(function ($invoiceGroup) {
-                $invoice = $invoiceGroup->first();
-                $foods = $invoiceGroup->map(function ($item) {
-                    return [
-                        'food_id' => $item->id_food,
-                        'food_name' => $item->food_name,
-                        'quantity' => $item->quantity
-                    ];
-                });
-                $invoice->foods = $foods;
-                return $invoice;
-            });
-
-            return response()->json($result);
+            return response()->json([
+                'data' => $invoices
+            ]);
         } catch (\Exception $e) {
             Log::error('Lỗi khi lấy danh sách hóa đơn: ' . $e->getMessage());
             return response()->json(['error' => 'Lỗi khi lấy danh sách hóa đơn'], 500);
         }
     }
-    // sau khi thanh toán phải chạy code tạo hoá đơn
+
     public function store(InvoiceRequest $request)
     {
         DB::beginTransaction();
@@ -81,23 +49,17 @@ class InvoiceController extends Controller
                 return response()->json(['message' => 'Không có món nào trong giỏ hàng'], 400);
             }
 
-           
-
             $total = 0;
 
             foreach ($carts as $cart) {
-                // $food = Food::where('id', $cart->id_food)->first(); // ❌
-                $food = Food::find($cart->id_food); // ✅
+                $food = Food::find($cart->id_food);
 
                 if (!$food) {
                     return response()->json(['message' => "Món ăn với ID {$cart->id_food} không tồn tại."], 400);
                 }
 
-                // $itemTotal = $cart->quantity * $food->cost;
-                // $total += $itemTotal;
                 $total += $cart['quantity'] * $food->cost;
             }
-          
 
             $idSale = null;
             $discountPercent = 0;
@@ -118,6 +80,7 @@ class InvoiceController extends Controller
                 'id_user' => $role === 'staff' ? $user->id : null,
                 'id_customer' => $role === 'customer' ? $user->id : null,
                 'id_sale' => $idSale,
+                'status' => 0,
             ]);
 
             foreach ($carts as $cart) {
@@ -169,6 +132,7 @@ class InvoiceController extends Controller
             'total' => 'required|numeric',
             'timeEnd' => 'required|date',
             'id_customer' => 'required|exists:customers,id',
+            'status' => 'nullable|in:0,1,2',
         ]);
 
         try {

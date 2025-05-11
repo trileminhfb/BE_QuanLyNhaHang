@@ -19,6 +19,7 @@ class InvoiceSeeder extends Seeder
                 'id_user' => rand(1, 5),
                 'id_customer' => rand(1, 10),
                 'id_sale' => rand(1, 3),
+                'status' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];  
