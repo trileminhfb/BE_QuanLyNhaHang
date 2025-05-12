@@ -18,13 +18,30 @@ class CategoryController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'name'     => 'required|string|max:255',
-            'status'   => 'required|integer',
-            'id_type'  => 'nullable|integer',
-        ]);
+        $data = $request->only(['name', 'status', 'id_type']);
 
+        // Tạo mới danh mục
         $category = Category::create($data);
+
+        // Xử lý food_ids nếu có
+        if ($request->has('food_ids')) {
+            $food_ids = $request->input('food_ids');
+
+            if (is_array($food_ids) && !empty($food_ids)) {
+                $foodData = array_filter(array_map(function ($food_id) use ($category) {
+                    return DB::table('foods')->where('id', $food_id)->exists() ? [
+                        'id_category' => $category->id,
+                        'id_food'     => $food_id,
+                        'created_at'  => now(),
+                        'updated_at'  => now(),
+                    ] : null;
+                }, $food_ids));
+
+                if ($foodData) {
+                    DB::table('category_foods')->insert($foodData);
+                }
+            }
+        }
 
         return response()->json([
             'message'  => '🎉 Danh mục đã được tạo thành công!',

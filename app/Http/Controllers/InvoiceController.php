@@ -5,13 +5,14 @@ namespace App\Http\Controllers;
 use App\Http\Requests\InvoiceRequest;
 use Illuminate\Http\Request;
 use App\Models\Invoice;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\FacadesDB;
 use Illuminate\Support\Facades\Log;
 use App\Models\Cart;
 use App\Models\Food;
 use App\Models\InvoiceFood;
 use App\Models\Sale;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class InvoiceController extends Controller
 {
@@ -24,7 +25,7 @@ class InvoiceController extends Controller
                 'table',
                 'sale',
                 'invoiceFoods.food'
-            ])->get(); // ngắn gọn
+            ])->get();
 
             return response()->json([
                 'data' => $invoices
@@ -49,17 +50,18 @@ class InvoiceController extends Controller
                 return response()->json(['message' => 'Không có món nào trong giỏ hàng'], 400);
             }
 
-            $total = 0;
+            // ======= Bỏ qua phần tính total từ giỏ hàng =======
+            // $total = 0;
+            // foreach ($carts as $cart) {
+            //     $food = Food::find($cart->id_food);
+            //     if (!$food) {
+            //         return response()->json(['message' => "Món ăn với ID {$cart->id_food} không tồn tại."], 400);
+            //     }
+            //     $total += $cart['quantity'] * $food->cost;
+            // }
 
-            foreach ($carts as $cart) {
-                $food = Food::find($cart->id_food);
-
-                if (!$food) {
-                    return response()->json(['message' => "Món ăn với ID {$cart->id_food} không tồn tại."], 400);
-                }
-
-                $total += $cart['quantity'] * $food->cost;
-            }
+            // Dùng total từ request gửi lên
+            $total = $request->input('total', 0);
 
             $idSale = null;
             $discountPercent = 0;
@@ -127,12 +129,15 @@ class InvoiceController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'id_table' => 'required|exists:tables,id',
-            'id_user' => 'required|exists:users,id',
-            'total' => 'required|numeric',
-            'timeEnd' => 'required|date',
-            'id_customer' => 'required|exists:customers,id',
-            'status' => 'nullable|in:0,1,2',
+            'id_table'     => 'required|exists:tables,id',
+            'id_user'      => 'required|exists:users,id',
+            'total'        => 'required|numeric',
+            'timeEnd'      => 'required|date',
+            'id_customer'  => 'required|exists:customers,id',
+            'status'       => 'nullable|in:0,1,2',
+            'foods'        => 'nullable|array',
+            'foods.*.id'   => 'required|exists:foods,id',
+            'foods.*.quantity' => 'required|integer|min:0',
         ]);
 
         try {
@@ -142,7 +147,32 @@ class InvoiceController extends Controller
                 return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
             }
 
+            // Cập nhật thông tin chính của hóa đơn
             $invoice->update($validated);
+
+            // Cập nhật danh sách món ăn nếu có
+            if ($request->has('foods')) {
+                $foods = $request->input('foods');
+
+                foreach ($foods as $item) {
+                    if ($item['quantity'] === 0) {
+                        DB::table('invoice_food')
+                            ->where('id_invoice', $id)
+                            ->where('id_food', $item['id'])
+                            ->delete();
+                    } else {
+                        DB::table('invoice_food')->updateOrInsert(
+                            [
+                                'id_invoice' => $id,
+                                'id_food'    => $item['id'],
+                            ],
+                            [
+                                'quantity'   => $item['quantity'],
+                            ]
+                        );
+                    }
+                }
+            }
 
             return response()->json([
                 'message' => 'Hóa đơn được cập nhật thành công',
@@ -153,6 +183,7 @@ class InvoiceController extends Controller
             return response()->json(['error' => 'Lỗi cập nhật hóa đơn'], 500);
         }
     }
+
 
     public function delete($id)
     {
