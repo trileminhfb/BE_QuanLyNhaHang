@@ -31,7 +31,7 @@ class BookingController extends Controller
     public function createBooking(Request $request)
     {
         try {
-            $customer = Auth::guard('sanctum')->user(); 
+            $customer = Auth::guard('sanctum')->user();
             if (!$customer) {
                 return response()->json(['message' => 'Unauthorized'], 401);
             }
@@ -69,7 +69,7 @@ class BookingController extends Controller
 
             return response()->json(['data' => $booking], 200);
         } catch (\Exception $e) {
-            
+
             Log::error('Error retrieving booking: ' . $e->getMessage());
 
             return response()->json([
@@ -119,11 +119,15 @@ class BookingController extends Controller
                 $booking->status = $status;
             }
 
-            if ($booking->status == 2 && $booking->timeBooking) {
+            // Nếu status là 2 và timeBooking quá 30 phút thì chuyển sang 4
+            if ($status == 2 && $booking->timeBooking) {
                 $bookingTime = Carbon::parse($booking->timeBooking);
                 $now = Carbon::now();
-                $diffMinutes = $now->diffInMinutes($bookingTime, false); 
+                $diffMinutes = $now->diffInMinutes($bookingTime, false); // âm nếu đã quá
 
+                if ($diffMinutes < -30) {
+                    $booking->status = 4;
+                    $autoChanged = true;
                 if ($diffMinutes < -30) {
                     $booking->status = 4;
                     $autoChanged = true;
@@ -138,33 +142,6 @@ class BookingController extends Controller
                 'time_difference_minutes' => $diffMinutes,
                 'booking' => $booking,
             ], 200);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
-    }
-    public function autoUpdateStatus()
-    {
-        try {
-            $now = Carbon::now();
-
-            
-            $bookings = Booking::where('status', '!=', 4)->get();
-
-            $updatedCount = 0;
-
-            foreach ($bookings as $booking) {
-                
-                if (Carbon::parse($booking->timeBooking)->addHour()->lte($now)) {
-                    $booking->status = 4;
-                    $booking->save();
-                    $updatedCount++;
-                }
-            }
-
-            return response()->json([
-                'message' => 'Cập nhật thành công.',
-                'updated_count' => $updatedCount,
-            ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
