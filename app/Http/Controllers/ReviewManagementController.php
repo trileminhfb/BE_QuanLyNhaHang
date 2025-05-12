@@ -11,8 +11,12 @@ class ReviewManagementController extends Controller
     // Lấy danh sách tất cả bình luận
     public function getData()
     {
-        $reviews = ReviewManagement::all();
-        return response()->json($reviews);
+        $reviews = ReviewManagement::with('user:id,name')->get();
+
+        return response()->json([
+            'status' => 1,
+            'data' => $reviews
+        ]);
     }
 
     // Thêm bình luận

@@ -21,6 +21,14 @@ class TablesSeeder extends Seeder
             ['number' => 3, 'status' => 0, 'created_at' => $now, 'updated_at' => $now],
             ['number' => 4, 'status' => 0, 'created_at' => $now, 'updated_at' => $now],
             ['number' => 5, 'status' => 1, 'created_at' => $now, 'updated_at' => $now],
+            ['number' => 6, 'status' => 0, 'created_at' => $now, 'updated_at' => $now],
+            ['number' => 7, 'status' => 1, 'created_at' => $now, 'updated_at' => $now],
+            ['number' => 8, 'status' => 0, 'created_at' => $now, 'updated_at' => $now],
+            ['number' => 9, 'status' => 1, 'created_at' => $now, 'updated_at' => $now],
+            ['number' => 10, 'status' => 0, 'created_at' => $now, 'updated_at' => $now],
+            ['number' => 11, 'status' => 1, 'created_at' => $now, 'updated_at' => $now],
+            ['number' => 12, 'status' => 0, 'created_at' => $now, 'updated_at' => $now],
+            ['number' => 13, 'status' => 1, 'created_at' => $now, 'updated_at' => $now],
         ]);
     }
 }
