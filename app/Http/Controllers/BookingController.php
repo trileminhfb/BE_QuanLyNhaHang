@@ -69,7 +69,6 @@ class BookingController extends Controller
 
             return response()->json(['data' => $booking], 200);
         } catch (\Exception $e) {
-
             Log::error('Error retrieving booking: ' . $e->getMessage());
 
             return response()->json([
@@ -87,9 +86,9 @@ class BookingController extends Controller
             }
 
             $phoneNumber = $request->input('phoneNumber');
-            $fullName    = $request->input('FullName');
+            $fullName = $request->input('FullName');
             $timeBooking = $request->input('timeBooking');
-            $status      = $request->input('status');
+            $status = $request->input('status');
             $autoChanged = false;
             $diffMinutes = null;
 
@@ -98,9 +97,9 @@ class BookingController extends Controller
                     ['phoneNumber' => $phoneNumber],
                     [
                         'FullName' => $fullName ?? '',
-                        'otp'      => null,
-                        'point'    => 0,
-                        'id_rank'  => 1,
+                        'otp' => null,
+                        'point' => 0,
+                        'id_rank' => 1,
                     ]
                 );
 
@@ -125,9 +124,6 @@ class BookingController extends Controller
                 $now = Carbon::now();
                 $diffMinutes = $now->diffInMinutes($bookingTime, false); // âm nếu đã quá
 
-                if ($diffMinutes < -30) {
-                    $booking->status = 4;
-                    $autoChanged = true;
                 if ($diffMinutes < -30) {
                     $booking->status = 4;
                     $autoChanged = true;
