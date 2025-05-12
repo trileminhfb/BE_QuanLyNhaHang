@@ -14,9 +14,9 @@ class UserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'image'          => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'image'          => 'nullable',
             'name'           => 'required|string|min:3|max:100',
-            'role'           => 'required|string|in:admin,user,staff',
+            'role'           => 'required|string|in:admin,manager,staff',
             'phone_number'   => 'required|string|regex:/^0[0-9]{9}$/|unique:users,phone_number,' . $this->route('id', '0'),
             'email'          => 'required|email|unique:users,email,' . $this->route('id', '0'),
             'status'         => 'required|in:active,inactive,banned',
@@ -28,16 +28,12 @@ class UserRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'image.image'            => 'File tải lên phải là hình ảnh.',
-            'image.mimes'            => 'Ảnh phải có định dạng jpg, jpeg hoặc png.',
-            'image.max'              => 'Ảnh không được lớn hơn 2MB.',
-
             'name.required'          => 'Tên là bắt buộc.',
             'name.min'               => 'Tên phải có ít nhất 3 ký tự.',
             'name.max'               => 'Tên không được vượt quá 100 ký tự.',
 
             'role.required'          => 'Vai trò là bắt buộc.',
-            'role.in'                => 'Vai trò không hợp lệ. Chỉ chấp nhận: admin, user, staff.',
+            'role.in'                => 'Vai trò không hợp lệ. Chỉ chấp nhận: admin, manager, staff.',
 
             'phone_number.required'  => 'Số điện thoại là bắt buộc.',
             'phone_number.regex'     => 'Số điện thoại không hợp lệ.',

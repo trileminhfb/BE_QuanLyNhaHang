@@ -15,7 +15,7 @@ class IngredientRequest extends FormRequest
     {
         return [
             'name_ingredient' => 'required|string|min:2|max:100|unique:ingredients,name_ingredient',
-            'image'           => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            'image'           => 'required',
             'unit'            => 'required|string|max:50',
         ];
     }

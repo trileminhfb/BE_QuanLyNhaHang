@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('name')->unique();
             $table->integer('id_type');
             $table->string("image")->nullable();
-            $table->integer('id_category');
             $table->integer('bestSeller')->default(0);
             $table->integer('cost');
             $table->string('detail');

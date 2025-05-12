@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\BookingRequest;
+use App\Models\Booking;
+use Carbon\Carbon;
 use App\Models\Customer;
 use Illuminate\Http\Request;
-use App\Models\Booking;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -14,17 +15,10 @@ class BookingController extends Controller
     public function index()
     {
         try {
-            $bookings = DB::table('bookings')
-                ->leftJoin('customers', 'bookings.id_customer', '=', 'customers.id')
-                ->select(
-                    'bookings.id',
-                    'bookings.timeBooking',
-                    'bookings.quantity',
-                    'customers.*',
-                    'bookings.created_at',
-                    'bookings.updated_at'
-                )
-                ->get();
+            $bookings = Booking::with([
+                'customer',
+                'bookingFoods.food'
+            ])->get();
 
             return response()->json(['data' => $bookings], 200);
         } catch (\Exception $e) {
@@ -33,110 +27,154 @@ class BookingController extends Controller
             ], 500);
         }
     }
+
     public function createBooking(Request $request)
     {
         try {
-            // Validate request đầu vào
-            $validated = $request->validate([
-                'phoneNumber'   => 'required|string|max:20',
-                'FullName'      => 'required|string|max:255',
-                'timeBooking'   => 'required|date_format:Y-m-d H:i:s',
-                'quantity'      => 'required|integer|min:1',
-            ]);
+            $customer = Auth::guard('sanctum')->user(); // để dễ hiểu
+            if (!$customer) {
+                return response()->json(['message' => 'Unauthorized'], 401);
+            }
 
-            // Khi tạo customer:
-            $customer = Customer::firstOrCreate(
-                ['phoneNumber' => $validated['phoneNumber']],
-                [
-                    'FullName' => $validated['FullName'],
-                    'otp'      => null,
-                    'point'    => 0,
-                    'id_rank'  => 1,
-                ]
-            );
+            $status = $request->input('status', 1);
+            $timeBooking = $request->input('timeBooking');
 
-            // Tạo booking mới
             $booking = Booking::create([
-                'id_customer'  => $customer->id,
-                'timeBooking'  => $validated['timeBooking'],
-                'quantity'     => $validated['quantity'],
+                'id_customer' => $customer->id,
+                'timeBooking' => $timeBooking,
+                'status' => $status,
             ]);
 
             return response()->json([
-                'message' => 'Đặt bàn thành công.',
+                'message' => 'Booking created successfully.',
                 'booking' => $booking,
                 'customer' => $customer,
             ], 201);
         } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function show($id)
+    {
+        try {
+            $booking = Booking::with([
+                'customer',
+                'bookingFoods.food'
+            ])->find($id);
+
+            if (!$booking) {
+                return response()->json(['message' => 'Booking not found'], 404);
+            }
+
+            return response()->json(['data' => $booking], 200);
+        } catch (\Exception $e) {
+            // Debugging the error message
+            Log::error('Error retrieving booking: ' . $e->getMessage());
+
             return response()->json([
                 'error' => $e->getMessage()
             ], 500);
         }
-    }
-    public function show($id)
-    {
-        // Tìm booking theo ID
-        $booking = Booking::find($id);
-
-        // Kiểm tra xem booking có tồn tại không
-        if (!$booking) {
-            return response()->json(['message' => 'Booking not found'], 404);
-        }
-
-        return response()->json($booking, 200);
     }
 
     public function update(Request $request, $id)
     {
         try {
-            // Tìm booking theo ID
             $booking = Booking::find($id);
             if (!$booking) {
                 return response()->json(['message' => 'Booking not found'], 404);
             }
 
-            // Validate dữ liệu đầu vào
-            $validated = $request->validate([
-                'phoneNumber'   => 'required|string|max:20',
-                'FullName'      => 'required|string|max:255',
-                'timeBooking'   => 'required|date_format:Y-m-d H:i:s',
-                'quantity'      => 'required|integer|min:1',
-            ]);
+            $phoneNumber = $request->input('phoneNumber');
+            $fullName    = $request->input('FullName');
+            $timeBooking = $request->input('timeBooking');
+            $status      = $request->input('status');
+            $autoChanged = false;
+            $diffMinutes = null;
 
-            // Tìm hoặc tạo Customer
-            $customer = Customer::firstOrCreate(
-                ['phoneNumber' => $validated['phoneNumber']],
-                [
-                    'FullName' => $validated['FullName'],
-                    'otp'      => null,
-                    'point'    => 0,
-                    'id_rank'  => 1,
-                ]
-            );
+            // Nếu có phoneNumber thì xử lý cập nhật hoặc tạo customer
+            if ($phoneNumber) {
+                $customer = Customer::firstOrCreate(
+                    ['phoneNumber' => $phoneNumber],
+                    [
+                        'FullName' => $fullName ?? '',
+                        'otp'      => null,
+                        'point'    => 0,
+                        'id_rank'  => 1,
+                    ]
+                );
 
-            // Cập nhật thông tin Customer (nếu đã tồn tại)
-            $customer->update([
-                'FullName' => $validated['FullName'],
-            ]);
+                if ($fullName) {
+                    $customer->update(['FullName' => $fullName]);
+                }
 
-            // Cập nhật thông tin Booking
-            $booking->update([
-                'id_customer'  => $customer->id,
-                'timeBooking'  => $validated['timeBooking'],
-                'quantity'     => $validated['quantity'],
-            ]);
+                $booking->id_customer = $customer->id;
+            }
+
+            // Cập nhật timeBooking nếu có
+            if ($timeBooking) {
+                $booking->timeBooking = $timeBooking;
+            }
+
+            // Cập nhật status nếu có
+            if (!is_null($status)) {
+                $booking->status = $status;
+
+                // Nếu status là 2 và timeBooking quá 30 phút thì chuyển sang 4
+                if ($status == 2 && $booking->timeBooking) {
+                    $bookingTime = Carbon::parse($booking->timeBooking);
+                    $now = Carbon::now();
+                    $diffMinutes = $now->diffInMinutes($bookingTime, false); // âm nếu đã quá
+
+                    if ($diffMinutes < 0) {
+                        // timeBooking trong quá khứ → KHÔNG cập nhật status nữa
+                    } else if ($diffMinutes >= 30) {
+                        $booking->status = 4;
+                    }
+                }
+            }
+
+            $booking->save();
 
             return response()->json([
-                'message'  => 'Cập nhật đặt bàn thành công.',
-                'booking'  => $booking,
-                'customer' => $customer,
+                'message' => 'Cập nhật đặt bàn thành công.',
+                'auto_status_changed' => $autoChanged,
+                'time_difference_minutes' => $diffMinutes,
+                'booking' => $booking,
             ], 200);
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage()
-            ], 500);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+    public function autoUpdateStatus()
+    {
+        try {
+            $now = Carbon::now();
+
+            // Lấy tất cả các bản ghi chưa có status là 4
+            $bookings = Booking::where('status', '!=', 4)->get();
+
+            $updatedCount = 0;
+
+            foreach ($bookings as $booking) {
+                // Kiểm tra nếu timeBooking đã vượt quá 1 giờ so với thời điểm hiện tại
+                if (Carbon::parse($booking->timeBooking)->addHour()->lte($now)) {
+                    $booking->status = 4;
+                    $booking->save();
+                    $updatedCount++;
+                }
+            }
+
+            return response()->json([
+                'message' => 'Cập nhật thành công.',
+                'updated_count' => $updatedCount,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
     public function delete($id)
     {
         $booking = Booking::find($id);

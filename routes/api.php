@@ -4,7 +4,7 @@ use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookingController;
-use App\Http\Controllers\BoongkingFoodController;
+use App\Http\Controllers\BookingFoodController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CategoryFoodController;
 use App\Http\Controllers\CustomerController;
@@ -26,11 +26,9 @@ use App\Http\Controllers\SaleFoodController;
 use App\Http\Controllers\TableController;
 use App\Http\Controllers\TypeController;
 use App\Models\Rate;
-use App\Http\Controllers\GeminiChatController;
-use App\Http\Controllers\MessageController;
+
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-
     return $request->user();
 });
 
@@ -44,9 +42,10 @@ Route::prefix('admin')->group(function () {
         Route::delete('/{id}', [CustomerController::class, 'delete']);
     });
 
-    Route::prefix('bookings')->group(function () {
+        Route::prefix('bookings')->group(function () {
+        Route::get('/check-timeout', [BookingController::class, 'autoUpdateStatus']); // Đặt trước
         Route::get('/', [BookingController::class, 'index']);
-        Route::get('/{id}', [BookingController::class, 'update']);
+        Route::get('/{id}', [BookingController::class, 'show']);
         Route::put('/{id}', [BookingController::class, 'update']);
         Route::delete('/{id}', [BookingController::class, 'delete']);
     });
@@ -69,8 +68,8 @@ Route::prefix('admin')->group(function () {
 
     Route::prefix('category-foods')->group(function () {
         Route::get('/', [CategoryFoodController::class, 'getData']);
-        Route::post('/create', [CategoryFoodController::class, 'store']);
-        Route::get('/{id}', [CategoryFoodController::class, 'findById']);
+        Route::post('/', [CategoryFoodController::class, 'store']);
+        Route::get('/{id}', [CategoryFoodController::class, 'show']);
         Route::put('/{id}', [CategoryFoodController::class, 'update']);
         Route::delete('/{id}', [CategoryFoodController::class, 'destroy']);
     });
@@ -100,36 +99,36 @@ Route::prefix('admin')->group(function () {
     });
 
     Route::prefix('warehouses')->group(function () {
-        Route::get('/',                         [WarehouseController::class, 'getData']);
-        Route::post('/create',                  [WarehouseController::class, 'store']);
-        Route::get('/show/{id}',                [WarehouseController::class, 'show']);
-        Route::put('/update/{id}',              [WarehouseController::class, 'update']);
-        Route::delete('/delete/{id}',           [WarehouseController::class, 'destroy']);
+        Route::get('/', [WarehouseController::class, 'getData']);
+        Route::post('/create', [WarehouseController::class, 'store']);
+        Route::get('/show/{id}', [WarehouseController::class, 'show']);
+        Route::put('/update/{id}', [WarehouseController::class, 'update']);
+        Route::delete('/delete/{id}', [WarehouseController::class, 'destroy']);
     });
 
     Route::prefix('rates')->group(function () {
-        Route::get('/',                         [RateController::class, 'getData']);
-        Route::post('/create',                  [RateController::class, 'store']);
-        Route::get('/show/{id}',                [RateController::class, 'show']);
-        Route::put('/update/{id}',              [RateController::class, 'update']);
-        Route::delete('/delete/{id}',           [RateController::class, 'destroy']);
+        Route::get('/', [RateController::class, 'getData']);
+        Route::post('/create', [RateController::class, 'store']);
+        Route::get('/show/{id}', [RateController::class, 'show']);
+        Route::put('/update/{id}', [RateController::class, 'update']);
+        Route::delete('/delete/{id}', [RateController::class, 'destroy']);
     });
 
     Route::prefix('warehouse-invoices')->group(function () {
-        Route::get('/',                         [WarehouseInvoiceController::class, 'getData']);
-        Route::post('/create',                  [WarehouseInvoiceController::class, 'store']);
-        Route::get('/show/{id}',                [WarehouseInvoiceController::class, 'show']);
-        Route::put('/update/{id}',              [WarehouseInvoiceController::class, 'update']);
-        Route::delete('/delete/{id}',           [WarehouseInvoiceController::class, 'destroy']);
-        Route::get('/search',                   [WarehouseInvoiceController::class, 'search']);
+        Route::get('/', [WarehouseInvoiceController::class, 'getData']);
+        Route::post('/create', [WarehouseInvoiceController::class, 'store']);
+        Route::get('/show/{id}', [WarehouseInvoiceController::class, 'show']);
+        Route::put('/update/{id}', [WarehouseInvoiceController::class, 'update']);
+        Route::delete('/delete/{id}', [WarehouseInvoiceController::class, 'destroy']);
+        Route::get('/search', [WarehouseInvoiceController::class, 'search']);
     });
 
     Route::prefix('review-management')->group(function () {
-        Route::get('/',                         [ReviewManagementController::class, 'getData']);
-        Route::post('/create',                  [ReviewManagementController::class, 'store']);
-        Route::get('/show/{id}',                [ReviewManagementController::class, 'show']);
-        Route::put('/update/{id}',              [ReviewManagementController::class, 'update']);
-        Route::delete('/delete/{id}',           [ReviewManagementController::class, 'destroy']);
+        Route::get('/', [ReviewManagementController::class, 'getData']);
+        Route::post('/create', [ReviewManagementController::class, 'store']);
+        Route::get('/show/{id}', [ReviewManagementController::class, 'show']);
+        Route::put('/update/{id}', [ReviewManagementController::class, 'update']);
+        Route::delete('/delete/{id}', [ReviewManagementController::class, 'destroy']);
     });
 
     Route::prefix('users')->group(function () {
@@ -139,21 +138,21 @@ Route::prefix('admin')->group(function () {
         Route::put('/update/{id}',              [UserController::class, 'update']);
         Route::delete('/delete/{id}',           [UserController::class, 'destroy']);
 
-        Route::post('/login',                   [UserController::class, 'login']);
-        Route::post('/check-login',             [UserController::class, 'checkLogin']);
-        Route::post('/logout',                  [UserController::class, 'logout']);
+        Route::post('/login', [UserController::class, 'login']);
+        Route::post('/check-login', [UserController::class, 'checkLogin']);
+        Route::post('/logout', [UserController::class, 'logout']);
 
         Route::get('/profile',                  [UserController::class, 'getUserInfo']);
-        Route::put('/profile-update',           [UserController::class, 'updateUserInfo']);
+        Route::put('/profile-update/{id}',      [UserController::class, 'updateUserInfo']);
         Route::put('/change-password',          [UserController::class, 'changePasswordProfile'])->middleware('checkUser');
     });
 
     Route::prefix('booking-food')->group(function () {
-        Route::get('/', [BoongkingFoodController::class, 'index']);
-        Route::post('/', [BoongkingFoodController::class, 'store']);
-        Route::get('/{id}', [BoongkingFoodController::class, 'show']);
-        Route::put('/{id}', [BoongkingFoodController::class, 'update']);
-        Route::delete('/{id}', [BoongkingFoodController::class, 'destroy']);
+        Route::get('/', [BookingFoodController::class, 'index']);
+        Route::post('/', [BookingFoodController::class, 'store']);
+        Route::get('/{id}', [BookingFoodController::class, 'show']);
+        Route::put('/{id}', [BookingFoodController::class, 'update']);
+        Route::delete('/{id}', [BookingFoodController::class, 'destroy']);
     });
     Route::prefix('carts')->group(function () {
         Route::get('/', [CartController::class, 'index']);
@@ -219,61 +218,22 @@ Route::prefix('client')->group(function () {
     Route::post('login', [AuthController::class, 'loginWithOtp']);
     Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('reset-password', [AuthController::class, 'resetPassword']);
+    Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
-    Route::middleware('auth:sanctum')->prefix('/')->group(function () {
-        Route::post('logout', [AuthController::class, 'logout']);
-
-        Route::prefix('invoice-food')->group(function () {
-            Route::get('/', [InvoiceFoodController::class, 'index']);
-        });
-
-        Route::prefix('bookings')->group(function () {
-            Route::post('/create', [BookingController::class, 'createBooking']);
-        });
-
-        Route::prefix('customers')->group(function () {
-            Route::get('/', [CustomerController::class, 'index']);
-            Route::post('/create', [CustomerController::class, 'store']);
-            Route::get('/{id}', [CustomerController::class, 'show']);
-            Route::put('/update/{id}', [CustomerController::class, 'update']);
-            Route::delete('/{id}', [CustomerController::class, 'delete']);
-        });
-
-        Route::prefix('booking-food')->group(function () {
-            Route::post('/', [BoongkingFoodController::class, 'store']);
-        });
-
-        Route::prefix('sales')->group(function () {
-            Route::get('/', [SaleController::class, 'index']);
-        });
-
-        Route::prefix('rates')->group(function () {
-            Route::get('/', [RateController::class, 'getData']);
-            Route::post('/create', [RateController::class, 'store']);
-            Route::get('/show/{id}', [RateController::class, 'show']);
-            Route::put('/update/{id}', [RateController::class, 'update']);
-            Route::delete('/delete/{id}', [RateController::class, 'destroy']);
-        });
-
-        Route::prefix('invoices')->group(function () {
-            Route::get('/', [InvoiceController::class, 'index']);
-        });
-
-        Route::prefix('ranks')->group(function () {
-            Route::get('/', [RankController::class, 'index']);
-        });
-
-        Route::prefix('history-points')->group(function () {
-            Route::get('/', [HistoryPointController::class, 'index']);
-            Route::delete('/{id}', [HistoryPointController::class, 'destroy']);
-        });
+    Route::prefix('invoice-food')->middleware('auth:sanctum')->group(function () {
+        Route::get('/', [InvoiceFoodController::class, 'index']);
     });
-    Route::prefix('carts')->group(function () {
-        Route::get('/', [CartController::class, 'index']);
-        Route::post('/create', [CartController::class, 'store']);
-        Route::get('/{id}', [CartController::class, 'show']);
-        Route::put('/{id}', [CartController::class, 'update']);
-        Route::delete('/{id}', [CartController::class, 'destroy']);
+
+    Route::prefix('bookings')->middleware('auth:sanctum')->group(function () {
+        Route::post('/create', [BookingController::class, 'createBooking']);
+    });
+
+    Route::prefix('customers')->middleware('auth:sanctum')->group(function () {
+        Route::get('/', [CustomerController::class, 'index']);
+        Route::post('/create', [CustomerController::class, 'store']);
+        Route::get('/{id}', [CustomerController::class, 'show']);
+        Route::put('/update/{id}', [CustomerController::class, 'update']);
+        Route::delete('/{id}', [CustomerController::class, 'delete']);
     });
 
     Route::prefix('types')->group(function () {
@@ -295,14 +255,5 @@ Route::prefix('client')->group(function () {
     Route::prefix('categories')->group(function () {
         Route::get('/', [CategoryController::class, 'index']);
     });
-});
 
-Route::prefix('chat')->group(function () {
-    Route::post('/send', [GeminiChatController::class, 'send']);
-});
-
-Route::prefix('chat')->middleware('auth:sanctum')->group(function () {
-    Route::post('/send-message', [MessageController::class, 'sendMessage']);
-    Route::post('/reply-message', [MessageController::class, 'replyMessage']);
-    Route::get('/get-messages/{customerId}/{staffId}', [MessageController::class, 'getMessages']);
 });

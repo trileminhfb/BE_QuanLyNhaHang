@@ -27,13 +27,14 @@ class UserController extends Controller
     // Thêm mới tài khoản
     public function store(UserRequest $request)
     {
-        // Xử lý và lưu ảnh
+        $path = null;
+
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('images', 'public');
         }
 
         $user = User::create([
-            'image'         => isset($path) ? $path : null,
+            'image'         => $path,
             'name'          => $request->name,
             'role'          => $request->role,
             'phone_number'  => $request->phone_number,
@@ -62,9 +63,9 @@ class UserController extends Controller
             ], 404);
         }
 
-        // Xử lý và lưu ảnh mới nếu có
+        $path = $user->image;
+
         if ($request->hasFile('image')) {
-            // Xóa ảnh cũ nếu có
             if ($user->image && Storage::exists('public/' . $user->image)) {
                 Storage::delete('public/' . $user->image);
             }
@@ -73,7 +74,7 @@ class UserController extends Controller
         }
 
         $data = [
-            'image'         => isset($path) ? $path : $user->image,
+            'image'         => $path,
             'name'          => $request->name,
             'role'          => $request->role,
             'phone_number'  => $request->phone_number,
@@ -82,7 +83,6 @@ class UserController extends Controller
             'birth'         => $request->birth,
         ];
 
-        // Chỉ mã hóa mật khẩu nếu người dùng truyền vào
         if ($request->filled('password')) {
             $data['password'] = bcrypt($request->password);
         }

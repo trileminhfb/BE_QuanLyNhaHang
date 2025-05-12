@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\WarehouseInvoice;
 use App\Http\Requests\WarehouseInvoiceRequest;
+use App\Models\Warehouse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class WarehouseInvoiceController extends Controller
 {
@@ -39,12 +41,35 @@ class WarehouseInvoiceController extends Controller
     // Thêm mới hóa đơn kho
     public function store(WarehouseInvoiceRequest $request)
     {
-        $invoice = WarehouseInvoice::create([
-            'id_ingredient' => $request->id_ingredient,
-            'quantity'      => $request->quantity,
-            'price'         => $request->price,
-            'stock_in_date' => $request->stock_in_date,
-        ]);
+        DB::beginTransaction();
+
+        try {
+            $data = $request->only(['id_ingredient', 'quantity', 'price', 'stock_in_date']);
+
+            $invoice = WarehouseInvoice::create($data);
+
+            $warehouse = Warehouse::firstOrCreate(
+                ['id_ingredient' => $data['id_ingredient']],
+                ['quantity' => 0]
+            );
+
+            $warehouse->increment('quantity', $data['quantity']);
+
+            DB::commit();
+
+            return response()->json([
+                'status'  => 1,
+                'message' => 'Thêm mới hóa đơn kho thành công.',
+                'data'    => $invoice
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
+        }
 
         return response()->json([
             'status' => 1,

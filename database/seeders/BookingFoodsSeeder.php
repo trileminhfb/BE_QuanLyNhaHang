@@ -12,7 +12,7 @@ class BookingFoodsSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('boongking_foods')->insert([
+        DB::table('booking_foods')->insert([
             [
                 'id_foods' => 1,
                 'quantity' => 10,

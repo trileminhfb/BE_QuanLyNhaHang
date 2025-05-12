@@ -2,16 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Booking extends Model
 {
     use HasFactory;
 
+    protected $table = 'bookings';
+
     protected $fillable = [
         'timeBooking',
-        'quantity',
+        'status',
         'id_customer',
     ];
 
@@ -19,8 +21,9 @@ class Booking extends Model
     {
         return $this->belongsTo(Customer::class, 'id_customer');
     }
-    public function table()
+
+    public function bookingFoods()
     {
-        return $this->belongsTo(Table::class, 'id_table');
+        return $this->hasMany(booking_food::class, 'id_booking');
     }
 }

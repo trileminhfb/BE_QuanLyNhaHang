@@ -19,7 +19,7 @@ class InvoiceFood extends Model
 
     public function food()
     {
-        return $this->belongsTo(Food::class);
+        return $this->belongsTo(Food::class, 'id_food');
     }
 
     public function invoice()

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
 {
@@ -11,18 +12,36 @@ class CategoryController extends Controller
     {
 
         $categories = Category::with(['type', 'categoryFoods.food'])->get();
+
         return response()->json($categories, 200);
     }
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'name'     => 'required|string|max:255',
-            'status'   => 'required|integer',
-            'id_type'  => 'nullable|integer',
-        ]);
+        $data = $request->only(['name', 'status', 'id_type']);
 
+        // Tạo mới danh mục
         $category = Category::create($data);
+
+        // Xử lý food_ids nếu có
+        if ($request->has('food_ids')) {
+            $food_ids = $request->input('food_ids');
+
+            if (is_array($food_ids) && !empty($food_ids)) {
+                $foodData = array_filter(array_map(function ($food_id) use ($category) {
+                    return DB::table('foods')->where('id', $food_id)->exists() ? [
+                        'id_category' => $category->id,
+                        'id_food'     => $food_id,
+                        'created_at'  => now(),
+                        'updated_at'  => now(),
+                    ] : null;
+                }, $food_ids));
+
+                if ($foodData) {
+                    DB::table('category_foods')->insert($foodData);
+                }
+            }
+        }
 
         return response()->json([
             'message'  => '🎉 Danh mục đã được tạo thành công!',
@@ -46,19 +65,36 @@ class CategoryController extends Controller
         $category = Category::find($id);
 
         if (!$category) {
-            return response()->json(['message' => '❌ Không tìm thấy danh mục!'], 404);
+            return response()->json(['message' => ' Không tìm thấy danh mục!'], 404);
         }
 
-        $data = $request->validate([
-            'name'     => 'sometimes|string|max:255',
-            'status'   => 'sometimes|integer',
-            'id_type'  => 'nullable|integer',
-        ]);
 
-        $category->update($data);
+        $data = $request->only(['name', 'status', 'id_type']);
+
+        $category->update(array_filter($data));
+
+        if ($request->has('food_ids')) {
+            $food_ids = $request->input('food_ids');
+            DB::table('category_foods')->where('id_category', $id)->delete();
+            if (is_array($food_ids) && !empty($food_ids)) {
+                $foodData = array_filter(array_map(function ($food_id) use ($id) {
+
+                    return DB::table('foods')->where('id', $food_id)->exists() ? [
+                        'id_category' => $id,
+                        'id_food' => $food_id,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ] : null;
+                }, $food_ids));
+
+                if ($foodData) {
+                    DB::table('category_foods')->insert($foodData);
+                }
+            }
+        }
 
         return response()->json([
-            'message'  => '✅ Danh mục đã được cập nhật!',
+            'message'  => ' Danh mục đã được cập nhật!',
             'category' => $category,
         ], 200);
     }
