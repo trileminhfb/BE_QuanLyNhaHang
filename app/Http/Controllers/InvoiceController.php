@@ -5,13 +5,14 @@ namespace App\Http\Controllers;
 use App\Http\Requests\InvoiceRequest;
 use Illuminate\Http\Request;
 use App\Models\Invoice;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\FacadesDB;
 use Illuminate\Support\Facades\Log;
 use App\Models\Cart;
 use App\Models\Food;
 use App\Models\InvoiceFood;
 use App\Models\Sale;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class InvoiceController extends Controller
 {
@@ -24,7 +25,7 @@ class InvoiceController extends Controller
                 'table',
                 'sale',
                 'invoiceFoods.food'
-            ])->get(); // ngắn gọn
+            ])->get();
 
             return response()->json([
                 'data' => $invoices
@@ -127,12 +128,15 @@ class InvoiceController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'id_table' => 'required|exists:tables,id',
-            'id_user' => 'required|exists:users,id',
-            'total' => 'required|numeric',
-            'timeEnd' => 'required|date',
-            'id_customer' => 'required|exists:customers,id',
-            'status' => 'nullable|in:0,1,2',
+            'id_table'     => 'required|exists:tables,id',
+            'id_user'      => 'required|exists:users,id',
+            'total'        => 'required|numeric',
+            'timeEnd'      => 'required|date',
+            'id_customer'  => 'required|exists:customers,id',
+            'status'       => 'nullable|in:0,1,2',
+            'foods'        => 'nullable|array',
+            'foods.*.id'   => 'required|exists:foods,id',
+            'foods.*.quantity' => 'required|integer|min:1',
         ]);
 
         try {
@@ -142,7 +146,27 @@ class InvoiceController extends Controller
                 return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
             }
 
+            // Cập nhật thông tin chính của hóa đơn
             $invoice->update($validated);
+
+            // Cập nhật danh sách món ăn nếu có
+            if ($request->has('foods')) {
+                $foods = $request->input('foods');
+
+                // Xoá toàn bộ món cũ trong hóa đơn
+                DB::table('invoice_food')->where('id_invoice', $id)->delete();
+
+                // Chèn lại món ăn mới
+                $foodData = array_map(function ($item) use ($id) {
+                    return [
+                        'id_invoice' => $id,
+                        'id_food'    => $item['id'],
+                        'quantity'   => $item['quantity'],
+                    ];
+                }, $foods);
+
+                DB::table('invoice_food')->insert($foodData);
+            }
 
             return response()->json([
                 'message' => 'Hóa đơn được cập nhật thành công',
