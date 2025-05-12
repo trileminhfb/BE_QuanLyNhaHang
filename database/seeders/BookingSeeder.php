@@ -6,7 +6,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class BookingSeeder extends Seeder
-{ 
+{
     public function run(): void
     {
         DB::table('bookings')->insert([
@@ -17,13 +17,13 @@ class BookingSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'timeBooking' => now()->addDays(2),
+                'timeBooking' => now()->subDays(2),
                 'id_customer' => 2,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'timeBooking' => now()->addDays(3),
+                'timeBooking' => now(),
                 'id_customer' => 3,
                 'created_at' => now(),
                 'updated_at' => now(),
