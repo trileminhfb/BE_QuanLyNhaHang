@@ -50,17 +50,18 @@ class InvoiceController extends Controller
                 return response()->json(['message' => 'Không có món nào trong giỏ hàng'], 400);
             }
 
-            $total = 0;
+            // ======= Bỏ qua phần tính total từ giỏ hàng =======
+            // $total = 0;
+            // foreach ($carts as $cart) {
+            //     $food = Food::find($cart->id_food);
+            //     if (!$food) {
+            //         return response()->json(['message' => "Món ăn với ID {$cart->id_food} không tồn tại."], 400);
+            //     }
+            //     $total += $cart['quantity'] * $food->cost;
+            // }
 
-            foreach ($carts as $cart) {
-                $food = Food::find($cart->id_food);
-
-                if (!$food) {
-                    return response()->json(['message' => "Món ăn với ID {$cart->id_food} không tồn tại."], 400);
-                }
-
-                $total += $cart['quantity'] * $food->cost;
-            }
+            // Dùng total từ request gửi lên
+            $total = $request->input('total', 0);
 
             $idSale = null;
             $discountPercent = 0;
@@ -136,7 +137,7 @@ class InvoiceController extends Controller
             'status'       => 'nullable|in:0,1,2',
             'foods'        => 'nullable|array',
             'foods.*.id'   => 'required|exists:foods,id',
-            'foods.*.quantity' => 'required|integer|min:1',
+            'foods.*.quantity' => 'required|integer|min:0',
         ]);
 
         try {
@@ -153,19 +154,24 @@ class InvoiceController extends Controller
             if ($request->has('foods')) {
                 $foods = $request->input('foods');
 
-                // Xoá toàn bộ món cũ trong hóa đơn
-                DB::table('invoice_food')->where('id_invoice', $id)->delete();
-
-                // Chèn lại món ăn mới
-                $foodData = array_map(function ($item) use ($id) {
-                    return [
-                        'id_invoice' => $id,
-                        'id_food'    => $item['id'],
-                        'quantity'   => $item['quantity'],
-                    ];
-                }, $foods);
-
-                DB::table('invoice_food')->insert($foodData);
+                foreach ($foods as $item) {
+                    if ($item['quantity'] === 0) {
+                        DB::table('invoice_food')
+                            ->where('id_invoice', $id)
+                            ->where('id_food', $item['id'])
+                            ->delete();
+                    } else {
+                        DB::table('invoice_food')->updateOrInsert(
+                            [
+                                'id_invoice' => $id,
+                                'id_food'    => $item['id'],
+                            ],
+                            [
+                                'quantity'   => $item['quantity'],
+                            ]
+                        );
+                    }
+                }
             }
 
             return response()->json([
@@ -177,6 +183,7 @@ class InvoiceController extends Controller
             return response()->json(['error' => 'Lỗi cập nhật hóa đơn'], 500);
         }
     }
+
 
     public function delete($id)
     {
