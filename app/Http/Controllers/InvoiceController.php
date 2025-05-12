@@ -82,7 +82,7 @@ class InvoiceController extends Controller
                 'id_user' => $role === 'staff' ? $user->id : null,
                 'id_customer' => $role === 'customer' ? $user->id : null,
                 'id_sale' => $idSale,
-                'status' => 0,
+                'status' => 1,
             ]);
 
             foreach ($carts as $cart) {
@@ -134,7 +134,7 @@ class InvoiceController extends Controller
             'total'        => 'required|numeric',
             'timeEnd'      => 'required|date',
             'id_customer'  => 'required|exists:customers,id',
-            'status'       => 'nullable|in:0,1,2',
+            'status'       => 'nullable|in:1,2,3',
             'foods'        => 'nullable|array',
             'foods.*.id'   => 'required|exists:foods,id',
             'foods.*.quantity' => 'required|integer|min:0',
