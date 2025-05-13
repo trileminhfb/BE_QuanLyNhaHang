@@ -43,7 +43,7 @@ Route::prefix('admin')->group(function () {
         Route::delete('/{id}', [CustomerController::class, 'delete']);
     });
 
-        Route::prefix('bookings')->group(function () {
+    Route::prefix('bookings')->group(function () {
         Route::get('/check-timeout', [BookingController::class, 'autoUpdateStatus']); // Đặt trước
         Route::get('/', [BookingController::class, 'index']);
         Route::get('/{id}', [BookingController::class, 'show']);
