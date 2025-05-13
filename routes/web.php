@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\GeminiChatController; // Import controller
+use App\Http\Controllers\GeminiChatController;
 
 
 // Route cho chat bot
@@ -13,5 +13,5 @@ Route::get('/', function () {
 });
 
 Route::get('/chat', function () {
-    return view('chat'); // View bạn đã tạo ở bước 1
+    return view('chat');
 });
