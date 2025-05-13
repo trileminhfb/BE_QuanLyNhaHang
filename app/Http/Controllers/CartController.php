@@ -14,17 +14,50 @@ class CartController extends Controller
     }
 
     // Tạo mới 1 giỏ hàng
-    public function store(Request $request)
-    {
-        $request->validate([
-            'id_food' => 'required|integer',
-            'id_table' => 'required|integer',
-            'quantity' => 'required|integer|min:1',
-        ]);
+    // public function store(Request $request)
+    // {
+    //     $request->validate([
+    //         'id_food' => 'required|integer',
+    //         'id_table' => 'required|integer',
+    //         'quantity' => 'required|integer|min:1',
+    //     ]);
 
+    //     $cart = Cart::create($request->all());
+    //     return response()->json($cart, 201);
+    // }
+    public function store(Request $request)
+{
+    $request->validate([
+        'id_food' => 'required|integer',
+        'id_table' => 'required|integer',
+        'quantity' => 'required|integer|min:1',
+    ]);
+
+    // Kiểm tra xem món ăn đã tồn tại trong cart của bàn chưa
+    $existingCart = Cart::where('id_food', $request->id_food)
+                        ->where('id_table', $request->id_table)
+                        ->first();
+
+    if ($existingCart) {
+        // Nếu đã có thì cập nhật số lượng (cộng thêm)
+        $existingCart->quantity += $request->quantity;
+        $existingCart->save();
+
+        return response()->json([
+            'message' => 'Cart updated with new quantity',
+            'data' => $existingCart
+        ], 200);
+    } else {
+        // Nếu chưa có thì tạo mới
         $cart = Cart::create($request->all());
-        return response()->json($cart, 201);
+
+        return response()->json([
+            'message' => 'Cart created',
+            'data' => $cart
+        ], 201);
     }
+}
+
 
     // Lấy thông tin chi tiết một cart
     public function show($id)
