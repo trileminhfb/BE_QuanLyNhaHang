@@ -30,7 +30,9 @@ class DatabaseSeeder extends Seeder
             TypeSeeder::class,
             CartSeeder::class,
             BookingFoodsSeeder::class,
-            InvoiceFoodSeeder::class
+            InvoiceFoodSeeder::class,
+            SaleReportSeeder::class,
+            SaleReportFoodSeeder::class,
         ]);
     }
 }
