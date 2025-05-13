@@ -5,19 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ReviewManagement extends Model
+class Message extends Model
 {
     use HasFactory;
-    protected $table = 'review__management';
     protected $fillable = [
-        'id_rate',
+        'id_customer',
         'id_user',
-        'comment',
+        'content',
+        'sender',
     ];
 
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'id_customer');
+    }
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user');
     }
 }
-
