@@ -27,7 +27,8 @@ use App\Http\Controllers\TableController;
 use App\Http\Controllers\TypeController;
 use App\Models\Rate;
 use App\Http\Controllers\GeminiChatController;
-
+use App\Http\Controllers\MessageController;
+use App\Models\Message;
 
 Route::middleware('auth:sanctum')->get('/test', function (Request $request) {
     return $request->user();
@@ -57,6 +58,9 @@ Route::prefix('admin')->group(function () {
         Route::get('/{id}', [InvoiceController::class, 'show']);
         Route::put('/{id}', [InvoiceController::class, 'update']);
         Route::delete('/{id}', [InvoiceController::class, 'delete']);
+        Route::post('/{id}/pay-transfer', [InvoiceController::class, 'payByTransfer']);
+        Route::post('/payos/callback', [InvoiceController::class, 'handlePayOSCallback']);
+        Route::post('/payment/callback', [InvoiceController::class, 'handlePaymentResult']);
     });
 
     Route::prefix('categories')->group(function () {
@@ -69,8 +73,8 @@ Route::prefix('admin')->group(function () {
 
     Route::prefix('category-foods')->group(function () {
         Route::get('/', [CategoryFoodController::class, 'getData']);
-        Route::post('/', [CategoryFoodController::class, 'store']);
-        Route::get('/{id}', [CategoryFoodController::class, 'show']);
+        Route::post('/create', [CategoryFoodController::class, 'store']);
+        Route::get('/{id}', [CategoryFoodController::class, 'findById']);
         Route::put('/{id}', [CategoryFoodController::class, 'update']);
         Route::delete('/{id}', [CategoryFoodController::class, 'destroy']);
     });
@@ -239,6 +243,14 @@ Route::prefix('client')->group(function () {
             Route::delete('/{id}', [CustomerController::class, 'delete']);
         });
 
+        Route::prefix('carts')->group(function () {
+            Route::get('/', [CartController::class, 'index']);
+            Route::post('/create', [CartController::class, 'store']);
+            Route::get('/{id}', [CartController::class, 'show']);
+            Route::put('/{id}', [CartController::class, 'update']);
+            Route::delete('/{id}', [CartController::class, 'destroy']);
+        });
+
         Route::prefix('booking-food')->group(function () {
             Route::post('/', [BookingFoodController::class, 'store']);
         });
@@ -255,9 +267,9 @@ Route::prefix('client')->group(function () {
             Route::delete('/delete/{id}', [RateController::class, 'destroy']);
         });
 
-        Route::prefix('invoices')->group(function () {
-            Route::get('/', [InvoiceController::class, 'index']);
-        });
+            Route::prefix('invoices')->group(function () {
+                Route::get('/', [InvoiceController::class, 'index']);
+            });
 
         Route::prefix('ranks')->group(function () {
             Route::get('/', [RankController::class, 'index']);
@@ -267,13 +279,6 @@ Route::prefix('client')->group(function () {
             Route::get('/', [HistoryPointController::class, 'index']);
             Route::delete('/{id}', [HistoryPointController::class, 'destroy']);
         });
-    });
-    Route::prefix('carts')->group(function () {
-        Route::get('/', [CartController::class, 'index']);
-        Route::post('/create', [CartController::class, 'store']);
-        Route::get('/{id}', [CartController::class, 'show']);
-        Route::put('/{id}', [CartController::class, 'update']);
-        Route::delete('/{id}', [CartController::class, 'destroy']);
     });
 
     Route::prefix('types')->group(function () {
@@ -300,3 +305,10 @@ Route::prefix('client')->group(function () {
 Route::prefix('chat')->group(function () {
     Route::post('/send', [GeminiChatController::class, 'send']);
 });
+
+Route::prefix('chat')->middleware('auth:sanctum')->group(function () {
+    Route::post('/send-message', [MessageController::class, 'sendMessage']);
+    Route::post('/reply-message', [MessageController::class, 'replyMessage']);
+    Route::get('/get-messages/{customerId}/{staffId}', [MessageController::class, 'getMessages']);
+});
+

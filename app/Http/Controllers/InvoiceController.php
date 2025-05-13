@@ -6,6 +6,7 @@ use App\Http\Requests\InvoiceRequest;
 use Illuminate\Http\Request;
 use App\Models\Invoice;
 use Illuminate\Support\FacadesDB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Models\Cart;
 use App\Models\Food;
@@ -200,4 +201,127 @@ class InvoiceController extends Controller
             return response()->json(['error' => 'Lỗi xóa hóa đơn'], 500);
         }
     }
+
+    // 1. Hàm để tạo thanh toán chuyển khoản và lấy QR code
+    public function payByTransfer($id)
+    {
+        $invoice = Invoice::find($id);
+
+        if (!$invoice) {
+            return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
+        }
+
+        if ($invoice->status == 1) {
+            return response()->json(['message' => 'Hóa đơn đã được thanh toán'], 400);
+        }
+
+        $amount = $invoice->total;
+
+        // Gọi PayOS để tạo link thanh toán
+        $paymentUrl = $this->createPayOSPayment($invoice->id, $amount);
+
+        return response()->json([
+            'message' => 'Tạo thanh toán thành công',
+            'payment_url' => $paymentUrl,
+            'amount' => $amount
+        ]);
+    }
+
+    // 2. Hàm gọi PayOS API để tạo link thanh toán
+    public function createPayOSPayment($invoiceId)
+    {
+        $invoice = Invoice::find($invoiceId);
+
+        if (!$invoice) {
+            return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
+        }
+
+        $clientId = env('PAYOS_CLIENT_ID');
+        $apiKey = env('PAYOS_API_KEY');
+        $checksumKey = env('PAYOS_CHECKSUM_KEY');
+
+        $payOS = new \GuzzleHttp\Client([
+            'base_uri' => 'https://api-sandbox.payos.vn/',
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'x-client-id' => $clientId,
+                'x-api-key' => $apiKey,
+            ],
+        ]);
+
+        $amount = $invoice->total;
+        $orderCode = $invoiceId;
+
+        $body = [
+            'orderCode' => $orderCode,
+            'amount' => (int) $amount,
+            'description' => 'Thanh toán hóa đơn #' . $invoiceId,
+            'returnUrl' => 'https://your-frontend.com/return',
+            'cancelUrl' => 'https://your-frontend.com/cancel',
+        ];
+
+        $response = $payOS->post('v1/payment-requests', [
+            'json' => $body,
+        ]);
+
+        $bodyContent = (string) $response->getBody();
+        $data = json_decode($bodyContent, true);
+
+        return response()->json([
+            'message' => 'Tạo thanh toán thành công',
+            'payment_url' => $data['data']['checkoutUrl'],
+            'amount' => $amount
+        ]);
+    }
+
+
+    // 3. Webhook xử lý khi PayOS trả lại thông tin thanh toán thành công
+    public function handlePayOSCallback(Request $request)
+    {
+        $orderCode = $request->orderCode;
+
+        $invoice = Invoice::find($orderCode);
+
+        if (!$invoice) {
+            return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
+        }
+
+        if ($invoice->status == 1) {
+            return response()->json(['message' => 'Hóa đơn đã được thanh toán trước đó'], 200);
+        }
+
+        // Cập nhật trạng thái đã thanh toán
+        $invoice->status = 1;
+        $invoice->save();
+
+        return response()->json(['message' => 'Cập nhật trạng thái thanh toán thành công'], 200);
+    }
+
+
+    public function handlePaymentResult(Request $request)
+{
+    $orderCode = $request->input('orderCode');
+    $status = $request->input('status'); // Ví dụ: "PAID" hoặc "SUCCESS" tùy theo PayOS trả về
+
+    if (!$orderCode || !$status) {
+        return response()->json(['message' => 'Thiếu thông tin thanh toán'], 400);
+    }
+
+    $invoice = Invoice::find($orderCode);
+
+    if (!$invoice) {
+        return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
+    }
+
+    if ($invoice->status == 1) {
+        return response()->json(['message' => 'Hóa đơn đã được thanh toán trước đó'], 200);
+    }
+
+    // Cập nhật trạng thái đã thanh toán
+    $invoice->status = 1;
+    $invoice->save();
+
+    return response()->json(['message' => 'Cập nhật trạng thái thanh toán thành công'], 200);
+}
+
 }
