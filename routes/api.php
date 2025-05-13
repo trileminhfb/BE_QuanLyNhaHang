@@ -267,9 +267,9 @@ Route::prefix('client')->group(function () {
             Route::delete('/delete/{id}', [RateController::class, 'destroy']);
         });
 
-            Route::prefix('invoices')->group(function () {
-                Route::get('/', [InvoiceController::class, 'index']);
-            });
+        Route::prefix('invoices')->group(function () {
+            Route::get('/', [InvoiceController::class, 'index']);
+        });
 
         Route::prefix('ranks')->group(function () {
             Route::get('/', [RankController::class, 'index']);
@@ -311,4 +311,3 @@ Route::prefix('chat')->middleware('auth:sanctum')->group(function () {
     Route::post('/reply-message', [MessageController::class, 'replyMessage']);
     Route::get('/get-messages/{customerId}/{staffId}', [MessageController::class, 'getMessages']);
 });
-
