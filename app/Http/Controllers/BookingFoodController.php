@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreBoongkingFoodRequest;
 use App\Models\booking_food;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BookingFoodController extends Controller
 {
@@ -17,13 +18,28 @@ class BookingFoodController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->only(['id_booking', 'id_foods', 'quantity']);
+        // Bước 1: Kiểm tra dữ liệu đầu vào
+        $request->validate([
+            'id_booking' => 'required|exists:bookings,id',
+            'foods' => 'required|array|min:1',
+            'foods.*.id_foods' => 'required|exists:foods,id',
+            'foods.*.quantity' => 'required|integer|min:1',
+        ]);
 
-        $bookingFood = booking_food::create($data);
+        // Bước 2: Duyệt từng món ăn và lưu vào bảng booking_foods
+        foreach ($request->foods as $food) {
+            DB::table('booking_foods')->insert([
+                'id_booking' => $request->id_booking,
+                'id_foods' => $food['id_foods'],
+                'quantity' => $food['quantity'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
 
+        // Bước 3: Trả về kết quả
         return response()->json([
-            'message' => '✅ Đã lưu món ăn vào booking!',
-            'data'    => $bookingFood
+            'message' => 'Đặt món thành công!'
         ], 201);
     }
 
@@ -62,15 +78,14 @@ class BookingFoodController extends Controller
 
         if (!$bookingFood) {
             return response()->json([
-                'message' => '❌ Không tìm thấy món ăn để xóa!'
+                'message' => ' Không tìm thấy món ăn để xóa!'
             ], 404);
         }
-
         $bookingFood->delete();
 
         return response()->json([
-            'message' => '✅ Món ăn đã được xóa thành công!'
+            'message' => ' Món ăn đã được xóa thành công!'
         ]);
     }
-    
+
 }

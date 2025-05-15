@@ -95,7 +95,7 @@ Route::prefix('admin')->group(function () {
         Route::delete('/{id}', [RankController::class, 'destroy']);
     });
 
-    
+
     Route::prefix('ingredients')->group(function () {
         Route::get('/', [IngredientController::class, 'getData']);
         Route::post('/create', [IngredientController::class, 'store']);
