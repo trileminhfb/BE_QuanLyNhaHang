@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Food extends Model
 {
@@ -21,6 +22,11 @@ class Food extends Model
         'status'
     ];
 
+    public function getImageAttribute($value)
+    {
+        return ($value ? asset(Storage::url($value)) : null);
+    }
+
     public function type()
     {
         return $this->belongsTo(Type::class, 'id_type');
@@ -35,4 +41,11 @@ class Food extends Model
     {
         return $this->belongsToMany(Category::class, 'category_foods', 'id_food', 'id_category');
     }
+
+    public function invoices()
+    {
+        return $this->belongsToMany(Invoice::class, 'invoice_food', 'id_food', 'id_invoice')
+            ->withPivot('quantity');
+    }
+
 }

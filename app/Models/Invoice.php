@@ -34,11 +34,19 @@ class Invoice extends Model
         return $this->belongsTo(Table::class, 'id_table');
     }
 
-    public function sale(){
+    public function sale()
+    {
         return $this->belongsTo(Sale::class, 'id_sale');
     }
 
-    public function invoiceFoods(){
+    public function invoiceFoods()
+    {
         return $this->hasMany(InvoiceFood::class, 'id_invoice');
+    }
+
+    public function foods()
+    {
+        return $this->belongsToMany(Food::class, 'invoice_food', 'id_invoice', 'id_food')
+            ->withPivot('quantity');
     }
 }

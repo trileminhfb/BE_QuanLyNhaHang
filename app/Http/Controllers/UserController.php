@@ -34,20 +34,20 @@ class UserController extends Controller
         }
 
         $user = User::create([
-            'image'         => $path,
-            'name'          => $request->name,
-            'role'          => $request->role,
-            'phone_number'  => $request->phone_number,
-            'email'         => $request->email,
-            'status'        => $request->status,
-            'birth'         => $request->birth,
-            'password'      => bcrypt($request->password),
+            'image' => $path,
+            'name' => $request->name,
+            'role' => $request->role,
+            'phone_number' => $request->phone_number,
+            'email' => $request->email,
+            'status' => $request->status,
+            'birth' => $request->birth,
+            'password' => bcrypt($request->password),
         ]);
 
         return response()->json([
             'status' => 1,
             'message' => 'Thêm người dùng thành công.',
-            'data'    => $user
+            'data' => $user
         ]);
     }
 
@@ -74,13 +74,13 @@ class UserController extends Controller
         }
 
         $data = [
-            'image'         => $path,
-            'name'          => $request->name,
-            'role'          => $request->role,
-            'phone_number'  => $request->phone_number,
-            'email'         => $request->email,
-            'status'        => $request->status,
-            'birth'         => $request->birth,
+            'image' => $path,
+            'name' => $request->name,
+            'role' => $request->role,
+            'phone_number' => $request->phone_number,
+            'email' => $request->email,
+            'status' => $request->status,
+            'birth' => $request->birth,
         ];
 
         if ($request->filled('password')) {
@@ -92,7 +92,7 @@ class UserController extends Controller
         return response()->json([
             'status' => 1,
             'message' => 'Cập nhật thông tin thành công.',
-            'data'    => $user
+            'data' => $user
         ]);
     }
 
@@ -133,21 +133,21 @@ class UserController extends Controller
 
         if ($user && Hash::check($request->password, $user->password)) {
             return response()->json([
-                'status'        => 1,
-                'message'       => 'Đăng nhập thành công',
-                'key'           => $user->createToken('key_admin')->plainTextToken,
-                'name'          => $user->name,
-                'email'         => $user->email,
-                'phone_number'  => $user->phone_number,
-                'role'          => $user->role,
-                'status_user'   => $user->status,
-                'image'         => $user->image,
-                'birth'         => $user->birth,
+                'status' => 1,
+                'message' => 'Đăng nhập thành công',
+                'key' => $user->createToken('key_admin')->plainTextToken,
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone_number' => $user->phone_number,
+                'role' => $user->role,
+                'status_user' => $user->status,
+                'image' => $user->image,
+                'birth' => $user->birth,
             ]);
         } else {
             return response()->json([
-                'status'    => 0,
-                'message'   => 'Tài khoản hoặc mật khẩu không đúng'
+                'status' => 0,
+                'message' => 'Tài khoản hoặc mật khẩu không đúng'
             ]);
         }
     }
@@ -160,7 +160,7 @@ class UserController extends Controller
         if ($user && $user instanceof \App\Models\User) {
             return response()->json([
                 'status' => 1,
-                'user'   => $user
+                'user' => $user
             ]);
         }
 
@@ -177,14 +177,14 @@ class UserController extends Controller
 
         if (!$user || !($user instanceof \App\Models\User)) {
             return response()->json([
-                'status'  => 0,
+                'status' => 0,
                 'message' => 'Người dùng không hợp lệ.',
             ], 401);
         }
 
         if (!Hash::check($request->old_password, $user->password)) {
             return response()->json([
-                'status'  => 0,
+                'status' => 0,
                 'message' => 'Mật khẩu cũ không đúng.',
             ]);
         }
@@ -193,7 +193,7 @@ class UserController extends Controller
         $user->save();
 
         return response()->json([
-            'status'  => 1,
+            'status' => 1,
             'message' => 'Đổi mật khẩu thành công.',
         ]);
     }
@@ -211,7 +211,7 @@ class UserController extends Controller
         }
 
         return response()->json([
-            'status'  => 0,
+            'status' => 0,
             'message' => 'Có lỗi xảy ra.',
         ], 401);
     }
@@ -225,23 +225,24 @@ class UserController extends Controller
             $data = $request->only(['name', 'phone_number', 'birth']);
 
             if ($request->hasFile('image')) {
-                if ($user->image && Storage::exists('public/' . $user->image)) {
-                    Storage::delete('public/' . $user->image);
+                $imagePath = $request->file('image')->store('images', 'public');
+                $data['image'] = $imagePath;
+            } else {
+                if (str_contains($user->image, 'storage/')) {
+                    $data['image'] = explode('storage/', $user->image)[1];
                 }
-                $path = $request->file('image')->store('images', 'public');
-                $data['image'] = $path;
             }
 
             $user->update($data);
 
             return response()->json([
-                'status'  => 1,
+                'status' => 1,
                 'message' => 'Cập nhật thông tin thành công.',
             ]);
         }
 
         return response()->json([
-            'status'  => 0,
+            'status' => 0,
             'message' => 'Có lỗi xảy ra.',
         ], 401);
     }
@@ -255,13 +256,13 @@ class UserController extends Controller
             $user->currentAccessToken()->delete();
 
             return response()->json([
-                'status'  => 1,
+                'status' => 1,
                 'message' => 'Đăng xuất thành công.',
             ]);
         }
 
         return response()->json([
-            'status'  => 0,
+            'status' => 0,
             'message' => 'Người dùng không hợp lệ.',
         ], 401);
     }
