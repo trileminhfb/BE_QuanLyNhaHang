@@ -50,17 +50,12 @@ class MessageController extends Controller
 
     public function getMessages($customerId, $staffId)
     {
-        $messages = Message::where(function ($query) use ($customerId, $staffId) {
-            $query->where('id_customer', $customerId)
-                  ->where('id_user', $staffId);
-        })
-        ->orWhere(function ($query) use ($customerId, $staffId) {
-            $query->where('id_customer', $customerId)
-                  ->where('id_user', $staffId);
-        })
-        ->orderBy('created_at', 'asc')
-        ->get();
+        $messages = Message::where('id_customer', $customerId)
+            ->where('id_user', $staffId)
+            ->orderBy('created_at', 'asc')
+            ->get();
 
         return response()->json(['messages' => $messages]);
     }
+
 }

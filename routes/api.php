@@ -95,6 +95,7 @@ Route::prefix('admin')->group(function () {
         Route::delete('/{id}', [RankController::class, 'destroy']);
     });
 
+
     Route::prefix('ingredients')->group(function () {
         Route::get('/', [IngredientController::class, 'getData']);
         Route::post('/create', [IngredientController::class, 'store']);
@@ -249,6 +250,7 @@ Route::prefix('client')->group(function () {
             Route::get('/{id}', [CartController::class, 'show']);
             Route::put('/{id}', [CartController::class, 'update']);
             Route::delete('/{id}', [CartController::class, 'destroy']);
+            Route::delete('/clear', [CartController::class, 'clearCart']);
         });
 
         Route::prefix('booking-food')->group(function () {
@@ -265,10 +267,13 @@ Route::prefix('client')->group(function () {
             Route::get('/show/{id}', [RateController::class, 'show']);
             Route::put('/update/{id}', [RateController::class, 'update']);
             Route::delete('/delete/{id}', [RateController::class, 'destroy']);
+
         });
 
         Route::prefix('invoices')->group(function () {
             Route::get('/', [InvoiceController::class, 'index']);
+            Route::get('/payByTransfer/{id}', [InvoiceController::class, 'payByTransfer']);
+                Route::post('/callback', [InvoiceController::class, 'handlePayOSCallback']);
         });
 
         Route::prefix('ranks')->group(function () {

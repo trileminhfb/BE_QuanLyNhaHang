@@ -227,7 +227,6 @@ class InvoiceController extends Controller
             'amount' => $amount
         ]);
     }
-
     // 2. Hàm gọi PayOS API để tạo link thanh toán
     public function createPayOSPayment($invoiceId)
     {
@@ -246,7 +245,6 @@ class InvoiceController extends Controller
             apiKey: $apiKey,
             checksumKey: $checksumKey
         );
-
         $amount = $invoice->total;
 
         $items = $foods->map(function ($food) {
@@ -270,42 +268,17 @@ class InvoiceController extends Controller
 
         return $response['checkoutUrl'];
     }
-
-
     // 3. Webhook xử lý khi PayOS trả lại thông tin thanh toán thành công
     public function handlePayOSCallback(Request $request)
     {
-        $orderCode = $request->orderCode;
-
-        $invoice = Invoice::find($orderCode);
-
-        if (!$invoice) {
-            return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
-        }
-
-        if ($invoice->status == 1) {
-            return response()->json(['message' => 'Hóa đơn đã được thanh toán trước đó'], 200);
-        }
-
-        // Cập nhật trạng thái đã thanh toán
-        $invoice->status = 1;
-        $invoice->save();
-
-        return response()->json(['message' => 'Cập nhật trạng thái thanh toán thành công'], 200);
-    }
-
-
-    public function handlePaymentResult(Request $request)
-    {
         $orderCode = $request->input('orderCode');
-        $status = $request->input('status'); // Ví dụ: "PAID" hoặc "SUCCESS" tùy theo PayOS trả về
+        $status = $request->input('status');
 
         if (!$orderCode || !$status) {
             return response()->json(['message' => 'Thiếu thông tin thanh toán'], 400);
         }
 
         $invoice = Invoice::find($orderCode);
-
         if (!$invoice) {
             return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
         }
@@ -314,11 +287,78 @@ class InvoiceController extends Controller
             return response()->json(['message' => 'Hóa đơn đã được thanh toán trước đó'], 200);
         }
 
-        // Cập nhật trạng thái đã thanh toán
-        $invoice->status = 1;
-        $invoice->save();
+        if (in_array($status, ['PAID', 'SUCCESS'])) {
+            // Cập nhật trạng thái thanh toán
+            $invoice->status = 1;
+            $invoice->save();
 
-        return response()->json(['message' => 'Cập nhật trạng thái thanh toán thành công'], 200);
+            // Xóa toàn bộ giỏ hàng của user
+            Cart::where('user_id', $invoice->user_id)->delete();
+
+            return response()->json(['message' => 'Thanh toán thành công, đã xóa giỏ hàng'], 200);
+        }
+
+        return response()->json(['message' => 'Thanh toán không thành công'], 400);
     }
+
+    public function handlePaymentResult(Request $request)
+    {
+        $orderCode = $request->input('orderCode');
+        $status = $request->input('status');
+
+        if (!$orderCode || !$status) {
+            return response()->json(['message' => 'Thiếu thông tin thanh toán'], 400);
+        }
+
+        $invoice = Invoice::find($orderCode);
+        if (!$invoice) {
+            return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
+        }
+
+        if ($invoice->status == 1) {
+            return response()->json(['message' => 'Hóa đơn đã được thanh toán trước đó'], 200);
+        }
+
+        if ($status === 'PAID' || $status === 'SUCCESS') {
+            $invoice->status = 1;
+            $invoice->save();
+
+ // Xóa giỏ hàng liên quan
+            Cart::where('invoice_id', $invoice->id)->delete();
+
+            return response()->json(['message' => 'Thanh toán thành công, giỏ hàng đã được xóa'], 200);
+        }
+
+        return response()->json(['message' => 'Thanh toán không thành công'], 400);
+    }
+
+    public function clearCartByInvoice($invoiceId)
+    {
+        $invoice = Invoice::with('cartItems')->find($invoiceId);
+
+        if (!$invoice) {
+            return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
+        }
+
+        // Giả sử mỗi hóa đơn liên quan đến các cart item trong bảng cart
+        // Bạn cần điều chỉnh query phù hợp với quan hệ thực tế giữa invoice và cart
+
+        Cart::where('invoice_id', $invoiceId)->delete();
+
+        return response()->json(['message' => 'Đã xóa giỏ hàng liên quan đến hóa đơn']);
+    }
+
+    public function destroy($id)
+{
+    $cartItem = Cart::find($id);
+    if (!$cartItem) {
+        return response()->json(['message' => 'Không tìm thấy món trong giỏ hàng'], 404);
+    }
+
+    $cartItem->delete();
+
+    return response()->json(['message' => 'Xóa món khỏi giỏ hàng thành công']);
+}
+
 
 }
