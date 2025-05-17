@@ -81,4 +81,13 @@ class CartController extends Controller
         $cart->delete();
         return response()->json(['message' => 'Deleted successfully']);
     }
+    public function clearCart()
+    {
+        $userId = auth()->id();
+
+        Cart::where('user_id', $userId)->delete();
+
+        return response()->json(['message' => 'Đã xóa toàn bộ giỏ hàng'], 200);
+    }
+
 }

@@ -158,7 +158,7 @@ class FoodController extends Controller
             }
 
             // Trả về phản hồi JSON với dữ liệu food đã được cập nhật
-            // DB::commit();
+            DB::commit();
             return response()->json([
                 'message' => 'Cập nhật thành công',
                 'data' => $food->load('type:id,name', 'categories:id,name')
