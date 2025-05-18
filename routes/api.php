@@ -234,6 +234,7 @@ Route::prefix('client')->group(function () {
 
         Route::prefix('bookings')->group(function () {
             Route::post('/create', [BookingController::class, 'createBooking']);
+            Route::get('/history', [BookingController::class, 'historyBooking']);
         });
 
         Route::prefix('customers')->group(function () {

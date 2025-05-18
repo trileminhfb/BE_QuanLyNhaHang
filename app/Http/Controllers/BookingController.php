@@ -155,4 +155,15 @@ class BookingController extends Controller
 
         return response()->json(['message' => 'Booking deleted successfully'], 200);
     }
+
+    public function historyBooking(Request $request)
+    {
+        $bookings = Booking::where('id_customer', $request->user()->id)
+            ->with(['bookingFoods.food'])
+            ->get();
+
+        return response()->json([
+            'data' => $bookings
+        ]);
+    }
 }
