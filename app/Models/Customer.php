@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Rank;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 
 class Customer extends Model
@@ -37,5 +38,10 @@ class Customer extends Model
     public function getBirthAttribute($value)
     {
         return \Carbon\Carbon::parse($value)->format('Y-m-d');
+    }
+
+    public function getImageAttribute($value)
+    {
+        return ($value ? asset(Storage::url($value)) : null);
     }
 }

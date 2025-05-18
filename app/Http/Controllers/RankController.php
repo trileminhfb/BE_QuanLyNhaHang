@@ -70,19 +70,16 @@ class RankController extends Controller
 
         // Xử lý ảnh
         if ($request->hasFile('image')) {
-            if ($rank->image && Storage::exists('public/' . $rank->image)) {
-                Storage::delete('public/' . $rank->image);
-            }
             $imagePath = $request->file('image')->store('ranks', 'public');
         } else {
-            $imagePath = $rank->image; // Giữ ảnh cũ nếu không upload ảnh mới
+            $imagePath = explode('storage/', $rank->image)[1]; // Giữ ảnh cũ nếu không upload ảnh mới
         }
 
         $rank->update([
             'nameRank' => $request->nameRank,
             'necessaryPoint' => $request->necessaryPoint,
             'saleRank' => $request->saleRank,
-            'image' => $imagePath, // 👉 Đừng quên cập nhật cột image!
+            'image' => $imagePath,
         ]);
 
         return response()->json([

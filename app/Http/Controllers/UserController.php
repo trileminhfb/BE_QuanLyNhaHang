@@ -63,18 +63,9 @@ class UserController extends Controller
             ], 404);
         }
 
-        $path = $user->image;
-
-        if ($request->hasFile('image')) {
-            if ($user->image && Storage::exists('public/' . $user->image)) {
-                Storage::delete('public/' . $user->image);
-            }
-
-            $path = $request->file('image')->store('images', 'public');
-        }
 
         $data = [
-            'image' => $path,
+            'image' => '',
             'name' => $request->name,
             'role' => $request->role,
             'phone_number' => $request->phone_number,
@@ -82,6 +73,13 @@ class UserController extends Controller
             'status' => $request->status,
             'birth' => $request->birth,
         ];
+
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('images', 'public');
+            $data['image'] = $imagePath;
+        } else {
+            $data['image'] = explode('storage/', $user->image)[1];
+        }
 
         if ($request->filled('password')) {
             $data['password'] = bcrypt($request->password);

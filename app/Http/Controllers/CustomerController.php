@@ -7,6 +7,7 @@ use App\Mail\OtpMail;
 use App\Models\Customer;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -94,66 +95,60 @@ class CustomerController extends Controller
 
     public function update(Request $request, $id)
     {
-        $customer = Customer::find($id);
+        try {
+            DB::beginTransaction();
+            $customer = Customer::find($id);
 
-        if (!$customer) {
+            if (!$customer) {
+                return response()->json([
+                    'message' => 'Không tìm thấy khách hàng'
+                ], 404);
+            }
+
+            // Validate dữ liệu đầu vào
+            $validated = $request->validate([
+                'phoneNumber' => 'nullable|string|unique:customers,phoneNumber,' . $id,
+                'FullName' => 'nullable|string|max:255',
+                'otp' => 'nullable|string|max:6',
+                'point' => 'nullable|integer',
+                'id_rank' => 'nullable|integer',
+                'mail' => 'nullable|email|max:255',
+                'birth' => 'nullable|date',
+                'image' => 'nullable|file|mimes:jpeg,png,jpg,gif|max:2048',
+                'password' => 'nullable|string|min:6|confirmed', // nếu cần cập nhật mật khẩu
+            ]);
+
+            $data = $validated;
+
+            if ($request->hasFile('image')) {
+                $imagePath = $request->file('image')->store('images', 'public'); // Lưu file vào thư mục images trong storage/public
+                $data['image'] = $imagePath; // Cập nhật đường dẫn hình ảnh vào mảng dữ liệu
+            } else {
+                $data['image'] = explode('storage/', $customer->image)[1];
+            }
+
+            // Cập nhật mật khẩu nếu có
+            if ($request->has('password')) {
+                $data['password'] = Hash::make($request->password);
+            }
+
+            // Cập nhật khách hàng
+            $customer->update($data);
+
+            DB::commit();
+
             return response()->json([
-                'message' => 'Không tìm thấy khách hàng'
-            ], 404);
+                'message' => 'Khách hàng đã được cập nhật thành công',
+                'customer' => $customer
+            ], 200);
+        } catch (\Throwable $th) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'message' => $th->getMessage(),
+            ], 500);
         }
-
-        // Validate dữ liệu đầu vào
-        $validated = $request->validate([
-            'phoneNumber' => 'nullable|string|unique:customers,phoneNumber,' . $id,
-            'FullName' => 'nullable|string|max:255',
-            'otp' => 'nullable|string|max:6',
-            'point' => 'nullable|integer',
-            'id_rank' => 'nullable|integer',
-            'mail' => 'nullable|email|max:255',
-            'birth' => 'nullable|date',
-            'image' => 'nullable|string', // chỉ là đường dẫn
-            'password' => 'nullable|string|min:6|confirmed', // nếu cần cập nhật mật khẩu
-        ]);
-
-        $data = $validated;
-
-        // Xử lý ảnh base64 nếu có
-        if ($request->filled('image_base64')) {
-            $imageData = $request->image_base64;
-
-            if (preg_match('/^data:image\/(\w+);base64,/', $imageData, $type)) {
-                $image = substr($imageData, strpos($imageData, ',') + 1);
-                $image = base64_decode($image);
-                $extension = strtolower($type[1]);
-                $imageName = 'customer_' . time() . '.' . $extension;
-                Storage::disk('public')->put("customers/{$imageName}", $image);
-                $data['image'] = "customers/{$imageName}";
-            }
-        }
-
-        // Xử lý nếu gửi ảnh dạng file
-        if ($request->hasFile('image')) {
-            // Xóa ảnh cũ nếu có
-            if ($customer->image) {
-                Storage::disk('public')->delete($customer->image);
-            }
-
-            $imagePath = $request->file('image')->store('customers', 'public');
-            $data['image'] = $imagePath;
-        }
-
-        // Cập nhật mật khẩu nếu có
-        if ($request->has('password')) {
-            $data['password'] = Hash::make($request->password);
-        }
-
-        // Cập nhật khách hàng
-        $customer->update($data);
-
-        return response()->json([
-            'message' => 'Khách hàng đã được cập nhật thành công',
-            'customer' => $customer
-        ], 200);
     }
 
     public function delete($id)
