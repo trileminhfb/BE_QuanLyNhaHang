@@ -84,24 +84,42 @@ class AuthController extends Controller
     public function loginWithOtp(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string',
+            'email'    => 'required|email',
+            'password' => 'required|string',   // ở đây có thể là OTP
         ]);
 
-        $customer = Customer::where('mail', $request->email)->first();
+        // Lấy khách hàng + rank
+        $customer = Customer::with('rank')
+            ->where('mail', $request->email)
+            ->first();
 
+        // Kiểm tra tồn tại & password/OTP
         if (!$customer || !Hash::check($request->password, $customer->password)) {
-            return response()->json(['message' => 'Email hoặc mật khẩu không đúng'], 401);
+            return response()->json([
+                'message' => 'Email hoặc mật khẩu/OTP không đúng'
+            ], 401);
         }
 
-        // Tạo token sau khi đăng nhập thành công
+        // Tạo token
         $token = $customer->createToken('YourAppName')->plainTextToken;
 
         return response()->json([
-            'message' => 'Đăng nhập thành công',
-            'token' => $token,
-            'full_name' => $customer->FullName, // Thêm fullname vào response
-            'email' => $customer->mail // Có thể thêm nếu cần
+            'message'  => 'Đăng nhập thành công',
+            'token'    => $token,
+            'customer' => [
+                'id'          => $customer->id,
+                'phoneNumber' => $customer->phoneNumber,
+                'mail'        => $customer->mail,
+                'birth'       => $customer->birth,
+                'FullName'    => $customer->FullName,
+                'image'       => $customer->image,
+                'point'       => $customer->point,
+                'isActive'    => $customer->isActive,
+                'created_at'  => $customer->created_at,
+                'updated_at'  => $customer->updated_at,
+                // Trả về toàn bộ rank:
+                'rank'        => $customer->rank      // chứa mọi cột của bảng ranks
+            ]
         ], 200);
     }
 
