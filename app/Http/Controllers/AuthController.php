@@ -99,7 +99,9 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Đăng nhập thành công',
-            'token' => $token, // Trả về token
+            'token' => $token,
+            'full_name' => $customer->FullName, // Thêm fullname vào response
+            'email' => $customer->mail // Có thể thêm nếu cần
         ], 200);
     }
 
