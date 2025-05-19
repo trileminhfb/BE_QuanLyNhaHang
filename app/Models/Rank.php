@@ -23,4 +23,8 @@ class Rank extends Model
     {
         return ($value ? asset(Storage::url($value)) : null);
     }
+    public function rank()
+    {
+        return $this->belongsTo(Rank::class, 'rank_id'); // nếu rank_id là khóa ngoại
+    }
 }
