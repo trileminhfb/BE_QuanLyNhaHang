@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    // Phương thức đăng ký (đã có trong code của bạn)
     public function register(Request $request)
     {
         $validated = Validator::make($request->all(), [
@@ -27,7 +26,6 @@ class AuthController extends Controller
             return response()->json(['errors' => $validated->errors()], 422);
         }
 
-        // Tạo OTP và lưu vào cơ sở dữ liệu
         $otp = rand(100000, 999999);
 
         $customer = Customer::create([
@@ -40,10 +38,9 @@ class AuthController extends Controller
             'otp' => $otp,
             'point' => 0,
             'id_rank' => 1,
-            'isActive' => false, // Chưa kích hoạt
+            'isActive' => false,
         ]);
 
-        // Gửi OTP qua email
         Mail::to($request->email)->send(new OtpMail($otp, $request->FullName));
 
         return response()->json([
@@ -52,7 +49,6 @@ class AuthController extends Controller
         ], 201);
     }
 
-    // Phương thức xác thực OTP (đã có trong code của bạn)
     public function verifyOtp(Request $request)
     {
         $request->validate([
@@ -66,12 +62,10 @@ class AuthController extends Controller
             return response()->json(['message' => 'OTP không hợp lệ'], 401);
         }
 
-        // Kích hoạt tài khoản
         $customer->isActive = true;
-        $customer->otp = null;  // Xóa OTP sau khi xác thực
+        $customer->otp = null;
         $customer->save();
 
-        // Tạo token sau khi xác thực
         $token = $customer->createToken('YourAppName')->plainTextToken;
 
         return response()->json([
@@ -80,27 +74,23 @@ class AuthController extends Controller
         ], 200);
     }
 
-    // Phương thức đăng nhập bằng email và password
     public function loginWithOtp(Request $request)
     {
         $request->validate([
             'email'    => 'required|email',
-            'password' => 'required|string',   // ở đây có thể là OTP
+            'password' => 'required|string',
         ]);
 
-        // Lấy khách hàng + rank
         $customer = Customer::with('rank')
             ->where('mail', $request->email)
             ->first();
 
-        // Kiểm tra tồn tại & password/OTP
         if (!$customer || !Hash::check($request->password, $customer->password)) {
             return response()->json([
                 'message' => 'Email hoặc mật khẩu/OTP không đúng'
             ], 401);
         }
 
-        // Tạo token
         $token = $customer->createToken('YourAppName')->plainTextToken;
 
         return response()->json([
@@ -117,8 +107,7 @@ class AuthController extends Controller
                 'isActive'    => $customer->isActive,
                 'created_at'  => $customer->created_at,
                 'updated_at'  => $customer->updated_at,
-                // Trả về toàn bộ rank:
-                'rank'        => $customer->rank      // chứa mọi cột của bảng ranks
+                'rank'        => $customer->rank
             ]
         ], 200);
     }
@@ -129,21 +118,16 @@ class AuthController extends Controller
             'email' => 'required|email',
         ]);
 
-        // Tìm khách hàng theo email
         $customer = Customer::where('mail', $request->email)->first();
 
         if (!$customer) {
             return response()->json(['message' => 'Email không tồn tại'], 404);
         }
 
-        // Tạo OTP mới
         $otp = rand(100000, 999999);
-
-        // Cập nhật OTP vào cơ sở dữ liệu
         $customer->otp = $otp;
         $customer->save();
 
-        // Gửi OTP qua email
         Mail::to($request->email)->send(new OtpMail($otp, $customer->FullName));
 
         return response()->json([
@@ -157,29 +141,36 @@ class AuthController extends Controller
         $request->validate([
             'email' => 'required|email',
             'otp' => 'required|string',
-            'password' => 'required|string|min:6|confirmed', // Xác nhận mật khẩu
+            'old_password' => 'required|string',
+            'password' => 'required|string|min:6|confirmed',
         ]);
 
-        // Tìm khách hàng theo email
         $customer = Customer::where('mail', $request->email)->first();
 
-        if (!$customer || $customer->otp !== $request->otp) {
-            return response()->json(['message' => 'OTP không hợp lệ hoặc email không đúng'], 401);
+        if (!$customer) {
+            return response()->json(['message' => 'Email không tồn tại'], 404);
         }
 
-        // Cập nhật mật khẩu mới
+        if ($customer->otp !== $request->otp) {
+            return response()->json(['message' => 'OTP không hợp lệ'], 401);
+        }
+
+        if (!Hash::check($request->old_password, $customer->password)) {
+            return response()->json(['message' => 'Mật khẩu cũ không đúng'], 403);
+        }
+
         $customer->password = Hash::make($request->password);
-        $customer->otp = null;  // Xóa OTP sau khi đổi mật khẩu
+        $customer->otp = null;
         $customer->save();
 
         return response()->json([
             'message' => 'Mật khẩu đã được thay đổi thành công',
-        ]);
+        ], 200);
     }
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete(); // hoặc auth()->logout();
+        $request->user()->currentAccessToken()->delete();
 
         return response()->json([
             'message' => 'Đăng xuất thành công'
