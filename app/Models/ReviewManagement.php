@@ -15,4 +15,9 @@ class ReviewManagement extends Model
         'comment',
     ];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'id_user');
+    }
 }
+

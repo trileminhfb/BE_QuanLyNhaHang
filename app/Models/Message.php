@@ -2,28 +2,25 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
-class Booking extends Model
+class Message extends Model
 {
     use HasFactory;
-
-    protected $table = 'bookings';
-
     protected $fillable = [
-        'timeBooking',
-        'status',
         'id_customer',
+        'id_user',
+        'content',
+        'sender',
     ];
 
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'id_customer');
     }
-
-    public function bookingFoods()
+    public function user()
     {
-        return $this->hasMany(booking_food::class, 'id_booking');
+        return $this->belongsTo(User::class, 'id_user');
     }
 }

@@ -19,12 +19,15 @@ class IngredientController extends Controller
         ]);
     }
 
-    // Thêm mới nguyên liệu
     public function store(IngredientRequest $request)
     {
+        if ($request->hasFile('image')) {
+            $imageName = $request->file('image')->store('ingredients', 'public');
+        }
+
         $ingredient = Ingredient::create([
             'name_ingredient' => $request->name_ingredient,
-            'image'           => $request->image,
+            'image'           => $imageName ?? null,
             'unit'            => $request->unit,
         ]);
 
@@ -35,8 +38,7 @@ class IngredientController extends Controller
         ]);
     }
 
-    // Cập nhật nguyên liệu theo ID
-    public function update(IngredientRequest $request, $id)
+    public function update(Request $request, $id)
     {
         $ingredient = Ingredient::find($id);
 
@@ -47,9 +49,14 @@ class IngredientController extends Controller
             ]);
         }
 
+        $imagePath = $ingredient->image;
+
+        if ($request->originImg != $imagePath) {
+            $imagePath = $request->file('image')->store('ingredients', 'public');
+        }
         $ingredient->update([
             'name_ingredient' => $request->name_ingredient,
-            'image'           => $request->image,
+            'image'           => trim($imagePath, 'storage/'[1]),
             'unit'            => $request->unit,
         ]);
 

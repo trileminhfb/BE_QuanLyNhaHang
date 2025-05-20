@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\RankRequest;
 use App\Models\Rank;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class RankController extends Controller
 {
@@ -13,22 +14,27 @@ class RankController extends Controller
         return response()->json(Rank::all(), 200);
     }
 
-    public function store(RankRequest $request)
+    public function store(Request $request)
     {
-        $rank = Rank::create($request->validated());
+        $request->validate([
+            'nameRank' => 'required|string|max:255',
+            'necessaryPoint' => 'required|integer|min:0',
+            'saleRank' => 'required|integer|min:0|max:100',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
 
-        // Set the image based on the nameRank
-        if ($rank->nameRank == 'Bạc') {
-            $rank->image = 'rank_bac.png';
-        } elseif ($rank->nameRank == 'Đồng') {
-            $rank->image = 'rank_dong.png';
-        } elseif ($rank->nameRank == 'Kim Cương') {
-            $rank->image = 'rank_kimcuong.png';
-        } elseif ($rank->nameRank == 'Vàng') {
-            $rank->image = 'rank_vang.png';
+        // Xử lý hình ảnh
+        $imageName = null;
+        if ($request->hasFile('image')) {
+            $imageName = $request->file('image')->store('ranks', 'public');
         }
 
-        $rank->save();
+        $rank = Rank::create([
+            'nameRank' => $request->nameRank,
+            'necessaryPoint' => $request->necessaryPoint,
+            'saleRank' => $request->saleRank,
+            'image' => $imageName,
+        ]);
 
         return response()->json([
             'message' => 'Rank created successfully',
@@ -48,34 +54,39 @@ class RankController extends Controller
         return response()->json($rank, 200);
     }
 
-    public function update(RankRequest $request, $id)
-{
-    $rank = Rank::find($id);
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'nameRank' => 'required|string|max:255',
+            'necessaryPoint' => 'required|integer|min:0',
+            'saleRank' => 'required|integer|min:0|max:100',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+        $rank = Rank::find($id);
 
-    if (!$rank) {
-        return response()->json(['message' => 'Rank not found'], 404);
+        if (!$rank) {
+            return response()->json(['message' => 'Rank not found'], 404);
+        }
+
+        // Xử lý ảnh
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('ranks', 'public');
+        } else {
+            $imagePath = explode('storage/', $rank->image)[1]; // Giữ ảnh cũ nếu không upload ảnh mới
+        }
+
+        $rank->update([
+            'nameRank' => $request->nameRank,
+            'necessaryPoint' => $request->necessaryPoint,
+            'saleRank' => $request->saleRank,
+            'image' => $imagePath,
+        ]);
+
+        return response()->json([
+            'message' => 'Rank updated successfully',
+            'data' => $rank
+        ], 200);
     }
-
-    $rank->update($request->validated());
-
-    // Set the image based on the nameRank
-    if ($rank->nameRank == 'Bạc') {
-        $rank->image = 'rank_bac.png';
-    } elseif ($rank->nameRank == 'Đồng') {
-        $rank->image = 'rank_dong.png';
-    } elseif ($rank->nameRank == 'Kim Cương') {
-        $rank->image = 'rank_kimcuong.png';
-    } elseif ($rank->nameRank == 'Vàng') {
-        $rank->image = 'rank_vang.png';
-    }
-
-    $rank->save();
-
-    return response()->json([
-        'message' => 'Rank updated successfully',
-        'data' => $rank
-    ], 200);
-}
 
     public function destroy($id)
     {
@@ -83,6 +94,11 @@ class RankController extends Controller
 
         if (!$rank) {
             return response()->json(['message' => 'Rank not found'], 404);
+        }
+
+        // Xóa hình ảnh nếu có
+        if ($rank->image && Storage::exists('public/' . $rank->image)) {
+            Storage::delete('public/' . $rank->image);
         }
 
         $rank->delete();

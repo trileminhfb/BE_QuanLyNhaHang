@@ -12,6 +12,8 @@
         "vite-plugin-full-reload": "^1.2.0"
     },
     "dependencies": {
-        "openai": "^4.96.2"
+        "laravel-echo": "^2.1.0",
+        "openai": "^4.96.2",
+        "pusher-js": "^8.4.0"
     }
 }

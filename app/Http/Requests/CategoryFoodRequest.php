@@ -14,21 +14,21 @@ class CategoryFoodRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id_category' => 'required|integer|min:1',
-            'id_food'     => 'required|integer|min:1',
+            'id_category' => ['required', 'integer', 'min:1'],
+            'id_food'     => ['required', 'integer', 'min:1'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'id_category.required' => 'ID danh mục là bắt buộc.',
+            'id_category.required' => 'Vui lòng nhập ID danh mục.',
             'id_category.integer'  => 'ID danh mục phải là số nguyên.',
-            'id_category.min'      => 'ID danh mục không hợp lệ.',
+            'id_category.min'      => 'ID danh mục phải lớn hơn 0.',
 
-            'id_food.required'     => 'ID món ăn là bắt buộc.',
+            'id_food.required'     => 'Vui lòng nhập ID món ăn.',
             'id_food.integer'      => 'ID món ăn phải là số nguyên.',
-            'id_food.min'          => 'ID món ăn không hợp lệ.',
+            'id_food.min'          => 'ID món ăn phải lớn hơn 0.',
         ];
     }
 }

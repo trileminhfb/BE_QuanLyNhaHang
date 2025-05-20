@@ -5,68 +5,39 @@ namespace App\Http\Controllers;
 use App\Http\Requests\InvoiceRequest;
 use Illuminate\Http\Request;
 use App\Models\Invoice;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\FacadesDB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Models\Cart;
 use App\Models\Food;
 use App\Models\InvoiceFood;
 use App\Models\Sale;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use PayOS\PayOS;
 
 class InvoiceController extends Controller
 {
     public function index()
     {
         try {
-            $invoices = DB::table('invoices')
-                ->leftJoin('tables', 'invoices.id_table', '=', 'tables.id')
-                ->leftJoin('users', 'invoices.id_user', '=', 'users.id')
-                ->leftJoin('customers', 'invoices.id_customer', '=', 'customers.id')
-                ->leftJoin('sales', 'invoices.id_sale', '=', 'sales.id')
-                ->leftJoin('invoice_food', 'invoices.id', '=', 'invoice_food.id_invoice')
-                ->leftJoin('foods', 'invoice_food.id_food', '=', 'foods.id')
-                ->select(
-                    'invoices.id',
-                    'invoices.id_table',
-                    'invoices.timeEnd',
-                    'invoices.total',
-                    'invoices.id_user',
-                    'invoices.id_customer',
-                    'invoices.id_sale',
-                    'tables.number as table_number',
-                    'users.name as user_name',
-                    'users.role',
-                    'users.phone_number',
-                    'users.email',
-                    'customers.FullName as customer_name',
-                    'sales.*',
-                    'invoice_food.id_food',
-                    'invoice_food.quantity',
-                    'foods.name as food_name'
-                )
-                ->get();
+            $invoices = Invoice::with([
+                'user',
+                'customer',
+                'table',
+                'sale',
+                'invoiceFoods.food'
+            ])->get();
 
-            $groupedInvoices = $invoices->groupBy('id');
-            $result = $groupedInvoices->map(function ($invoiceGroup) {
-                $invoice = $invoiceGroup->first();
-                $foods = $invoiceGroup->map(function ($item) {
-                    return [
-                        'food_id' => $item->id_food,
-                        'food_name' => $item->food_name,
-                        'quantity' => $item->quantity
-                    ];
-                });
-                $invoice->foods = $foods;
-                return $invoice;
-            });
-
-            return response()->json($result);
+            return response()->json([
+                'data' => $invoices
+            ]);
         } catch (\Exception $e) {
             Log::error('Lỗi khi lấy danh sách hóa đơn: ' . $e->getMessage());
             return response()->json(['error' => 'Lỗi khi lấy danh sách hóa đơn'], 500);
         }
     }
-    // sau khi thanh toán phải chạy code tạo hoá đơn
+
     public function store(InvoiceRequest $request)
     {
         DB::beginTransaction();
@@ -81,23 +52,18 @@ class InvoiceController extends Controller
                 return response()->json(['message' => 'Không có món nào trong giỏ hàng'], 400);
             }
 
-           
+            // ======= Bỏ qua phần tính total từ giỏ hàng =======
+            // $total = 0;
+            // foreach ($carts as $cart) {
+            //     $food = Food::find($cart->id_food);
+            //     if (!$food) {
+            //         return response()->json(['message' => "Món ăn với ID {$cart->id_food} không tồn tại."], 400);
+            //     }
+            //     $total += $cart['quantity'] * $food->cost;
+            // }
 
-            $total = 0;
-
-            foreach ($carts as $cart) {
-                // $food = Food::where('id', $cart->id_food)->first(); // ❌
-                $food = Food::find($cart->id_food); // ✅
-
-                if (!$food) {
-                    return response()->json(['message' => "Món ăn với ID {$cart->id_food} không tồn tại."], 400);
-                }
-
-                // $itemTotal = $cart->quantity * $food->cost;
-                // $total += $itemTotal;
-                $total += $cart['quantity'] * $food->cost;
-            }
-          
+            // Dùng total từ request gửi lên
+            $total = $request->input('total', 0);
 
             $idSale = null;
             $discountPercent = 0;
@@ -118,6 +84,7 @@ class InvoiceController extends Controller
                 'id_user' => $role === 'staff' ? $user->id : null,
                 'id_customer' => $role === 'customer' ? $user->id : null,
                 'id_sale' => $idSale,
+                'status' => 1,
             ]);
 
             foreach ($carts as $cart) {
@@ -169,6 +136,10 @@ class InvoiceController extends Controller
             'total' => 'required|numeric',
             'timeEnd' => 'required|date',
             'id_customer' => 'required|exists:customers,id',
+            'status' => 'nullable|in:1,2,3',
+            'foods' => 'nullable|array',
+            'foods.*.id' => 'required|exists:foods,id',
+            'foods.*.quantity' => 'required|integer|min:0',
         ]);
 
         try {
@@ -178,7 +149,32 @@ class InvoiceController extends Controller
                 return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
             }
 
+            // Cập nhật thông tin chính của hóa đơn
             $invoice->update($validated);
+
+            // Cập nhật danh sách món ăn nếu có
+            if ($request->has('foods')) {
+                $foods = $request->input('foods');
+
+                foreach ($foods as $item) {
+                    if ($item['quantity'] === 0) {
+                        DB::table('invoice_food')
+                            ->where('id_invoice', $id)
+                            ->where('id_food', $item['id'])
+                            ->delete();
+                    } else {
+                        DB::table('invoice_food')->updateOrInsert(
+                            [
+                                'id_invoice' => $id,
+                                'id_food' => $item['id'],
+                            ],
+                            [
+                                'quantity' => $item['quantity'],
+                            ]
+                        );
+                    }
+                }
+            }
 
             return response()->json([
                 'message' => 'Hóa đơn được cập nhật thành công',
@@ -189,6 +185,7 @@ class InvoiceController extends Controller
             return response()->json(['error' => 'Lỗi cập nhật hóa đơn'], 500);
         }
     }
+
 
     public function delete($id)
     {
@@ -205,4 +202,163 @@ class InvoiceController extends Controller
             return response()->json(['error' => 'Lỗi xóa hóa đơn'], 500);
         }
     }
+
+    // 1. Hàm để tạo thanh toán chuyển khoản và lấy QR code
+    public function payByTransfer($id)
+    {
+        $invoice = Invoice::find($id);
+
+        if (!$invoice) {
+            return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
+        }
+
+        if ($invoice->status == 2) {
+            return response()->json(['message' => 'Hóa đơn đã được thanh toán'], 400);
+        }
+
+        $amount = $invoice->total;
+
+        // Gọi PayOS để tạo link thanh toán
+        $paymentUrl = $this->createPayOSPayment($invoice->id);
+
+        return response()->json([
+            'message' => 'Tạo thanh toán thành công',
+            'payment_url' => $paymentUrl,
+            'amount' => $amount
+        ]);
+    }
+    // 2. Hàm gọi PayOS API để tạo link thanh toán
+    public function createPayOSPayment($invoiceId)
+    {
+        $invoice = Invoice::with('foods')->findOrFail($invoiceId);
+        $foods = $invoice->foods;
+
+        if (!$invoice) {
+            return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
+        }
+
+        $clientId = env('PAYOS_CLIENT_ID');
+        $apiKey = env('PAYOS_API_KEY');
+        $checksumKey = env('PAYOS_CHECKSUM_KEY');
+        $payOS = new PayOS(
+            clientId: $clientId,
+            apiKey: $apiKey,
+            checksumKey: $checksumKey
+        );
+        $amount = $invoice->total;
+
+        $items = $foods->map(function ($food) {
+            return [
+                'name' => $food->name,
+                'quantity' => $food->pivot->quantity,
+                'price' => $food->cost,
+            ];
+        })->toArray();
+
+        $body = [
+            'orderCode' => (int) (time() . rand(10, 99)),
+            'amount' => (int) 2000,
+            'description' => 'Thanh toán hóa đơn #' . $invoiceId,
+            "items" => $items,
+            'returnUrl' => 'http://localhost:5173/?status=success',
+            'cancelUrl' => 'http://localhost:5173/?status=error',
+        ];
+
+        $response = $payOS->createPaymentLink($body);
+
+        return $response['checkoutUrl'];
+    }
+    // 3. Webhook xử lý khi PayOS trả lại thông tin thanh toán thành công
+    public function handlePayOSCallback(Request $request)
+    {
+        $orderCode = $request->input('orderCode');
+        $status = $request->input('status');
+
+        if (!$orderCode || !$status) {
+            return response()->json(['message' => 'Thiếu thông tin thanh toán'], 400);
+        }
+
+        $invoice = Invoice::find($orderCode);
+        if (!$invoice) {
+            return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
+        }
+
+        if ($invoice->status == 1) {
+            return response()->json(['message' => 'Hóa đơn đã được thanh toán trước đó'], 200);
+        }
+
+        if (in_array($status, ['PAID', 'SUCCESS'])) {
+            // Cập nhật trạng thái thanh toán
+            $invoice->status = 1;
+            $invoice->save();
+
+            // Xóa toàn bộ giỏ hàng của user
+            Cart::where('user_id', $invoice->user_id)->delete();
+
+            return response()->json(['message' => 'Thanh toán thành công, đã xóa giỏ hàng'], 200);
+        }
+
+        return response()->json(['message' => 'Thanh toán không thành công'], 400);
+    }
+
+    public function handlePaymentResult(Request $request)
+    {
+        $orderCode = $request->input('orderCode');
+        $status = $request->input('status');
+
+        if (!$orderCode || !$status) {
+            return response()->json(['message' => 'Thiếu thông tin thanh toán'], 400);
+        }
+
+        $invoice = Invoice::find($orderCode);
+        if (!$invoice) {
+            return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
+        }
+
+        if ($invoice->status == 1) {
+            return response()->json(['message' => 'Hóa đơn đã được thanh toán trước đó'], 200);
+        }
+
+        if ($status === 'PAID' || $status === 'SUCCESS') {
+            $invoice->status = 1;
+            $invoice->save();
+
+ // Xóa giỏ hàng liên quan
+            Cart::where('invoice_id', $invoice->id)->delete();
+
+            return response()->json(['message' => 'Thanh toán thành công, giỏ hàng đã được xóa'], 200);
+        }
+
+        return response()->json(['message' => 'Thanh toán không thành công'], 400);
+    }
+
+    public function clearCartByInvoice($invoiceId)
+    {
+        $invoice = Invoice::with('cartItems')->find($invoiceId);
+
+        if (!$invoice) {
+            return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
+        }
+
+        // Giả sử mỗi hóa đơn liên quan đến các cart item trong bảng cart
+        // Bạn cần điều chỉnh query phù hợp với quan hệ thực tế giữa invoice và cart
+
+        Cart::where('invoice_id', $invoiceId)->delete();
+
+        return response()->json(['message' => 'Đã xóa giỏ hàng liên quan đến hóa đơn']);
+    }
+
+    public function destroy($id)
+{
+    $cartItem = Cart::find($id);
+    if (!$cartItem) {
+        return response()->json(['message' => 'Không tìm thấy món trong giỏ hàng'], 404);
+    }
+
+    $cartItem->delete();
+
+    return response()->json(['message' => 'Xóa món khỏi giỏ hàng thành công']);
+}
+
+
 }

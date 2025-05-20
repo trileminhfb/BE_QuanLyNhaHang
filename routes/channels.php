@@ -16,3 +16,7 @@ use Illuminate\Support\Facades\Broadcast;
 Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
+
+Broadcast::channel('chat.{customerId}.{userId}', function ($user, $customerId, $userId) {
+    return true; // hoặc xác thực xem user có quyền truy cập channel không
+});
