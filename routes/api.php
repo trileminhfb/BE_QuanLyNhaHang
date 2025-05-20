@@ -260,7 +260,7 @@ Route::prefix('client')->group(function () {
         });
 
         Route::prefix('sales')->group(function () {
-            Route::get('/', [SaleController::class, 'index']);
+            Route::get('/', [SaleController::class, 'activeSales']);
         });
 
         Route::prefix('rates')->group(function () {
@@ -269,13 +269,12 @@ Route::prefix('client')->group(function () {
             Route::get('/show/{id}', [RateController::class, 'show']);
             Route::put('/update/{id}', [RateController::class, 'update']);
             Route::delete('/delete/{id}', [RateController::class, 'destroy']);
-
         });
         
         Route::prefix('invoices')->group(function () {
             Route::get('/', [InvoiceController::class, 'index']);
             Route::get('/payByTransfer/{id}', [InvoiceController::class, 'payByTransfer']);
-                Route::post('/callback', [InvoiceController::class, 'handlePayOSCallback']);
+            Route::post('/callback', [InvoiceController::class, 'handlePayOSCallback']);
         });
 
         Route::prefix('ranks')->group(function () {

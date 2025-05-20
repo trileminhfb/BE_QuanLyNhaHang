@@ -17,7 +17,7 @@ class CustomerController extends Controller
     public function index()
     {
         try {
-            $customers = Customer::with(['rank:id,nameRank,necessaryPoint,saleRank'])->get();
+            $customers = Customer::with('rank')->get();
 
             return response()->json([
                 'customers' => $customers
@@ -79,7 +79,8 @@ class CustomerController extends Controller
 
     public function show($id)
     {
-        $customer = Customer::find($id);
+
+        $customer = Customer::with('rank')->find($id);
 
         if (!$customer) {
             return response()->json([
