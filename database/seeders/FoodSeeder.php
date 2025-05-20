@@ -94,7 +94,7 @@ class FoodSeeder extends Seeder
                 'image' => 'https://images.pexels.com/photos/1267320/pexels-photo-1267320.jpeg',
                 'bestSeller' => 0,
                 'cost' => 62000,
-                'detail' => 'Sốt bơ tỏi beo béo, thơm lừng.',
+                'detail' => 'Sốt bơ tỏi beo béo, thơm lừng , đậm từng hương vị',
                 'status' => 1,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),

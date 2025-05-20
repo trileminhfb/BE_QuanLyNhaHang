@@ -99,9 +99,16 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Đăng nhập thành công',
-            'token' => $token, // Trả về token
+            'token' => $token,
+            'customer' => [
+                'id' => $customer->id,
+                'FullName' => $customer->FullName,
+                'email' => $customer->mail,
+                'phoneNumber' => $customer->phoneNumber,
+            ]
         ], 200);
     }
+
 
     public function forgotPassword(Request $request)
     {
