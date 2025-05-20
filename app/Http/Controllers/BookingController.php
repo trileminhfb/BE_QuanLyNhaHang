@@ -43,6 +43,7 @@ class BookingController extends Controller
                 'id_customer' => $customer->id,
                 'timeBooking' => $timeBooking,
                 'status' => $status,
+
             ]);
 
             return response()->json([
@@ -155,15 +156,80 @@ class BookingController extends Controller
 
         return response()->json(['message' => 'Booking deleted successfully'], 200);
     }
+    public function deleteFoodInBooking($bookingId, $foodId)
+    {
+        $booking = Booking::find($bookingId);
 
+        if (!$booking) {
+            return response()->json(['message' => 'Booking not found'], 404);
+        }
+
+        // Giả sử foods là JSON, giải mã thành mảng
+        $foods = is_string($booking->foods) ? json_decode($booking->foods, true) : $booking->foods;
+
+        if (!is_array($foods)) {
+            return response()->json(['message' => 'Invalid foods data'], 400);
+        }
+
+        // Lọc bỏ món ăn với id_foods tương ứng
+        $foods = array_filter($foods, fn ($food) => $food['id_foods'] != $foodId);
+
+        if (empty($foods)) {
+            $booking->delete(); // Xóa booking nếu không còn món
+            return response()->json(['message' => 'Booking deleted as no food left'], 200);
+        }
+
+        $booking->foods = array_values($foods);
+        $booking->save();
+
+        return response()->json(['message' => 'Food removed from booking'], 200);
+    }
+
+    public function deleteFood($bookingId, $foodId)
+    {
+        try {
+            $booking = Booking::find($bookingId);
+            if (!$booking) {
+                return response()->json(['message' => 'Booking not found'], 404);
+            }
+
+            $deleted = DB::table('booking_foods')
+                ->where('id_booking', $bookingId)
+                ->where('id_foods', $foodId)
+                ->delete();
+
+            if (!$deleted) {
+                return response()->json(['message' => 'Food not found in booking'], 404);
+            }
+
+            return response()->json(['message' => 'Food removed from booking successfully'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
     public function historyBooking(Request $request)
     {
         $bookings = Booking::where('id_customer', $request->user()->id)
             ->with(['bookingFoods.food'])
             ->get();
 
-        return response()->json([
-            'data' => $bookings
-        ]);
+        $data = $bookings->map(function ($booking) {
+            return [
+                'id' => $booking->id,
+                'timeBooking' => $booking->timeBooking,
+                'status' => $booking->status,
+                'foods' => $booking->bookingFoods->map(function ($bf) {
+                    return [
+                        'id_foods' => $bf->food->id,
+                        'name' => $bf->food->name,
+                        'quantity' => $bf->quantity,
+                    ];
+                }),
+            ];
+        });
+
+        return response()->json(['data' => $data]);
     }
+
+
 }

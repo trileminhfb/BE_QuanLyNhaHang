@@ -116,16 +116,40 @@ class CustomerController extends Controller
                 'mail' => 'nullable|email|max:255',
                 'birth' => 'nullable|date',
                 'image' => 'nullable|file|mimes:jpeg,png,jpg,gif|max:2048',
-                'password' => 'nullable|string|min:6|confirmed', // nếu cần cập nhật mật khẩu
+                'password' => 'nullable|string|min:6|confirmed',
+                'image_base64' => 'nullable|string', // Thêm validation cho image_base64    
             ]);
 
             $data = $validated;
 
-            if ($request->hasFile('image')) {
-                $imagePath = $request->file('image')->store('images', 'public'); // Lưu file vào thư mục images trong storage/public
-                $data['image'] = $imagePath; // Cập nhật đường dẫn hình ảnh vào mảng dữ liệu
+            // Xử lý ảnh base64 nếu có
+            if ($request->filled('image_base64')) {
+                $imageData = $request->image_base64;
+                if (preg_match('/^data:image\/(\w+);base64,/', $imageData, $type)) {
+                    $image = substr($imageData, strpos($imageData, ',') + 1);
+                    $image = base64_decode($image);
+                    $extension = strtolower($type[1]);
+                    $imageName = 'customer_' . time() . '.' . $extension;
+                    Storage::disk('public')->put("customers/{$imageName}", $image);
+                    $data['image'] = "customers/{$imageName}";
+
+                    // Xóa ảnh cũ nếu có
+                    if ($customer->image) {
+                        Storage::disk('public')->delete($customer->image);
+                    }
+                }
+            } elseif ($request->hasFile('image')) {
+                // Xử lý ảnh upload qua file
+                $imagePath = $request->file('image')->store('customers', 'public');
+                $data['image'] = $imagePath;
+
+                // Xóa ảnh cũ nếu có
+                if ($customer->image) {
+                    Storage::disk('public')->delete($customer->image);
+                }
             } else {
-                $data['image'] = explode('storage/', $customer->image)[1];
+                // Giữ ảnh cũ nếu không có ảnh mới
+                $data['image'] = $customer->image;
             }
 
             // Cập nhật mật khẩu nếu có
@@ -143,9 +167,7 @@ class CustomerController extends Controller
                 'customer' => $customer
             ], 200);
         } catch (\Throwable $th) {
-
             DB::rollBack();
-
             return response()->json([
                 'message' => $th->getMessage(),
             ], 500);

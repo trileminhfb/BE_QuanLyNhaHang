@@ -69,6 +69,11 @@ class FoodController extends Controller
 
         // Tách category_ids ra vì nó không phải cột trong bảng foods
         $categoryIds = $data['category_ids'] ?? [];
+        if (is_string($categoryIds)) {
+            $categoryIds = explode(',', $categoryIds);
+        }
+        $categoryIds = array_map('intval', $categoryIds);
+
         unset($data['category_ids']); // Xóa category_ids khỏi mảng dữ liệu
 
         // Kiểm tra xem món ăn đã tồn tại chưa
@@ -133,11 +138,16 @@ class FoodController extends Controller
 
             // Tách category_ids ra vì nó không phải cột trong bảng foods
             $categoryIds = $data['category_ids'] ?? [];
+            if (is_string($categoryIds)) {
+                $categoryIds = explode(',', $categoryIds);
+            }
+            $categoryIds = array_map('intval', $categoryIds);
+
             unset($data['category_ids']); // Xóa category_ids khỏi mảng dữ liệu
 
             // Cập nhật food
             try {
-                $food->update($data); // Cập nhật bản ghi food
+                $food->update($data); // Cập nhật bản ghi foo   d
             } catch (\Exception $e) {
                 return response()->json([
                     'message' => 'Cập nhật không thành công',

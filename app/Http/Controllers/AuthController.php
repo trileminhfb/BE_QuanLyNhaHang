@@ -94,6 +94,7 @@ class AuthController extends Controller
         $token = $customer->createToken('YourAppName')->plainTextToken;
 
         return response()->json([
+
             'message'  => 'Đăng nhập thành công',
             'token'    => $token,
             'customer' => [
@@ -111,6 +112,7 @@ class AuthController extends Controller
             ]
         ], 200);
     }
+
 
     public function forgotPassword(Request $request)
     {
