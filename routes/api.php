@@ -172,7 +172,7 @@ Route::prefix('admin')->group(function () {
     });
 
     Route::prefix('sales')->group(function () {
-        Route::get('/', [SaleController::class, 'index']);
+        Route::get('/', [SaleController::class, 'activeSales']);
         Route::post('/create', [SaleController::class, 'store']);
         Route::get('/{id}', [SaleController::class, 'show']);
         Route::put('/{id}', [SaleController::class, 'update']);
@@ -272,6 +272,7 @@ Route::prefix('client')->group(function () {
 
         Route::prefix('sales')->group(function () {
             Route::get('/', [SaleController::class, 'index']);
+            Route::get('/sales/active', [SaleController::class, 'activeSales']);
         });
 
         Route::prefix('rates')->group(function () {
@@ -302,6 +303,8 @@ Route::prefix('client')->group(function () {
 
     Route::prefix('foods')->group(function () {
         Route::get('/', [FoodController::class, 'index']);
+
+        Route::get('/foods/active', [FoodController::class, 'activeSales']);
     });
 
     Route::prefix('tables')->group(function () {

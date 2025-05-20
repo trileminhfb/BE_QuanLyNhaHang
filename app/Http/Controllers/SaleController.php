@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Sale;
-use App\Http\Requests\SaleRequest;
 use Illuminate\Http\Request;
+use App\Http\Requests\SaleRequest;
+use Illuminate\Support\Carbon;
 
 class SaleController extends Controller
 {
-     // Lấy danh sách tất cả các chương trình khuyến mãi
-     public function index()
+    // Lấy danh sách tất cả các chương trình khuyến mãi
+    public function index()
     {
         return response()->json([
             'status' => 1,
@@ -17,9 +18,27 @@ class SaleController extends Controller
         ]);
     }
 
+    // Lấy danh sách các chương trình khuyến mãi đang hoạt động (status = 1)
+    public function activeSales()
+    {
+        $activeSales = Sale::where('status', 1)->get();
+
+        return response()->json([
+            'status' => 1,
+            'data' => $activeSales
+        ]);
+    }
+
     // Tạo mới một chương trình khuyến mãi
     public function store(Request $request)
     {
+        // Kiểm tra thời gian
+        if (strtotime($request->startTime) >= strtotime($request->endTime)) {
+            return response()->json([
+                'message' => 'Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc.'
+            ], 400);
+        }
+
         $sale = Sale::create([
             'nameSale'  => $request->nameSale,
             'status'    => $request->status ?? 1,
@@ -59,6 +78,13 @@ class SaleController extends Controller
             return response()->json(['message' => 'Sale not found'], 404);
         }
 
+        // Kiểm tra thời gian
+        if (strtotime($request->startTime) >= strtotime($request->endTime)) {
+            return response()->json([
+                'message' => 'Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc.'
+            ], 400);
+        }
+
         $sale->update([
             'nameSale'  => $request->nameSale,
             'status'    => $request->status ?? 1,
@@ -77,7 +103,6 @@ class SaleController extends Controller
     public function destroy($id)
     {
         $sale = Sale::find($id);
-
         if (!$sale) {
             return response()->json(['message' => 'Sale not found'], 404);
         }
@@ -86,5 +111,4 @@ class SaleController extends Controller
 
         return response()->json(['message' => 'Sale deleted successfully'], 200);
     }
-
 }
