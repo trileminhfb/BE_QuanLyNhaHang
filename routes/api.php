@@ -315,7 +315,7 @@ Route::prefix('client')->group(function () {
     Route::prefix('foods')->group(function () {
         Route::get('/', [FoodController::class, 'index']);
 
-        Route::get('/foods/active', [FoodController::class, 'activeSales']);
+        Route::get('/foods/active', [FoodController::class, 'activeFood']);
     });
 
     Route::prefix('tables')->group(function () {

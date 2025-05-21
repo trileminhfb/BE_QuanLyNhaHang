@@ -116,8 +116,7 @@ class FoodController extends Controller
         ], 201);
     }
 
-
-            public function activeFood()
+    public function activeSales()
     {
         $activeSales = Food::where('status', 1)->get();
 
