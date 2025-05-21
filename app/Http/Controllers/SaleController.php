@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Sale;
 use Illuminate\Http\Request;
+use App\Http\Requests\SaleRequest;
 use Illuminate\Support\Carbon;
 
 class SaleController extends Controller
@@ -102,7 +103,6 @@ class SaleController extends Controller
     public function destroy($id)
     {
         $sale = Sale::find($id);
-
         if (!$sale) {
             return response()->json(['message' => 'Sale not found'], 404);
         }

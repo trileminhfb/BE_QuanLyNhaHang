@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class SaleReport extends Model
 {
-    protected $table = 'sale_report';
+    protected $table = 'sale_reports';  // Kiểm tra bảng có đúng không
 
     protected $fillable = [
         'report_type',

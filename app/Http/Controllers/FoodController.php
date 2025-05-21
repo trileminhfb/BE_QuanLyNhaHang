@@ -26,6 +26,7 @@ class FoodController extends Controller
                 'status' => $food->status,
                 'created_at' => $food->created_at,
                 'updated_at' => $food->updated_at,
+
                 'type' => $food->type ? ['id' => $food->type->id, 'name' => $food->type->name] : null,
                 'categories' => $food->categories->map(fn($c) => ['id' => $c->id, 'name' => $c->name])->all()
             ];
@@ -115,73 +116,67 @@ class FoodController extends Controller
         ], 201);
     }
 
-    public function update(Request $request, $id)
+    public function activeSales()
+    {
+        $activeSales = Food::where('status', 1)->get();
+
+        return response()->json([
+            'status' => 1,
+            'data' => $activeSales
+        ]);
+    }
+
+
+
+public function update(Request $request, $id)
     {
         // Tìm món ăn theo id
+        $food = Food::find($id);
+
+        if (!$food) {
+            return response()->json(['message' => 'Không tìm thấy'], 404);
+        }
+
+        // Lấy dữ liệu từ request
+        $data = $request->all();
+
+        // Kiểm tra nếu có file hình ảnh mới được upload
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('images', 'public'); // Lưu file vào thư mục storage/app/public/images
+            $data['image'] = $imagePath;
+        }
+
+        // Tách category_ids ra vì nó không phải là cột của bảng foods
+        $categoryIds = $data['category_ids'] ?? [];
+        unset($data['category_ids']);
+
+        // Cập nhật thông tin món ăn
         try {
-            DB::beginTransaction();
-            $food = Food::find($id);
-
-            if (!$food) {
-                return response()->json(['message' => 'Không tìm thấy'], 404);
-            }
-
-            $data = $request->all();
-
-            // Kiểm tra nếu có file hình ảnh mới được upload
-            if ($request->hasFile('image')) {
-                $imagePath = $request->file('image')->store('images', 'public'); // Lưu file vào thư mục images trong storage/public
-                $data['image'] = $imagePath; // Cập nhật đường dẫn hình ảnh vào mảng dữ liệu
-            } else {
-                $data['image'] = explode('storage/', $food->image)[1];
-            }
-
-            // Tách category_ids ra vì nó không phải cột trong bảng foods
-            $categoryIds = $data['category_ids'] ?? [];
-            if (is_string($categoryIds)) {
-                $categoryIds = explode(',', $categoryIds);
-            }
-            $categoryIds = array_map('intval', $categoryIds);
-
-            unset($data['category_ids']); // Xóa category_ids khỏi mảng dữ liệu
-
-            // Cập nhật food
-            try {
-                $food->update($data); // Cập nhật bản ghi foo   d
-            } catch (\Exception $e) {
-                return response()->json([
-                    'message' => 'Cập nhật không thành công',
-                    'error' => $e->getMessage()
-                ], 500);
-            }
-
-            // Gán category nếu có
-            if (!empty($categoryIds)) {
-                try {
-                    $food->categories()->sync($categoryIds); // Gán các category cho food
-                } catch (\Exception $e) {
-                    return response()->json([
-                        'message' => 'Lỗi khi gán category',
-                        'error' => $e->getMessage()
-                    ], 500);
-                }
-            }
-
-            // Trả về phản hồi JSON với dữ liệu food đã được cập nhật
-            DB::commit();
+            $food->update($data);
+        } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Cập nhật thành công',
-                'data' => $food->load('type:id,name', 'categories:id,name')
-            ], 200);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-
-            return response()->json([
-                'message' => 'Lỗi ',
-                'error' => $th->getMessage()
+                'message' => 'Cập nhật không thành công',
+                'error' => $e->getMessage()
             ], 500);
         }
+
+        // Gán lại các category cho food (xóa cũ, thêm mới)
+        try {
+            $food->categories()->sync($categoryIds);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Lỗi khi gán category',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+
+        // Trả về phản hồi thành công
+        return response()->json([
+            'message' => 'Cập nhật thành công',
+            'data' => $food->load('type:id,name', 'categories:id,name')
+        ], 200);
     }
+
 
 
     public function destroy($id)

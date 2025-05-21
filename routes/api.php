@@ -27,6 +27,8 @@ use App\Http\Controllers\TableController;
 use App\Http\Controllers\TypeController;
 use App\Models\Rate;
 use App\Http\Controllers\GeminiChatController;
+use App\Http\Controllers\SaleReportController;
+use App\Http\Controllers\SaleReportFoodController;
 use App\Http\Controllers\MessageController;
 use App\Models\Message;
 
@@ -177,7 +179,7 @@ Route::prefix('admin')->group(function () {
     });
 
     Route::prefix('sales')->group(function () {
-        Route::get('/', [SaleController::class, 'index']);
+        Route::get('/', [SaleController::class, 'activeSales']);
         Route::post('/create', [SaleController::class, 'store']);
         Route::get('/{id}', [SaleController::class, 'show']);
         Route::put('/{id}', [SaleController::class, 'update']);
@@ -215,6 +217,25 @@ Route::prefix('admin')->group(function () {
         Route::put('/{id}', [InvoiceFoodController::class, 'update']);
         Route::delete('/{id}', [InvoiceFoodController::class, 'destroy']);
     });
+
+    Route::prefix('sale-report-foods')->group(function () {
+        Route::get('/', [SaleReportFoodController::class, 'index']);
+        Route::post('/create', [SaleReportFoodController::class, 'store']);
+        Route::get('/{id}', [SaleReportFoodController::class, 'show']);
+        Route::put('/{id}', [SaleReportFoodController::class, 'update']);
+        Route::delete('/{id}', [SaleReportFoodController::class, 'destroy']);
+        Route::post('/generate', [SaleReportFoodController::class, 'generateReportFoods']);
+    });
+
+
+    Route::prefix('sale-reports')->group(function () {
+        Route::get('/', [SaleReportController::class, 'index']);
+        Route::post('/create', [SaleReportController::class, 'store']);
+        Route::get('/{id}', [SaleReportController::class, 'show']);
+        Route::put('/{id}', [SaleReportController::class, 'update']);
+        Route::delete('/{id}', [SaleReportController::class, 'destroy']);
+    });
+
 });
 
 Route::prefix('client')->group(function () {
@@ -293,6 +314,8 @@ Route::prefix('client')->group(function () {
 
     Route::prefix('foods')->group(function () {
         Route::get('/', [FoodController::class, 'index']);
+
+        Route::get('/foods/active', [FoodController::class, 'activeFood']);
     });
 
     Route::prefix('tables')->group(function () {

@@ -10,10 +10,39 @@ class CartController extends Controller
     // Lấy toàn bộ giỏ hàng
     public function index()
     {
-        return response()->json(Cart::all(), 200);
+        $carts = Cart::with('food')->get();
+
+        $formatted = $carts->map(function ($cart) {
+            return [
+                'id' => $cart->id,
+                'id_table' => $cart->id_table,
+                'quantity' => $cart->quantity,
+                'created_at' => $cart->created_at,
+                'updated_at' => $cart->updated_at,
+                'food' => $cart->food ? [
+                    'id' => $cart->food->id,
+                    'name' => $cart->food->name,
+                    'cost' => $cart->food->cost,
+                    'image' => $cart->food->image,
+                    'detail' => $cart->food->detail,
+                ] : null
+            ];
+        });
+        return response()->json($formatted);
     }
 
     // Tạo mới 1 giỏ hàng
+    // public function store(Request $request)
+    // {
+    //     $request->validate([
+    //         'id_food' => 'required|integer',
+    //         'id_table' => 'required|integer',
+    //         'quantity' => 'required|integer|min:1',
+    //     ]);
+
+    //     $cart = Cart::create($request->all());
+    //     return response()->json($cart, 201);
+    // }
     public function store(Request $request)
     {
         $request->validate([
@@ -22,10 +51,13 @@ class CartController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
+
+
         // Kiểm tra xem món ăn đã tồn tại trong cart của bàn chưa
         $existingCart = Cart::where('id_food', $request->id_food)
-                            ->where('id_table', $request->id_table)
-                            ->first();
+            ->where('id_table', $request->id_table)
+            ->first();
+
 
         if ($existingCart) {
             // Nếu đã có thì cập nhật số lượng (cộng thêm)
@@ -46,6 +78,7 @@ class CartController extends Controller
             ], 201);
         }
     }
+
 
     // Lấy thông tin chi tiết một cart
     public function show($id)

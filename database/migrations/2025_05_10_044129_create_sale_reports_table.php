@@ -6,29 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
-
-        Schema::create('sale_report', function (Blueprint $table) {
+        Schema::create('sale_reports', function (Blueprint $table) {
             $table->id();
             $table->string('report_type');
             $table->date('report_date');
-            $table->decimal('total_revenue', 15, 2);
-            $table->integer('total_orders');
+            $table->decimal('total_revenue', 15, 2)->default(0);
+            $table->integer('total_orders')->default(0);
             $table->string('top_food_name')->nullable();
             $table->integer('top_food_quantity')->default(0);
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('sale_reports');
     }
+
 };

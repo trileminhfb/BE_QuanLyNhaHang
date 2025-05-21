@@ -7,14 +7,17 @@ use Illuminate\Http\Request;
 
 class SaleReportController extends Controller
 {
+    // Lấy danh sách tất cả báo cáo doanh thu
     public function index()
     {
         return response()->json([
             'status' => 1,
-            'data' => SaleReport::with('foods')->get()
+            'message' => 'Lấy danh sách báo cáo thành công.',
+            'data' => SaleReport::all()
         ]);
     }
 
+    // Tạo mới báo cáo doanh thu
     public function store(Request $request)
     {
         $report = SaleReport::create([
@@ -27,31 +30,41 @@ class SaleReportController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'Sale report created successfully',
-            'data'    => $report
+            'status' => 1,
+            'message' => 'Tạo báo cáo doanh thu thành công.',
+            'data' => $report
         ], 201);
     }
 
+    // Hiển thị chi tiết báo cáo theo ID
     public function show($id)
     {
-        $report = SaleReport::with('foods')->find($id);
+        $report = SaleReport::find($id);
 
         if (!$report) {
-            return response()->json(['message' => 'Sale report not found'], 404);
+            return response()->json([
+                'status' => 0,
+                'message' => 'Không tìm thấy báo cáo doanh thu.'
+            ], 404);
         }
 
         return response()->json([
             'status' => 1,
-            'data'   => $report
+            'message' => 'Lấy thông tin báo cáo thành công.',
+            'data' => $report
         ]);
     }
 
+    // Cập nhật báo cáo doanh thu
     public function update(Request $request, $id)
     {
         $report = SaleReport::find($id);
 
         if (!$report) {
-            return response()->json(['message' => 'Sale report not found'], 404);
+            return response()->json([
+                'status' => 0,
+                'message' => 'Không tìm thấy báo cáo doanh thu.'
+            ], 404);
         }
 
         $report->update([
@@ -64,22 +77,29 @@ class SaleReportController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'Sale report updated successfully',
-            'data'    => $report
+            'status' => 1,
+            'message' => 'Cập nhật báo cáo doanh thu thành công.',
+            'data' => $report
         ]);
     }
 
+    // Xoá báo cáo doanh thu theo ID
     public function destroy($id)
     {
         $report = SaleReport::find($id);
 
         if (!$report) {
-            return response()->json(['message' => 'Sale report not found'], 404);
+            return response()->json([
+                'status' => 0,
+                'message' => 'Không tìm thấy báo cáo doanh thu.'
+            ], 404);
         }
 
         $report->delete();
 
-        return response()->json(['message' => 'Sale report deleted successfully']);
+        return response()->json([
+            'status' => 1,
+            'message' => 'Xoá báo cáo doanh thu thành công.'
+        ]);
     }
 }
-
