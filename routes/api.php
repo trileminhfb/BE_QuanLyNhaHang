@@ -262,7 +262,7 @@ Route::prefix('client')->group(function () {
             Route::get('/', [CustomerController::class, 'index']);
             Route::post('/create', [CustomerController::class, 'store']);
             Route::get('/{id}', [CustomerController::class, 'show']);
-            Route::put('/update/{id}', [CustomerController::class, 'update']);
+            Route::put('/{id}', [CustomerController::class, 'update']);
             Route::delete('/{id}', [CustomerController::class, 'delete']);
         });
 
