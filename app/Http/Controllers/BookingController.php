@@ -156,6 +156,7 @@ class BookingController extends Controller
 
         return response()->json(['message' => 'Booking deleted successfully'], 200);
     }
+
     public function deleteFoodInBooking($bookingId, $foodId)
     {
         $booking = Booking::find($bookingId);
@@ -172,7 +173,7 @@ class BookingController extends Controller
         }
 
         // Lọc bỏ món ăn với id_foods tương ứng
-        $foods = array_filter($foods, fn ($food) => $food['id_foods'] != $foodId);
+        $foods = array_filter($foods, fn($food) => $food['id_foods'] != $foodId);
 
         if (empty($foods)) {
             $booking->delete(); // Xóa booking nếu không còn món
@@ -207,6 +208,7 @@ class BookingController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
     public function historyBooking(Request $request)
     {
         $bookings = Booking::where('id_customer', $request->user()->id)
@@ -230,6 +232,30 @@ class BookingController extends Controller
 
         return response()->json(['data' => $data]);
     }
+    public function getByCustomer($customerId)
+    {
+        try {
+            $bookings = Booking::with([
+                'customer',
+                'bookingFoods.food'
+            ])
+                ->where('id_customer', $customerId)
+                ->get();
 
+            if ($bookings->isEmpty()) {
+                return response()->json([
+                    'message' => 'Không tìm thấy đặt bàn nào cho khách hàng này.'
+                ], 404);
+            }
+
+            return response()->json([
+                'data' => $bookings
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 
 }

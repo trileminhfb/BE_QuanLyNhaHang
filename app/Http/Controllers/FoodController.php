@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Food;
 use App\Models\Category;
+use App\Models\Invoice;
+use App\Models\InvoiceFood;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -35,7 +37,42 @@ class FoodController extends Controller
         return response()->json($formatted);
     }
 
+    public function getFood(Request $request)
+    {
+        $status = $request->query('status');
+        $bestSeller = $request->query('bestSeller');
 
+        $query = Food::with(['type:id,name', 'categories:id,name']);
+
+        if (!is_null($status)) {
+            $query->where('status', $status);
+        }
+
+        if (!is_null($bestSeller)) {
+            $query->where('bestSeller', $bestSeller);
+        }
+
+        $foods = $query->get();
+
+        $formatted = $foods->map(function ($food) {
+            return [
+                'id' => $food->id,
+                'name' => $food->name,
+                'id_type' => $food->id_type,
+                'image' => $food->image,
+                'bestSeller' => $food->bestSeller,
+                'cost' => $food->cost,
+                'detail' => $food->detail,
+                'status' => $food->status,
+                'created_at' => $food->created_at,
+                'updated_at' => $food->updated_at,
+                'type' => $food->type ? ['id' => $food->type->id, 'name' => $food->type->name] : null,
+                'categories' => $food->categories->map(fn($c) => ['id' => $c->id, 'name' => $c->name])->all()
+            ];
+        });
+
+        return response()->json($formatted);
+    }
     public function show($id)
     {
         $food = Food::with(['type', 'categories'])->find($id);
@@ -47,11 +84,8 @@ class FoodController extends Controller
         return response()->json($food);
     }
 
-
-
     public function store(Request $request)
     {
-        // Lấy dữ liệu từ request
         $data = $request->all();
 
         // Kiểm tra và xử lý hình ảnh nếu có
@@ -126,9 +160,7 @@ class FoodController extends Controller
         ]);
     }
 
-
-
-public function update(Request $request, $id)
+    public function update(Request $request, $id)
     {
         // Tìm món ăn theo id
         $food = Food::find($id);
@@ -176,8 +208,6 @@ public function update(Request $request, $id)
             'data' => $food->load('type:id,name', 'categories:id,name')
         ], 200);
     }
-
-
 
     public function destroy($id)
     {

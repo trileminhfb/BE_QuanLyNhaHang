@@ -255,6 +255,7 @@ Route::prefix('client')->group(function () {
         Route::prefix('bookings')->group(function () {
             Route::post('/create', [BookingController::class, 'createBooking']);
             Route::get('/history', [BookingController::class, 'historyBooking']);
+            Route::get('/{id}', [BookingController::class, 'getByCustomer']);
             Route::delete('/{bookingId}/foods/{foodId}', [BookingController::class, 'deleteFoodInBooking']);
         });
 
@@ -262,7 +263,8 @@ Route::prefix('client')->group(function () {
             Route::get('/', [CustomerController::class, 'index']);
             Route::post('/create', [CustomerController::class, 'store']);
             Route::get('/{id}', [CustomerController::class, 'show']);
-            Route::put('/update/{id}', [CustomerController::class, 'update']);
+            Route::put('/{id}', [CustomerController::class, 'update']);
+            Route::put('/{id}/add-point', [CustomerController::class, 'addPoint']);
             Route::delete('/{id}', [CustomerController::class, 'delete']);
         });
 
@@ -272,6 +274,7 @@ Route::prefix('client')->group(function () {
             Route::get('/{id}', [CartController::class, 'show']);
             Route::put('/{id}', [CartController::class, 'update']);
             Route::delete('/{id}', [CartController::class, 'destroy']);
+            Route::delete('/by-table/{id_table}', [CartController::class, 'destroyByTable']);
             Route::delete('/clear', [CartController::class, 'clearCart']);
         });
 
@@ -293,6 +296,7 @@ Route::prefix('client')->group(function () {
 
         Route::prefix('invoices')->group(function () {
             Route::get('/', [InvoiceController::class, 'index']);
+            Route::get('/{id}', [InvoiceController::class, 'getByCustomer']);
             Route::get('/payByTransfer/{id}', [InvoiceController::class, 'payByTransfer']);
             Route::post('/callback', [InvoiceController::class, 'handlePayOSCallback']);
         });
@@ -313,7 +317,7 @@ Route::prefix('client')->group(function () {
 
     Route::prefix('foods')->group(function () {
         Route::get('/', [FoodController::class, 'index']);
-
+        Route::get('/', [FoodController::class, 'getFood']);
         Route::get('/foods/active', [FoodController::class, 'activeFood']);
     });
 

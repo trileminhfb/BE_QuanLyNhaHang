@@ -122,5 +122,18 @@ class CartController extends Controller
 
         return response()->json(['message' => 'Đã xóa toàn bộ giỏ hàng'], 200);
     }
+    public function destroyByTable($id_table)
+    {
+        $carts = Cart::where('id_table', $id_table)->get();
 
+        if ($carts->isEmpty()) {
+            return response()->json(['message' => 'Không tìm thấy cart nào cho bàn này'], 404);
+        }
+
+        foreach ($carts as $cart) {
+            $cart->delete();
+        }
+
+        return response()->json(['message' => 'Đã xóa tất cả cart theo bàn thành công'], 200);
+    }
 }

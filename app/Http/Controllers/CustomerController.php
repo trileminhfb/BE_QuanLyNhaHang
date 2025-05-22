@@ -195,4 +195,54 @@ class CustomerController extends Controller
             'message' => 'Khách hàng đã được xóa thành công'
         ], 200);
     }
+
+    public function addPoint(Request $request, $id)
+    {
+        $request->validate([
+            'point' => 'required|integer|min:1',   // số điểm cần cộng, tối thiểu 1
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $customer = Customer::find($id);
+
+            if (!$customer) {
+                return response()->json([
+                    'message' => 'Không tìm thấy khách hàng'
+                ], 404);
+            }
+
+            // + Điểm
+            $customer->point += $request->point;
+
+            /** ------------ Cập nhật rank tự động ------------ */
+            $newRankId = 1;
+
+            if ($customer->point >= 1000) {
+                $newRankId = 4;          // VIP
+            } elseif ($customer->point >= 500) {
+                $newRankId = 3;          // Vàng
+            } elseif ($customer->point >= 200) {
+                $newRankId = 2;          // Bạc
+            }
+
+            $customer->id_rank = $newRankId;
+            /** ----------------------------------------------- */
+
+            $customer->save();
+
+            DB::commit();
+
+            return response()->json([
+                'message'  => 'Cộng điểm & cập nhật rank thành công',
+                'customer' => $customer
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Lỗi: ' . $th->getMessage()
+            ], 500);
+        }
+    }
 }
