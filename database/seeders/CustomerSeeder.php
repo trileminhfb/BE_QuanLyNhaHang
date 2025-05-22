@@ -1,4 +1,5 @@
 <?php
+
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
@@ -33,7 +34,7 @@ class CustomerSeeder extends Seeder
                 'birth' => Carbon::now()->subYears(rand(18, 50))->format('Y-m-d'),
                 'password' => Hash::make('password123'),
                 'FullName' => $names[$i],
-                'image' => 'images/avt.png',
+                'image' => 'default/user' . rand(1, 7) . '.png',
                 'otp' => rand(0, 1) ? rand(100000, 999999) : null,
                 'point' => rand(50, 500),
                 'id_rank' => rand(1, 4),
@@ -46,4 +47,3 @@ class CustomerSeeder extends Seeder
         DB::table('customers')->insert($customers);
     }
 }
-

@@ -14,7 +14,7 @@ class FoodSeeder extends Seeder
             [
                 'name' => 'Phở bò',
                 'id_type' => 1, // Món ăn
-                'image' => 'https://images.pexels.com/photos/2347311/pexels-photo-2347311.jpeg',
+                'image' => 'default/phở bò.png',
                 'bestSeller' => 1,
                 'cost' => 50000,
                 'detail' => 'Phở bò thơm ngon với nước dùng đậm đà, thịt bò mềm.',
@@ -25,7 +25,7 @@ class FoodSeeder extends Seeder
             [
                 'name' => 'Phở gà',
                 'id_type' => 1, // Món ăn
-                'image' => 'https://images.pexels.com/photos/2347312/pexels-photo-2347312.jpeg',
+                'image' => 'default/phở gà.jpg',
                 'bestSeller' => 1,
                 'cost' => 45000,
                 'detail' => 'Phở gà với nước dùng trong, thịt gà ta mềm ngọt.',
@@ -36,7 +36,7 @@ class FoodSeeder extends Seeder
             [
                 'name' => 'Bún bò Huế',
                 'id_type' => 1, // Món ăn
-                'image' => 'https://images.pexels.com/photos/2347313/pexels-photo-2347313.jpeg',
+                'image' => 'default/bún bò huế.png',
                 'bestSeller' => 1,
                 'cost' => 55000,
                 'detail' => 'Bún bò Huế cay nồng, đậm chất miền Trung.',
@@ -47,7 +47,7 @@ class FoodSeeder extends Seeder
             [
                 'name' => 'Gỏi cuốn',
                 'id_type' => 1, // Món ăn
-                'image' => 'https://images.pexels.com/photos/2347314/pexels-photo-2347314.jpeg',
+                'image' => 'default/gỏi cuốn.jpg',
                 'bestSeller' => 1,
                 'cost' => 30000,
                 'detail' => 'Gỏi cuốn tôm thịt tươi ngon, ăn kèm nước chấm chua ngọt.',
@@ -58,7 +58,7 @@ class FoodSeeder extends Seeder
             [
                 'name' => 'Chè ba màu',
                 'id_type' => 1, // Món ăn
-                'image' => 'https://images.pexels.com/photos/2347316/pexels-photo-2347316.jpeg',
+                'image' => 'default/chè ba màu.png',
                 'bestSeller' => 1,
                 'cost' => 20000,
                 'detail' => 'Chè ba màu ngọt mát, đậm chất truyền thống.',
@@ -69,7 +69,7 @@ class FoodSeeder extends Seeder
             [
                 'name' => 'Coca-Cola',
                 'id_type' => 2, // Nước
-                'image' => 'https://images.pexels.com/photos/2347317/pexels-photo-2347317.jpeg',
+                'image' => 'default/Coca Cola.png',
                 'bestSeller' => 1,
                 'cost' => 15000,
                 'detail' => 'Nước ngọt Coca-Cola giải khát tuyệt vời.',
@@ -80,7 +80,7 @@ class FoodSeeder extends Seeder
             [
                 'name' => 'Nước cam ép',
                 'id_type' => 2, // Nước
-                'image' => 'https://images.pexels.com/photos/2347318/pexels-photo-2347318.jpeg',
+                'image' => 'default/nước cam ép.jpg',
                 'bestSeller' => 0,
                 'cost' => 25000,
                 'detail' => 'Nước cam ép tươi, giàu vitamin C.',
@@ -91,7 +91,7 @@ class FoodSeeder extends Seeder
             [
                 'name' => 'Trà sữa trân châu',
                 'id_type' => 2, // Nước
-                'image' => 'https://images.pexels.com/photos/2347319/pexels-photo-2347319.jpeg',
+                'image' => 'default/trà sữa trân châu.jpg',
                 'bestSeller' => 1,
                 'cost' => 30000,
                 'detail' => 'Trà sữa trân châu thơm ngon, trân châu dai giòn.',

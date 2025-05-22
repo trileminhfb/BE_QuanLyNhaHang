@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Ingredient;
 use App\Http\Requests\IngredientRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class IngredientController extends Controller
 {
@@ -22,7 +23,7 @@ class IngredientController extends Controller
     public function store(IngredientRequest $request)
     {
         if ($request->hasFile('image')) {
-            $imageName = $request->file('image')->store('ingredients', 'public');
+            $imageName = $request->file('image')->store('images', 'public');
         }
 
         $ingredient = Ingredient::create([
@@ -40,24 +41,37 @@ class IngredientController extends Controller
 
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'name_ingredient' => 'required|string|max:255',
+            'unit' => 'required|string|max:50',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+
         $ingredient = Ingredient::find($id);
 
         if (!$ingredient) {
             return response()->json([
                 'status' => 0,
                 'message' => 'Nguyên liệu không tồn tại.'
-            ]);
+            ], 404);
         }
 
-        $imagePath = $ingredient->image;
-
-        if ($request->originImg != $imagePath) {
-            $imagePath = $request->file('image')->store('ingredients', 'public');
+        // Xử lý hình ảnh
+        if ($request->hasFile('image')) {
+            // Xóa ảnh cũ nếu có
+            if ($ingredient->image && Storage::exists('public/' . $ingredient->image)) {
+                Storage::delete('public/' . $ingredient->image);
+            }
+            $imagePath = $request->file('image')->store('images', 'public');
+        } else {
+            $imagePath = $ingredient->image; // Giữ ảnh cũ nếu không upload mới
         }
+
+        // Cập nhật dữ liệu
         $ingredient->update([
             'name_ingredient' => $request->name_ingredient,
-            'image'           => trim($imagePath, 'storage/'[1]),
-            'unit'            => $request->unit,
+            'unit' => $request->unit,
+            'image' => $imagePath,
         ]);
 
         return response()->json([
@@ -66,6 +80,7 @@ class IngredientController extends Controller
             'data' => $ingredient
         ]);
     }
+
 
     // Xóa nguyên liệu theo ID
     public function destroy($id)

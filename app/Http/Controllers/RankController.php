@@ -26,7 +26,7 @@ class RankController extends Controller
         // Xử lý hình ảnh
         $imageName = null;
         if ($request->hasFile('image')) {
-            $imageName = $request->file('image')->store('ranks', 'public');
+            $imageName = $request->file('image')->store('images', 'public');
         }
 
         $rank = Rank::create([
@@ -70,7 +70,7 @@ class RankController extends Controller
 
         // Xử lý ảnh
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('ranks', 'public');
+            $imagePath = $request->file('image')->store('images', 'public');
         } else {
             $imagePath = explode('storage/', $rank->image)[1]; // Giữ ảnh cũ nếu không upload ảnh mới
         }
