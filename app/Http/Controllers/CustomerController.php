@@ -42,14 +42,14 @@ class CustomerController extends Controller
                 $image = base64_decode($image);
                 $extension = strtolower($type[1]);
                 $imageName = 'customer_' . time() . '.' . $extension;
-                Storage::disk('public')->put("customers/{$imageName}", $image);
-                $data['image'] = "customers/{$imageName}";
+                Storage::disk('public')->put("images/{$imageName}", $image);
+                $data['image'] = "images/{$imageName}";
             }
         }
 
         // Xử lý ảnh nếu upload bằng form-data (file)
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('customers', 'public');
+            $imagePath = $request->file('image')->store('images', 'public');
             $data['image'] = $imagePath;
         }
 
@@ -130,8 +130,8 @@ class CustomerController extends Controller
                     $image = base64_decode($image);
                     $extension = strtolower($type[1]);
                     $imageName = 'customer_' . time() . '.' . $extension;
-                    Storage::disk('public')->put("customers/{$imageName}", $image);
-                    $data['image'] = "customers/{$imageName}";
+                    Storage::disk('public')->put("images/{$imageName}", $image);
+                    $data['image'] = "images/{$imageName}";
 
                     // Xóa ảnh cũ nếu có
                     if ($customer->image) {
@@ -140,7 +140,7 @@ class CustomerController extends Controller
                 }
             } elseif ($request->hasFile('image')) {
                 // Xử lý ảnh upload qua file
-                $imagePath = $request->file('image')->store('customers', 'public');
+                $imagePath = $request->file('image')->store('images', 'public');
                 $data['image'] = $imagePath;
 
                 // Xóa ảnh cũ nếu có

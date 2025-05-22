@@ -235,7 +235,6 @@ Route::prefix('admin')->group(function () {
         Route::put('/{id}', [SaleReportController::class, 'update']);
         Route::delete('/{id}', [SaleReportController::class, 'destroy']);
     });
-
 });
 
 Route::prefix('client')->group(function () {
@@ -291,7 +290,7 @@ Route::prefix('client')->group(function () {
             Route::put('/update/{id}', [RateController::class, 'update']);
             Route::delete('/delete/{id}', [RateController::class, 'destroy']);
         });
-        
+
         Route::prefix('invoices')->group(function () {
             Route::get('/', [InvoiceController::class, 'index']);
             Route::get('/payByTransfer/{id}', [InvoiceController::class, 'payByTransfer']);
