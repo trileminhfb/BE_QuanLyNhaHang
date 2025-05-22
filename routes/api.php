@@ -283,10 +283,6 @@ Route::prefix('client')->group(function () {
             Route::post('/', [BookingFoodController::class, 'store']);
         });
 
-        Route::prefix('sales')->group(function () {
-            Route::get('/', [SaleController::class, 'activeSales']);
-        });
-
         Route::prefix('rates')->group(function () {
             Route::get('/', [RateController::class, 'getData']);
             Route::post('/create', [RateController::class, 'store']);
@@ -310,6 +306,10 @@ Route::prefix('client')->group(function () {
             Route::get('/', [HistoryPointController::class, 'index']);
             Route::delete('/{id}', [HistoryPointController::class, 'destroy']);
         });
+    });
+
+    Route::prefix('sales')->group(function () {
+        Route::get('/', [SaleController::class, 'activeSales']);
     });
 
     Route::prefix('types')->group(function () {
