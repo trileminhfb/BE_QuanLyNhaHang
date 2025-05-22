@@ -39,6 +39,7 @@ Route::middleware('auth:sanctum')->get('/test', function (Request $request) {
 Route::prefix('admin')->group(function () {
     Route::prefix('customers')->group(function () {
         Route::post('/register', [CustomerController::class, 'register']);
+        Route::put('/{id}/add-point', [CustomerController::class, 'addPoint']);
         Route::get('/', [CustomerController::class, 'index']);
         Route::post('/create', [CustomerController::class, 'store']);
         Route::get('/{id}', [CustomerController::class, 'show']);
