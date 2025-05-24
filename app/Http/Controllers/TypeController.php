@@ -12,7 +12,7 @@ class TypeController extends Controller
     {
         return response()->json([
             'status' => 1,
-            'data' => Type::all()
+            'data' => Type::where('status', 1)->get()
         ]);
     }
 
