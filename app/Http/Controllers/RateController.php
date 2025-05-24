@@ -13,14 +13,16 @@ class RateController extends Controller
     // Lấy danh sách đánh giá (có luôn thông tin food và customer)
     public function getData()
     {
-        $rates = Rate::with(['customer:id,FullName'])->get();
+        $rates = Rate::with([
+            'customer:id,FullName,phoneNumber,mail,birth,image,point,id_rank,isActive',
+            'food:id,name,id_type,image,bestSeller,cost,detail,status'
+        ])->get();
 
         return response()->json([
             'status' => 1,
             'data'   => $rates,
         ]);
     }
-
     // Thêm đánh giá mới
     public function store(RateRequest $request)
     {
