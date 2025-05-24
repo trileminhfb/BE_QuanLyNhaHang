@@ -270,15 +270,7 @@ Route::prefix('client')->group(function () {
             Route::delete('/{id}', [CustomerController::class, 'delete']);
         });
 
-        Route::prefix('carts')->group(function () {
-            Route::get('/', [CartController::class, 'index']);
-            Route::post('/create', [CartController::class, 'store']);
-            Route::get('/{id}', [CartController::class, 'show']);
-            Route::put('/{id}', [CartController::class, 'update']);
-            Route::delete('/{id}', [CartController::class, 'destroy']);
-            Route::delete('/by-table/{id_table}', [CartController::class, 'destroyByTable']);
-            Route::delete('/clear', [CartController::class, 'clearCart']);
-        });
+
 
         Route::prefix('booking-food')->group(function () {
             Route::post('/', [BookingFoodController::class, 'store']);
@@ -308,6 +300,16 @@ Route::prefix('client')->group(function () {
             Route::get('/', [HistoryPointController::class, 'index']);
             Route::delete('/{id}', [HistoryPointController::class, 'destroy']);
         });
+    });
+
+    Route::prefix('carts')->group(function () {
+        Route::get('/', [CartController::class, 'index']);
+        Route::post('/create', [CartController::class, 'store']);
+        Route::get('/{id}', [CartController::class, 'show']);
+        Route::put('/{id}', [CartController::class, 'update']);
+        Route::delete('/{id}', [CartController::class, 'destroy']);
+        Route::delete('/by-table/{id_table}', [CartController::class, 'destroyByTable']);
+        Route::delete('/clear', [CartController::class, 'clearCart']);
     });
 
     Route::prefix('sales')->group(function () {
