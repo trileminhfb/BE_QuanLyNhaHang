@@ -8,15 +8,32 @@ use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
 {
-    public function index()
+public function index()
+{
+    $categories = Category::with([
+        'type',
+        'categoryFoods.food'
+    ])->get();
+
+    if ($categories->isEmpty()) {
+        return response()->json(['message' => '❌ Không tìm thấy danh mục!'], 404);
+    }
+
+    return response()->json($categories, 200);
+}
+
+
+    public function getClient()
     {
         $categories = Category::with([
             'type' => function ($query) {
                 $query->where('status', 1);
             },
-            'categoryFoods.food'
+            'categoryFoods.food' => function ($query) {
+                $query->where('status', 1);
+            }
         ])
-            ->where('status', 1)
+            ->where('status', 1) 
             ->get();
 
         if ($categories->isEmpty()) {
