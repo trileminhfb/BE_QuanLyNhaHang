@@ -8,19 +8,19 @@ use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
 {
-public function index()
-{
-    $categories = Category::with([
-        'type',
-        'categoryFoods.food'
-    ])->get();
+    public function index()
+    {
+        $categories = Category::with([
+            'type',
+            'categoryFoods.food'
+        ])->get();
 
-    if ($categories->isEmpty()) {
-        return response()->json(['message' => '❌ Không tìm thấy danh mục!'], 404);
+        if ($categories->isEmpty()) {
+            return response()->json(['message' => '❌ Không tìm thấy danh mục!'], 404);
+        }
+
+        return response()->json($categories, 200);
     }
-
-    return response()->json($categories, 200);
-}
 
 
     public function getClient()
@@ -33,7 +33,7 @@ public function index()
                 $query->where('status', 1);
             }
         ])
-            ->where('status', 1) 
+            ->where('status', 1)
             ->get();
 
         if ($categories->isEmpty()) {
@@ -42,7 +42,6 @@ public function index()
 
         return response()->json($categories, 200);
     }
-
 
     public function store(Request $request)
     {
