@@ -255,6 +255,7 @@ Route::prefix('client')->group(function () {
         Route::prefix('bookings')->group(function () {
             Route::post('/create', [BookingController::class, 'createBooking']);
             Route::get('/history', [BookingController::class, 'historyBooking']);
+            Route::put('/{id}', [BookingController::class, 'updateStatus']);
             Route::get('/{id}', [BookingController::class, 'getByCustomer']);
             Route::delete('/{bookingId}/foods/{foodId}', [BookingController::class, 'deleteFoodInBooking']);
         });
@@ -293,6 +294,7 @@ Route::prefix('client')->group(function () {
         Route::prefix('invoices')->group(function () {
             Route::get('/', [InvoiceController::class, 'index']);
             Route::get('/{id}', [InvoiceController::class, 'getByCustomer']);
+            Route::put('/{id}', [InvoiceController::class, 'updateStatus']);
             Route::get('/payByTransfer/{id}', [InvoiceController::class, 'payByTransfer']);
             Route::post('/callback', [InvoiceController::class, 'handlePayOSCallback']);
         });
