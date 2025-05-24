@@ -10,11 +10,22 @@ class CategoryController extends Controller
 {
     public function index()
     {
+        $categories = Category::with([
+            'type' => function ($query) {
+                $query->where('status', 1);
+            },
+            'categoryFoods.food'
+        ])
+            ->where('status', 1)
+            ->get();
 
-        $categories = Category::with(['type', 'categoryFoods.food'])->get();
+        if ($categories->isEmpty()) {
+            return response()->json(['message' => '❌ Không tìm thấy danh mục!'], 404);
+        }
 
         return response()->json($categories, 200);
     }
+
 
     public function store(Request $request)
     {
