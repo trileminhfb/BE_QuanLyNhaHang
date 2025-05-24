@@ -67,42 +67,42 @@ class InvoiceController extends Controller
         }
     }
 
-    public function payBooking($id)
-    {
-        try {
-            // Tìm đặt bàn
-            $booking = Booking::find($id);
-            if (!$booking) {
-                return response()->json(['message' => 'Không tìm thấy đặt bàn'], 404);
-            }
-
-            // Kiểm tra trạng thái đặt bàn
-            if ($booking->status == 2) {
-                return response()->json(['message' => 'Đặt bàn đã được thanh toán'], 400);
-            }
-
-            // Tìm hóa đơn liên quan đến đặt bàn
-            $invoice = Invoice::where('id_booking', $booking->id)->first();
-            if (!$invoice) {
-                return response()->json(['message' => 'Không tìm thấy hóa đơn cho đặt bàn này'], 404);
-            }
-
-            // Tạo liên kết thanh toán PayOS
-            $paymentUrl = $this->createPayOSPayment($invoice->id);
-
-            return response()->json([
-                'message' => 'Tạo liên kết thanh toán thành công',
-                'payment_url' => $paymentUrl,
-                'amount' => $invoice->total
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Lỗi tạo liên kết thanh toán cho đặt bàn: ' . $e->getMessage());
-            return response()->json([
-                'message' => 'Lỗi khi tạo liên kết thanh toán',
-                'error' => $e->getMessage()
-            ], 500);
+ public function payBooking($id)
+{
+    try {
+        // Tìm đặt bàn
+        $booking = Booking::find($id);
+        if (!$booking) {
+            return response()->json(['message' => 'Không tìm thấy đặt bàn'], 404);
         }
+
+        // Kiểm tra trạng thái đặt bàn
+        if ($booking->status == 2) {
+            return response()->json(['message' => 'Đặt bàn đã được thanh toán'], 400);
+        }
+
+        // Tìm hóa đơn liên quan đến đặt bàn
+        $invoice = Invoice::where('id_booking', $booking->id)->first();
+        if (!$invoice) {
+            return response()->json(['message' => 'Không tìm thấy hóa đơn cho đặt bàn này'], 404);
+        }
+
+        // Tạo liên kết thanh toán PayOS
+        $paymentUrl = $this->createPayOSPayment($invoice->id);
+
+        return response()->json([
+            'message' => 'Tạo liên kết thanh toán thành công',
+            'payment_url' => $paymentUrl,
+            'amount' => $invoice->total
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Lỗi tạo liên kết thanh toán cho đặt bàn: ' . $e->getMessage());
+        return response()->json([
+            'message' => 'Lỗi khi tạo liên kết thanh toán',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
     public function store(InvoiceRequest $request)
     {
         DB::beginTransaction();
@@ -209,7 +209,7 @@ class InvoiceController extends Controller
             'id_user' => 'required|exists:users,id',
             'total' => 'required|numeric',
             'timeEnd' => 'required|date',
-            'id_customer' => 'required|exists:customers,id',
+            'id_customer' => 'nullable|exists:customers,id',
             'status' => 'nullable|in:1,2,3',
             'foods' => 'nullable|array',
             'foods.*.id' => 'required|exists:foods,id',
@@ -258,33 +258,6 @@ class InvoiceController extends Controller
         }
     }
 
-    public function updateStatus(Request $request, $id)
-    {
-        $validated = $request->validate([
-            'status' => 'required|in:1,2,3',
-        ]);
-
-        try {
-            $invoice = Invoice::find($id);
-
-            if (!$invoice) {
-                return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
-            }
-
-            $invoice->status = $validated['status'];
-            $invoice->save();
-
-            return response()->json([
-                'message' => 'Cập nhật trạng thái hóa đơn thành công',
-                'invoice' => $invoice
-            ], 200);
-        } catch (\Exception $e) {
-            Log::error('Lỗi cập nhật trạng thái hóa đơn: ' . $e->getMessage());
-            return response()->json(['error' => 'Lỗi cập nhật trạng thái hóa đơn'], 500);
-        }
-    }
-
-
     public function delete($id)
     {
         try {
@@ -310,7 +283,7 @@ class InvoiceController extends Controller
             return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
         }
 
-        if ($invoice->status == 1) {
+        if ($invoice->status == 2) {
             return response()->json(['message' => 'Hóa đơn đã được thanh toán'], 400);
         }
 
