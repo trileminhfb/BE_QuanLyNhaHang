@@ -5,15 +5,14 @@ namespace App\Http\Controllers;
 use App\Http\Requests\InvoiceRequest;
 use Illuminate\Http\Request;
 use App\Models\Invoice;
-use Illuminate\Support\FacadesDB;
-use Illuminate\Support\Facades\Http;
+use App\Models\Booking;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\Cart;
 use App\Models\Food;
 use App\Models\InvoiceFood;
 use App\Models\Sale;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use PayOS\PayOS;
 
 class InvoiceController extends Controller
@@ -63,38 +62,83 @@ class InvoiceController extends Controller
         } catch (\Exception $e) {
             Log::error('Lỗi khi lấy hóa đơn theo khách hàng: ' . $e->getMessage());
             return response()->json([
-                'error' => 'Lỗi khi lấy hóa đơn: ' . $e->getMessage() // log ra lỗi thật
+                'error' => 'Lỗi khi lấy hóa đơn: ' . $e->getMessage()
             ], 500);
         }
     }
 
+    public function payBooking($id)
+    {
+        try {
+            // Tìm đặt bàn
+            $booking = Booking::find($id);
+            if (!$booking) {
+                return response()->json(['message' => 'Không tìm thấy đặt bàn'], 404);
+            }
+
+            // Kiểm tra trạng thái đặt bàn
+            if ($booking->status == 2) {
+                return response()->json(['message' => 'Đặt bàn đã được thanh toán'], 400);
+            }
+
+            // Tìm hóa đơn liên quan đến đặt bàn
+            $invoice = Invoice::where('id_booking', $booking->id)->first();
+            if (!$invoice) {
+                return response()->json(['message' => 'Không tìm thấy hóa đơn cho đặt bàn này'], 404);
+            }
+
+            // Tạo liên kết thanh toán PayOS
+            $paymentUrl = $this->createPayOSPayment($invoice->id);
+
+            return response()->json([
+                'message' => 'Tạo liên kết thanh toán thành công',
+                'payment_url' => $paymentUrl,
+                'amount' => $invoice->total
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Lỗi tạo liên kết thanh toán cho đặt bàn: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Lỗi khi tạo liên kết thanh toán',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
     public function store(InvoiceRequest $request)
     {
         DB::beginTransaction();
         try {
             $idTable = $request->id_table;
+            $idBooking = $request->input('id_booking'); // Lấy id_booking từ request
             $user = $request->user();
             $role = $user->role ?? 'guest';
 
-            $carts = Cart::where('id_table', $idTable)->get();
-
-            if ($carts->isEmpty()) {
-                return response()->json(['message' => 'Không có món nào trong giỏ hàng'], 400);
+            // Lấy danh sách món từ request (nếu có) hoặc từ Cart
+            $items = $request->input('items', []);
+            if (empty($items)) {
+                $carts = Cart::where('id_table', $idTable)->get();
+                if ($carts->isEmpty()) {
+                    return response()->json(['message' => 'Không có món nào trong giỏ hàng'], 400);
+                }
+                $items = $carts->map(function ($cart) {
+                    return [
+                        'id_food' => $cart->id_food,
+                        'quantity' => $cart->quantity,
+                        'price' => $cart->food->cost,
+                        'name' => $cart->food->name,
+                    ];
+                })->toArray();
             }
 
-            // $total = 0;
-            // foreach ($carts as $cart) {
-            //     $food = Food::find($cart->id_food);
-            //     if (!$food) {
-            //         return response()->json(['message' => "Món ăn với ID {$cart->id_food} không tồn tại."], 400);
-            //     }
-            //     $total += $cart['quantity'] * $food->cost;
-            // }
+            // Kiểm tra và tính tổng tiền
             $total = $request->input('total', 0);
+            if (!$total) {
+                $total = collect($items)->sum(function ($item) {
+                    return $item['price'] * $item['quantity'];
+                });
+            }
 
             $idSale = null;
             $discountPercent = 0;
-
             if ($request->filled('nameSale')) {
                 $sale = Sale::where('nameSale', $request->nameSale)->first();
                 if ($sale) {
@@ -104,25 +148,28 @@ class InvoiceController extends Controller
                 }
             }
 
+            // Tạo hóa đơn
             $invoice = Invoice::create([
                 'id_table' => $idTable,
+                'id_booking' => $idBooking, // Lưu id_booking
                 'timeEnd' => Carbon::now(),
                 'total' => $total,
                 'id_user' => $role === 'staff' ? $user->id : null,
                 'id_customer' => $role === 'customer' ? $user->id : null,
                 'id_sale' => $idSale,
-                'status' => 1,
+                'status' => 0,
+                'note' => $request->input('note', ''),
             ]);
 
-            foreach ($carts as $cart) {
+            // Tạo chi tiết hóa đơn (InvoiceFood)
+            foreach ($items as $item) {
                 InvoiceFood::create([
                     'id_invoice' => $invoice->id,
-                    'id_food' => $cart->id_food,
-                    'quantity' => $cart->quantity,
+                    'id_food' => $item['id_food'],
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'],
                 ]);
             }
-
-            Cart::where('id_table', $idTable)->delete();
 
             DB::commit();
 
@@ -132,7 +179,7 @@ class InvoiceController extends Controller
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
-
+            Log::error('Lỗi khi tạo hóa đơn: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Lỗi khi tạo hóa đơn',
                 'error' => $e->getMessage()
@@ -163,7 +210,7 @@ class InvoiceController extends Controller
             'total' => 'required|numeric',
             'timeEnd' => 'required|date',
             'id_customer' => 'required|exists:customers,id',
-            'status' => 'nullable|in:1,2,3',
+            'status' => 'nullable|in:0,1,2',
             'foods' => 'nullable|array',
             'foods.*.id' => 'required|exists:foods,id',
             'foods.*.quantity' => 'required|integer|min:0',
@@ -221,6 +268,7 @@ class InvoiceController extends Controller
             }
 
             $invoice->delete();
+            return response()->json(['message' => 'Xóa hóa đơn thành công']);
         } catch (\Exception $e) {
             Log::error('Lỗi xóa hóa đơn: ' . $e->getMessage());
             return response()->json(['error' => 'Lỗi xóa hóa đơn'], 500);
@@ -235,142 +283,163 @@ class InvoiceController extends Controller
             return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
         }
 
-        if ($invoice->status == 2) {
+        if ($invoice->status == 1) {
             return response()->json(['message' => 'Hóa đơn đã được thanh toán'], 400);
         }
-
-        $amount = $invoice->total;
 
         $paymentUrl = $this->createPayOSPayment($invoice->id);
 
         return response()->json([
             'message' => 'Tạo thanh toán thành công',
             'payment_url' => $paymentUrl,
-            'amount' => $amount
+            'amount' => $invoice->total
         ]);
     }
+
     public function createPayOSPayment($invoiceId)
     {
-        $invoice = Invoice::with('foods')->findOrFail($invoiceId);
-        $foods = $invoice->foods;
+        try {
+            $invoice = Invoice::with('invoiceFoods.food')->findOrFail($invoiceId);
 
-        if (!$invoice) {
-            return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
-        }
+            if (!$invoice) {
+                return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
+            }
 
-        $clientId = env('PAYOS_CLIENT_ID');
-        $apiKey = env('PAYOS_API_KEY');
-        $checksumKey = env('PAYOS_CHECKSUM_KEY');
-        $payOS = new PayOS(
-            clientId: $clientId,
-            apiKey: $apiKey,
-            checksumKey: $checksumKey
-        );
-        $amount = $invoice->total;
+            $clientId = env('PAYOS_CLIENT_ID');
+            $apiKey = env('PAYOS_API_KEY');
+            $checksumKey = env('PAYOS_CHECKSUM_KEY');
+            $payOS = new PayOS(
+                clientId: $clientId,
+                apiKey: $apiKey,
+                checksumKey: $checksumKey
+            );
 
-        $items = $foods->map(function ($food) {
-            return [
-                'name' => $food->name,
-                'quantity' => $food->pivot->quantity,
-                'price' => $food->cost,
+            $items = $invoice->invoiceFoods->map(function ($invoiceFood) {
+                return [
+                    'name' => $invoiceFood->food->name ?? 'Không rõ tên',
+                    'quantity' => (int) $invoiceFood->quantity,
+                    'price' => (int) ($invoiceFood->price ?? $invoiceFood->food->cost), // Sử dụng price từ InvoiceFood
+                ];
+            })->toArray();
+
+            $body = [
+                'orderCode' => (int) $invoiceId,
+                'amount' => (int) $invoice->total,
+                'description' => 'Thanh toán hóa đơn #' . $invoiceId . ($invoice->note ? ' - Ghi chú: ' . $invoice->note : ''),
+                'items' => $items,
+                'returnUrl' => 'http://localhost:5173/?status=success',
+                'cancelUrl' => 'http://localhost:5173/?status=error',
             ];
-        })->toArray();
 
-        $body = [
-            'orderCode' => (int) (time() . rand(10, 99)),
-            'amount' => (int) 2000,
-            'description' => 'Thanh toán hóa đơn #' . $invoiceId,
-            "items" => $items,
-            'returnUrl' => 'http://localhost:5173/?status=success',
-            'cancelUrl' => 'http://localhost:5173/?status=error',
-        ];
+            $response = $payOS->createPaymentLink($body);
 
-        $response = $payOS->createPaymentLink($body);
-
-        return $response['checkoutUrl'];
+            return $response['checkoutUrl'];
+        } catch (\Exception $e) {
+            Log::error('Lỗi tạo liên kết thanh toán PayOS: ' . $e->getMessage());
+            return response()->json(['error' => 'Lỗi tạo liên kết thanh toán'], 500);
+        }
     }
+
     public function handlePayOSCallback(Request $request)
     {
-        $orderCode = $request->input('orderCode');
-        $status = $request->input('status');
+        try {
+            $orderCode = $request->input('orderCode');
+            $status = $request->input('status');
 
-        if (!$orderCode || !$status) {
-            return response()->json(['message' => 'Thiếu thông tin thanh toán'], 400);
+            if (!$orderCode || !$status) {
+                return response()->json(['message' => 'Thiếu thông tin thanh toán'], 400);
+            }
+
+            $booking = Booking::find($orderCode);
+            if (!$booking) {
+                return response()->json(['message' => 'Không tìm thấy đặt bàn'], 404);
+            }
+
+            if ($booking->status == 2) {
+                return response()->json(['message' => 'Đặt bàn đã được thanh toán trước đó'], 200);
+            }
+
+            if (in_array($status, ['PAID', 'SUCCESS'])) {
+                $booking->status = 2;
+                $booking->save();
+
+                return response()->json(['message' => 'Thanh toán đặt bàn thành công'], 200);
+            }
+
+            return response()->json(['message' => 'Thanh toán không thành công'], 400);
+        } catch (\Exception $e) {
+            Log::error('Lỗi xử lý callback PayOS: ' . $e->getMessage());
+            return response()->json(['error' => 'Lỗi xử lý callback thanh toán'], 500);
         }
-
-        $invoice = Invoice::find($orderCode);
-        if (!$invoice) {
-            return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
-        }
-
-        if ($invoice->status == 1) {
-            return response()->json(['message' => 'Hóa đơn đã được thanh toán trước đó'], 200);
-        }
-
-        if (in_array($status, ['PAID', 'SUCCESS'])) {
-            $invoice->status = 1;
-            $invoice->save();
-
-            Cart::where('user_id', $invoice->user_id)->delete();
-
-            return response()->json(['message' => 'Thanh toán thành công, đã xóa giỏ hàng'], 200);
-        }
-
-        return response()->json(['message' => 'Thanh toán không thành công'], 400);
     }
 
     public function handlePaymentResult(Request $request)
     {
-        $orderCode = $request->input('orderCode');
-        $status = $request->input('status');
+        try {
+            $orderCode = $request->input('orderCode');
+            $status = $request->input('status');
 
-        if (!$orderCode || !$status) {
-            return response()->json(['message' => 'Thiếu thông tin thanh toán'], 400);
+            if (!$orderCode || !$status) {
+                return response()->json(['message' => 'Thiếu thông tin thanh toán'], 400);
+            }
+
+            $invoice = Invoice::find($orderCode);
+            if (!$invoice) {
+                return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
+            }
+
+            if ($invoice->status == 1) {
+                return response()->json(['message' => 'Hóa đơn đã được thanh toán trước đó'], 200);
+            }
+
+            if ($status === 'PAID' || $status === 'SUCCESS') {
+                $invoice->status = 1;
+                $invoice->save();
+
+                Cart::where('id_table', $invoice->id_table)->delete();
+
+                return response()->json(['message' => 'Thanh toán thành công, giỏ hàng đã được xóa'], 200);
+            }
+
+            return response()->json(['message' => 'Thanh toán không thành công'], 400);
+        } catch (\Exception $e) {
+            Log::error('Lỗi xử lý kết quả thanh toán: ' . $e->getMessage());
+            return response()->json(['error' => 'Lỗi xử lý kết quả thanh toán'], 500);
         }
-
-        $invoice = Invoice::find($orderCode);
-        if (!$invoice) {
-            return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
-        }
-
-        if ($invoice->status == 1) {
-            return response()->json(['message' => 'Hóa đơn đã được thanh toán trước đó'], 200);
-        }
-
-        if ($status === 'PAID' || $status === 'SUCCESS') {
-            $invoice->status = 1;
-            $invoice->save();
-
-            Cart::where('invoice_id', $invoice->id)->delete();
-
-            return response()->json(['message' => 'Thanh toán thành công, giỏ hàng đã được xóa'], 200);
-        }
-
-        return response()->json(['message' => 'Thanh toán không thành công'], 400);
     }
 
     public function clearCartByInvoice($invoiceId)
     {
-        $invoice = Invoice::with('cartItems')->find($invoiceId);
+        try {
+            $invoice = Invoice::find($invoiceId);
 
-        if (!$invoice) {
-            return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
+            if (!$invoice) {
+                return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
+            }
+
+            Cart::where('id_table', $invoice->id_table)->delete();
+
+            return response()->json(['message' => 'Đã xóa giỏ hàng liên quan đến hóa đơn']);
+        } catch (\Exception $e) {
+            Log::error('Lỗi xóa giỏ hàng theo hóa đơn: ' . $e->getMessage());
+            return response()->json(['error' => 'Lỗi xóa giỏ hàng'], 500);
         }
-
-        Cart::where('invoice_id', $invoiceId)->delete();
-
-        return response()->json(['message' => 'Đã xóa giỏ hàng liên quan đến hóa đơn']);
     }
 
     public function destroy($id)
     {
-        $cartItem = Cart::find($id);
-        if (!$cartItem) {
-            return response()->json(['message' => 'Không tìm thấy món trong giỏ hàng'], 404);
+        try {
+            $cartItem = Cart::find($id);
+            if (!$cartItem) {
+                return response()->json(['message' => 'Không tìm thấy món trong giỏ hàng'], 404);
+            }
+
+            $cartItem->delete();
+
+            return response()->json(['message' => 'Xóa món khỏi giỏ hàng thành công']);
+        } catch (\Exception $e) {
+            Log::error('Lỗi xóa món trong giỏ hàng: ' . $e->getMessage());
+            return response()->json(['error' => 'Lỗi xóa món trong giỏ hàng'], 500);
         }
-
-        $cartItem->delete();
-
-        return response()->json(['message' => 'Xóa món khỏi giỏ hàng thành công']);
     }
 }

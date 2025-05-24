@@ -79,19 +79,34 @@ class CartController extends Controller
         }
     }
 
-
-    // Lấy thông tin chi tiết một cart
-    public function show($id)
+    public function show($id_table)
     {
-        $cart = Cart::find($id);
-        if (!$cart) {
-            return response()->json(['message' => 'Cart not found'], 404);
+        $carts = Cart::with('food')->where('id_table', $id_table)->get();
+
+        if ($carts->isEmpty()) {
+            return response()->json(['message' => 'Không tìm thấy giỏ hàng cho bàn này'], 404);
         }
-        return response()->json($cart);
+
+        $formatted = $carts->map(function ($cart) {
+            return [
+                'id' => $cart->id,
+                'id_table' => $cart->id_table,
+                'quantity' => $cart->quantity,
+                'created_at' => $cart->created_at,
+                'updated_at' => $cart->updated_at,
+                'food' => $cart->food ? [
+                    'id' => $cart->food->id,
+                    'name' => $cart->food->name,
+                    'cost' => $cart->food->cost,
+                    'image' => $cart->food->image,
+                    'detail' => $cart->food->detail,
+                ] : null
+            ];
+        });
+
+        return response()->json($formatted);
     }
 
-    // Cập nhật một cart
-    // fix: bắt điều kiện tại, lỡ như cập nhật số lượng âm
     public function update(Request $request, $id)
     {
         $cart = Cart::find($id);
@@ -103,7 +118,6 @@ class CartController extends Controller
         return response()->json($cart);
     }
 
-    // Xóa một cart
     public function destroy($id)
     {
         $cart = Cart::find($id);
@@ -114,6 +128,7 @@ class CartController extends Controller
         $cart->delete();
         return response()->json(['message' => 'Deleted successfully']);
     }
+
     public function clearCart()
     {
         $userId = auth()->id();
@@ -122,6 +137,7 @@ class CartController extends Controller
 
         return response()->json(['message' => 'Đã xóa toàn bộ giỏ hàng'], 200);
     }
+
     public function destroyByTable($id_table)
     {
         $carts = Cart::where('id_table', $id_table)->get();

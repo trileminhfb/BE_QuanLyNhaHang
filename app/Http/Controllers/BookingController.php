@@ -185,7 +185,41 @@ class BookingController extends Controller
 
         return response()->json(['message' => 'Food removed from booking'], 200);
     }
+    public function cancelBooking(Request $request, $id)
+    {
+        try {
+            // Tìm đặt bàn theo ID và customer_id
+            $booking = Booking::where('id', $id)
+                ->where('id_customer', auth()->id())
+                ->first();
 
+            if (!$booking) {
+                return response()->json([
+                    'message' => 'Không tìm thấy đặt bàn hoặc bạn không có quyền hủy.'
+                ], 404);
+            }
+
+            // Kiểm tra trạng thái (1 = Đang chờ thanh toán)
+            if ($booking->status != 1) {
+                return response()->json([
+                    'message' => 'Chỉ có thể hủy đặt bàn đang chờ thanh toán.'
+                ], 400);
+            }
+
+            // Cập nhật trạng thái thành "Bị hủy" (4)
+            $booking->status = 4;
+            $booking->save();
+
+            return response()->json([
+                'message' => 'Hủy đặt bàn thành công.'
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Lỗi khi hủy đặt bàn ID ' . $id . ': ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Lỗi server khi hủy đặt bàn: ' . $e->getMessage()
+            ], 500);
+        }
+    }
     public function deleteFood($bookingId, $foodId)
     {
         try {
