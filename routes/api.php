@@ -293,11 +293,11 @@ Route::prefix('client')->group(function () {
 
         Route::prefix('invoices')->group(function () {
             Route::get('/', [InvoiceController::class, 'index']);
-            Route::post('/', [InvoiceController::class, 'store']); // Thêm route để tạo hóa đơn
             Route::get('/{id}', [InvoiceController::class, 'getByCustomer']);
             Route::get('/payByTransfer/{id}', [InvoiceController::class, 'payByTransfer']);
             Route::post('/callback', [InvoiceController::class, 'handlePayOSCallback']);
         });
+
         Route::prefix('ranks')->group(function () {
             Route::get('/', [RankController::class, 'index']);
         });
@@ -306,6 +306,10 @@ Route::prefix('client')->group(function () {
             Route::get('/', [HistoryPointController::class, 'index']);
             Route::delete('/{id}', [HistoryPointController::class, 'destroy']);
         });
+    });
+
+    Route::prefix('invoices')->group(function () {
+        Route::post('/', [InvoiceController::class, 'store']);
     });
 
     Route::prefix('sales')->group(function () {
