@@ -277,7 +277,6 @@ Route::prefix('client')->group(function () {
         });
 
         Route::prefix('rates')->group(function () {
-            Route::get('/', [RateController::class, 'getData']);
             Route::post('/create', [RateController::class, 'store']);
             Route::get('/show/{id}', [RateController::class, 'show']);
             Route::put('/update/{id}', [RateController::class, 'update']);
@@ -300,6 +299,10 @@ Route::prefix('client')->group(function () {
             Route::get('/', [HistoryPointController::class, 'index']);
             Route::delete('/{id}', [HistoryPointController::class, 'destroy']);
         });
+    });
+
+    Route::prefix('rates')->group(function () {
+        Route::get('/', [RateController::class, 'getData']);
     });
 
     Route::prefix('carts')->group(function () {
