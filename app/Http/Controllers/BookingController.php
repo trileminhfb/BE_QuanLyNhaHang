@@ -144,6 +144,49 @@ class BookingController extends Controller
         }
     }
 
+    public function updateStatus(Request $request, $id)
+    {
+        try {
+            $booking = Booking::find($id);
+            if (!$booking) {
+                return response()->json(['message' => 'Booking not found'], 404);
+            }
+
+            $status = $request->input('status');
+            if (is_null($status)) {
+                return response()->json(['message' => 'Status is required'], 400);
+            }
+
+            $autoChanged = false;
+            $diffMinutes = null;
+
+            $booking->status = $status;
+
+            if ($status == 2 && $booking->timeBooking) {
+                $bookingTime = Carbon::parse($booking->timeBooking);
+                $now = Carbon::now();
+                $diffMinutes = $now->diffInMinutes($bookingTime, false);
+
+                if ($diffMinutes < -30) {
+                    $booking->status = 4;
+                    $autoChanged = true;
+                }
+            }
+
+            $booking->save();
+
+            return response()->json([
+                'message' => 'Cập nhật trạng thái thành công.',
+                'auto_status_changed' => $autoChanged,
+                'time_difference_minutes' => $diffMinutes,
+                'booking' => $booking,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+
     public function delete($id)
     {
         $booking = Booking::find($id);
@@ -291,5 +334,4 @@ class BookingController extends Controller
             ], 500);
         }
     }
-
 }

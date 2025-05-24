@@ -258,6 +258,33 @@ class InvoiceController extends Controller
         }
     }
 
+    public function updateStatus(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:1,2,3',
+        ]);
+
+        try {
+            $invoice = Invoice::find($id);
+
+            if (!$invoice) {
+                return response()->json(['message' => 'Không tìm thấy hóa đơn'], 404);
+            }
+
+            $invoice->status = $validated['status'];
+            $invoice->save();
+
+            return response()->json([
+                'message' => 'Cập nhật trạng thái hóa đơn thành công',
+                'invoice' => $invoice
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Lỗi cập nhật trạng thái hóa đơn: ' . $e->getMessage());
+            return response()->json(['error' => 'Lỗi cập nhật trạng thái hóa đơn'], 500);
+        }
+    }
+
+
     public function delete($id)
     {
         try {

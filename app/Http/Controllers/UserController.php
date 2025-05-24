@@ -131,6 +131,7 @@ class UserController extends Controller
 
         if ($user && Hash::check($request->password, $user->password)) {
             return response()->json([
+                'id' => $user->id,
                 'status' => 1,
                 'message' => 'Đăng nhập thành công',
                 'key' => $user->createToken('key_admin')->plainTextToken,
