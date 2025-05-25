@@ -67,52 +67,55 @@ class InvoiceController extends Controller
         }
     }
 
- public function payBooking($id)
-{
-    try {
-        // Tìm đặt bàn
-        $booking = Booking::find($id);
-        if (!$booking) {
-            return response()->json(['message' => 'Không tìm thấy đặt bàn'], 404);
+    public function payBooking($id)
+    {
+        try {
+            // Tìm đặt bàn
+            $booking = Booking::find($id);
+            if (!$booking) {
+                return response()->json(['message' => 'Không tìm thấy đặt bàn'], 404);
+            }
+
+            // Kiểm tra trạng thái đặt bàn
+            if ($booking->status == 2) {
+                return response()->json(['message' => 'Đặt bàn đã được thanh toán'], 400);
+            }
+
+            // Tìm hóa đơn liên quan đến đặt bàn
+            $invoice = Invoice::where('id_booking', $booking->id)->first();
+            if (!$invoice) {
+                return response()->json(['message' => 'Không tìm thấy hóa đơn cho đặt bàn này'], 404);
+            }
+
+            // Tạo liên kết thanh toán PayOS
+            $paymentUrl = $this->createPayOSPayment($invoice->id);
+
+            return response()->json([
+                'message' => 'Tạo liên kết thanh toán thành công',
+                'payment_url' => $paymentUrl,
+                'amount' => $invoice->total
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Lỗi tạo liên kết thanh toán cho đặt bàn: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Lỗi khi tạo liên kết thanh toán',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        // Kiểm tra trạng thái đặt bàn
-        if ($booking->status == 2) {
-            return response()->json(['message' => 'Đặt bàn đã được thanh toán'], 400);
-        }
-
-        // Tìm hóa đơn liên quan đến đặt bàn
-        $invoice = Invoice::where('id_booking', $booking->id)->first();
-        if (!$invoice) {
-            return response()->json(['message' => 'Không tìm thấy hóa đơn cho đặt bàn này'], 404);
-        }
-
-        // Tạo liên kết thanh toán PayOS
-        $paymentUrl = $this->createPayOSPayment($invoice->id);
-
-        return response()->json([
-            'message' => 'Tạo liên kết thanh toán thành công',
-            'payment_url' => $paymentUrl,
-            'amount' => $invoice->total
-        ]);
-    } catch (\Exception $e) {
-        Log::error('Lỗi tạo liên kết thanh toán cho đặt bàn: ' . $e->getMessage());
-        return response()->json([
-            'message' => 'Lỗi khi tạo liên kết thanh toán',
-            'error' => $e->getMessage()
-        ], 500);
     }
-}
+
     public function store(InvoiceRequest $request)
     {
         DB::beginTransaction();
         try {
             $idTable = $request->id_table;
-            $idBooking = $request->input('id_booking'); // Lấy id_booking từ request
+            $idBooking = $request->input('id_booking');
             $user = $request->user();
+            $idUser = $user ? $user->id : $request->input('id_user', null);
+            $idCustomer = $request->input('id_customer', null);
+            $idSale = $request->input('id_sale', null);
             $role = $user->role ?? 'guest';
 
-            // Lấy danh sách món từ request (nếu có) hoặc từ Cart
             $items = $request->input('items', []);
             if (empty($items)) {
                 $carts = Cart::where('id_table', $idTable)->get();
@@ -129,7 +132,6 @@ class InvoiceController extends Controller
                 })->toArray();
             }
 
-            // Kiểm tra và tính tổng tiền
             $total = $request->input('total', 0);
             if (!$total) {
                 $total = collect($items)->sum(function ($item) {
@@ -137,31 +139,27 @@ class InvoiceController extends Controller
                 });
             }
 
-            $idSale = null;
             $discountPercent = 0;
-            if ($request->filled('nameSale')) {
-                $sale = Sale::where('nameSale', $request->nameSale)->first();
+            if ($idSale) {
+                $sale = Sale::find($idSale);
                 if ($sale) {
                     $discountPercent = $sale->percent;
-                    $idSale = $sale->id;
                     $total -= ($total * $discountPercent / 100);
                 }
             }
 
-            // Tạo hóa đơn
             $invoice = Invoice::create([
                 'id_table' => $idTable,
-                'id_booking' => $idBooking, // Lưu id_booking
+                'id_booking' => $idBooking,
                 'timeEnd' => Carbon::now(),
                 'total' => $total,
-                'id_user' => $role === 'staff' ? $user->id : null,
-                'id_customer' => $role === 'customer' ? $user->id : null,
+                'id_user' => $idUser,
+                'id_customer' => $idCustomer,
                 'id_sale' => $idSale,
                 'status' => 1,
                 'note' => $request->input('note', ''),
             ]);
 
-            // Tạo chi tiết hóa đơn (InvoiceFood)
             foreach ($items as $item) {
                 InvoiceFood::create([
                     'id_invoice' => $invoice->id,
