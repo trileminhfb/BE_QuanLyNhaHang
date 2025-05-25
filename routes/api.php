@@ -37,8 +37,18 @@ Route::middleware('auth:sanctum')->get('/test', function (Request $request) {
 });
 
 Route::prefix('admin')->group(function () {
+    Route::prefix('users')->group(function () {
+        Route::post('/login', [UserController::class, 'login']);
+        Route::post('/check-login', [UserController::class, 'checkLogin']);
+    });
+
     Route::prefix('customers')->group(function () {
         Route::post('/register', [CustomerController::class, 'register']);
+    });
+});
+
+Route::prefix('admin')->middleware('checkUser')->group(function () {
+    Route::prefix('customers')->group(function () {
         Route::get('/', [CustomerController::class, 'index']);
         Route::post('/create', [CustomerController::class, 'store']);
         Route::get('/{id}', [CustomerController::class, 'show']);
@@ -46,8 +56,20 @@ Route::prefix('admin')->group(function () {
         Route::delete('/{id}', [CustomerController::class, 'delete']);
     });
 
+    Route::prefix('users')->group(function () {
+        Route::get('/', [UserController::class, 'getData']);
+        Route::post('/create', [UserController::class, 'store']);
+        Route::get('/show/{id}', [UserController::class, 'getById']);
+        Route::put('/update/{id}', [UserController::class, 'update']);
+        Route::delete('/delete/{id}', [UserController::class, 'destroy']);
+        Route::get('/profile', [UserController::class, 'getUserInfo']);
+        Route::put('/profile-update/{id}', [UserController::class, 'updateUserInfo']);
+        Route::put('/change-password', [UserController::class, 'changePasswordProfile']);
+        Route::post('/logout', [UserController::class, 'logout']);
+    });
+
     Route::prefix('bookings')->group(function () {
-        Route::get('/check-timeout', [BookingController::class, 'autoUpdateStatus']); // Đặt trước
+        Route::get('/check-timeout', [BookingController::class, 'autoUpdateStatus']);
         Route::get('/', [BookingController::class, 'index']);
         Route::get('/{id}', [BookingController::class, 'show']);
         Route::put('/{id}', [BookingController::class, 'update']);
@@ -97,7 +119,6 @@ Route::prefix('admin')->group(function () {
         Route::delete('/{id}', [RankController::class, 'destroy']);
     });
 
-
     Route::prefix('ingredients')->group(function () {
         Route::get('/', [IngredientController::class, 'getData']);
         Route::post('/create', [IngredientController::class, 'store']);
@@ -139,22 +160,6 @@ Route::prefix('admin')->group(function () {
         Route::delete('/delete/{id}', [ReviewManagementController::class, 'destroy']);
     });
 
-    Route::prefix('users')->group(function () {
-        Route::get('/', [UserController::class, 'getData']);
-        Route::post('/create', [UserController::class, 'store']);
-        Route::get('/show/{id}', [UserController::class, 'getById']);
-        Route::put('/update/{id}', [UserController::class, 'update']);
-        Route::delete('/delete/{id}', [UserController::class, 'destroy']);
-
-        Route::post('/login', [UserController::class, 'login']);
-        Route::post('/check-login', [UserController::class, 'checkLogin']);
-        Route::post('/logout', [UserController::class, 'logout']);
-
-        Route::get('/profile', [UserController::class, 'getUserInfo']);
-        Route::put('/profile-update/{id}', [UserController::class, 'updateUserInfo']);
-        Route::put('/change-password', [UserController::class, 'changePasswordProfile'])->middleware('checkUser');
-    });
-
     Route::prefix('booking-food')->group(function () {
         Route::get('/', [BookingFoodController::class, 'index']);
         Route::post('/', [BookingFoodController::class, 'store']);
@@ -162,6 +167,7 @@ Route::prefix('admin')->group(function () {
         Route::put('/{id}', [BookingFoodController::class, 'update']);
         Route::delete('/{id}', [BookingFoodController::class, 'destroy']);
     });
+
     Route::prefix('carts')->group(function () {
         Route::get('/', [CartController::class, 'index']);
         Route::post('/create', [CartController::class, 'store']);
@@ -227,7 +233,6 @@ Route::prefix('admin')->group(function () {
         Route::post('/generate', [SaleReportFoodController::class, 'generateReportFoods']);
     });
 
-
     Route::prefix('sale-reports')->group(function () {
         Route::get('/', [SaleReportController::class, 'index']);
         Route::post('/create', [SaleReportController::class, 'store']);
@@ -236,6 +241,7 @@ Route::prefix('admin')->group(function () {
         Route::delete('/{id}', [SaleReportController::class, 'destroy']);
     });
 });
+
 
 Route::prefix('client')->group(function () {
 
