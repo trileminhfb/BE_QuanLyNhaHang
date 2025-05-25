@@ -12,8 +12,8 @@ class IngredientSeeder extends Seeder
     {
         $ingredients = [
             [
-                'name_ingredient' => 'default/Thịt bò nga',
-                'image' => 'thịt bò nga.jpg',
+                'name_ingredient' => 'Thịt bò nga',
+                'image' => 'default/thịt bò nga.jpg',
                 'unit' => 'Kg',
             ],
             [
