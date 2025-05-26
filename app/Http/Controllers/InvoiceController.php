@@ -48,13 +48,23 @@ class InvoiceController extends Controller
                 'invoiceFoods.food'
             ])
                 ->where('id_customer', $customerId)
+                ->whereIn('status', [ 2, 3])
                 ->get();
 
             if ($invoices->isEmpty()) {
                 return response()->json([
-                    'message' => 'Không tìm thấy hóa đơn nào cho khách hàng này.'
+                    'message' => 'Không tìm thấy hóa đơn nào cho khách hàng này với trạng thái phù hợp.'
                 ], 404);
             }
+
+            // Thêm trường reward_points vào mỗi hóa đơn
+            $invoices = $invoices->map(function ($invoice) {
+                $total = $invoice->invoiceFoods->sum(function ($item) {
+                    return ($item->quantity ?? 0) * ($item->food->cost ?? 0);
+                });
+                $invoice->reward_points = round(($total * 0.05) / 1000);
+                return $invoice;
+            });
 
             return response()->json([
                 'data' => $invoices
@@ -321,7 +331,7 @@ class InvoiceController extends Controller
             })->toArray();
 
             $body = [
-                'orderCode' => (int) $invoiceId,
+                'orderCode' => rand(0, 99999),
                 'amount' => (int) $invoice->total,
                 'description' => 'Thanh toán hóa đơn #' . $invoiceId . ($invoice->note ? ' - Ghi chú: ' . $invoice->note : ''),
                 'items' => $items,

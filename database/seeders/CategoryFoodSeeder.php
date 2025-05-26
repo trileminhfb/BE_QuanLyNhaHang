@@ -10,26 +10,120 @@ class CategoryFoodSeeder extends Seeder
     public function run()
     {
         DB::table('category_foods')->insert([
-            ['id_category' => 7, 'id_food' => 1], // Phở bò - Món ăn truyền thống
-            ['id_category' => 1, 'id_food' => 1], // Phở bò - Món nước
-            ['id_category' => 7, 'id_food' => 2], // Phở gà - Món ăn truyền thống
-            ['id_category' => 1, 'id_food' => 2], // Phở gà - Món nước
-            ['id_category' => 7, 'id_food' => 3], // Bún bò Huế - Món ăn truyền thống
-            ['id_category' => 1, 'id_food' => 3], // Bún bò Huế - Món nước
-            ['id_category' => 7, 'id_food' => 4], // Gỏi cuốn - Món ăn truyền thống
-            ['id_category' => 10, 'id_food' => 4], // Gỏi cuốn - Món chay
-            ['id_category' => 12, 'id_food' => 4], // Gỏi cuốn - Món khai vị
-            ['id_category' => 7, 'id_food' => 5], // Chè ba màu - Món ăn truyền thống
-            ['id_category' => 13, 'id_food' => 5], // Chè ba màu - Món tráng miệng
-            ['id_category' => 17, 'id_food' => 6], // Coca-Cola - Nước ngọt
-            ['id_category' => 19, 'id_food' => 6], // Coca-Cola - Đồ uống có gas
-            ['id_category' => 18, 'id_food' => 7], // Nước cam ép - Nước ép
-            ['id_category' => 20, 'id_food' => 7], // Nước cam ép - Đồ uống không cồn
-            ['id_category' => 21, 'id_food' => 7], // Nước cam ép - Đồ uống lạnh
-            ['id_category' => 17, 'id_food' => 8], // Trà sữa trân châu - Nước ngọt
-            ['id_category' => 20, 'id_food' => 8], // Trà sữa trân châu - Đồ uống không cồn
-            ['id_category' => 21, 'id_food' => 8], // Trà sữa trân châu - Đồ uống lạnh
-            // Thêm các ánh xạ khác nếu cần...
+            ['id_category' => 2, 'id_food' => 1],
+            ['id_category' => 2, 'id_food' => 2],
+            ['id_category' => 2, 'id_food' => 3],
+            ['id_category' => 2, 'id_food' => 4],
+            ['id_category' => 2, 'id_food' => 5],
+            ['id_category' => 2, 'id_food' => 6],
+            ['id_category' => 2, 'id_food' => 7],
+            ['id_category' => 1, 'id_food' => 8],
+            ['id_category' => 2, 'id_food' => 9],
+            ['id_category' => 2, 'id_food' => 10],
+            ['id_category' => 12, 'id_food' => 11],
+            ['id_category' => 2, 'id_food' => 12],
+            ['id_category' => 2, 'id_food' => 13],
+            ['id_category' => 2, 'id_food' => 14],
+            ['id_category' => 2, 'id_food' => 15],
+            ['id_category' => 2, 'id_food' => 16],
+            ['id_category' => 2, 'id_food' => 17],
+            ['id_category' => 2, 'id_food' => 18],
+            ['id_category' => 2, 'id_food' => 19],
+            ['id_category' => 2, 'id_food' => 20],
+            ['id_category' => 2, 'id_food' => 21],
+            ['id_category' => 2, 'id_food' => 22],
+            ['id_category' => 4, 'id_food' => 23],
+            ['id_category' => 2, 'id_food' => 24],
+            ['id_category' => 9, 'id_food' => 25],
+            ['id_category' => 2, 'id_food' => 26],
+            ['id_category' => 2, 'id_food' => 27],
+            ['id_category' => 2, 'id_food' => 28],
+            ['id_category' => 2, 'id_food' => 29],
+            ['id_category' => 2, 'id_food' => 30],
+            ['id_category' => 10, 'id_food' => 31],
+            ['id_category' => 10, 'id_food' => 32],
+            ['id_category' => 10, 'id_food' => 33],
+            ['id_category' => 3, 'id_food' => 34],
+            ['id_category' => 3, 'id_food' => 35],
+            ['id_category' => 3, 'id_food' => 36],
+            ['id_category' => 3, 'id_food' => 37],
+            ['id_category' => 2, 'id_food' => 38],
+            ['id_category' => 2, 'id_food' => 39],
+            ['id_category' => 10, 'id_food' => 40],
+            ['id_category' => 2, 'id_food' => 41],
+            ['id_category' => 2, 'id_food' => 42],
+            ['id_category' => 7, 'id_food' => 43],
+            ['id_category' => 10, 'id_food' => 44],
+            ['id_category' => 2, 'id_food' => 45],
+            ['id_category' => 13, 'id_food' => 46],
+            ['id_category' => 2, 'id_food' => 47],
+            ['id_category' => 2, 'id_food' => 48],
+            ['id_category' => 2, 'id_food' => 49],
+            ['id_category' => 2, 'id_food' => 50],
+            ['id_category' => 2, 'id_food' => 51],
+            ['id_category' => 1, 'id_food' => 52],
+            ['id_category' => 1, 'id_food' => 53],
+            ['id_category' => 2, 'id_food' => 54],
+            ['id_category' => 2, 'id_food' => 55],
+            ['id_category' => 2, 'id_food' => 56],
+            ['id_category' => 2, 'id_food' => 57],
+            ['id_category' => 2, 'id_food' => 58],
+            ['id_category' => 10, 'id_food' => 59],
+            ['id_category' => 10, 'id_food' => 60],
+            ['id_category' => 1, 'id_food' => 61],
+            ['id_category' => 1, 'id_food' => 62],
+            ['id_category' => 2, 'id_food' => 63],
+            ['id_category' => 3, 'id_food' => 64],
+            ['id_category' => 2, 'id_food' => 65],
+            ['id_category' => 12, 'id_food' => 66],
+            ['id_category' => 2, 'id_food' => 67],
+            ['id_category' => 2, 'id_food' => 68],
+            ['id_category' => 2, 'id_food' => 69],
+            ['id_category' => 10, 'id_food' => 70],
+            ['id_category' => 10, 'id_food' => 71],
+            ['id_category' => 6, 'id_food' => 72],
+            ['id_category' => 10, 'id_food' => 73],
+            ['id_category' => 2, 'id_food' => 74],
+            ['id_category' => 2, 'id_food' => 75],
+            ['id_category' => 2, 'id_food' => 76],
+            ['id_category' => 2, 'id_food' => 77],
+            ['id_category' => 2, 'id_food' => 78],
+            ['id_category' => 2, 'id_food' => 79],
+            ['id_category' => 2, 'id_food' => 80],
+            ['id_category' => 2, 'id_food' => 81],
+            ['id_category' => 10, 'id_food' => 82],
+            ['id_category' => 3, 'id_food' => 83],
+            ['id_category' => 3, 'id_food' => 84],
+            ['id_category' => 3, 'id_food' => 85],
+            ['id_category' => 3, 'id_food' => 86],
+            ['id_category' => 3, 'id_food' => 87],
+            ['id_category' => 3, 'id_food' => 88],
+            ['id_category' => 2, 'id_food' => 89],
+            ['id_category' => 2, 'id_food' => 90],
+            ['id_category' => 2, 'id_food' => 91],
+            ['id_category' => 10, 'id_food' => 92],
+            ['id_category' => 2, 'id_food' => 93],
+            ['id_category' => 2, 'id_food' => 94],
+            ['id_category' => 3, 'id_food' => 95],
+            ['id_category' => 3, 'id_food' => 96],
+            ['id_category' => 3, 'id_food' => 97],
+            ['id_category' => 3, 'id_food' => 98],
+            ['id_category' => 3, 'id_food' => 99],
+            ['id_category' => 1, 'id_food' => 100],
+            ['id_category' => 15, 'id_food' => 101],
+            ['id_category' => 15, 'id_food' => 102],
+            ['id_category' => 15, 'id_food' => 103],
+            ['id_category' => 16, 'id_food' => 104],
+            ['id_category' => 16, 'id_food' => 105],
+            ['id_category' => 16, 'id_food' => 106],
+            ['id_category' => 15, 'id_food' => 107],
+            ['id_category' => 15, 'id_food' => 108],
+            ['id_category' => 15, 'id_food' => 109],
+            ['id_category' => 18, 'id_food' => 110],
+            ['id_category' => 18, 'id_food' => 111],
+            ['id_category' => 18, 'id_food' => 112],
+            ['id_category' => 18, 'id_food' => 113],
+
         ]);
     }
 }

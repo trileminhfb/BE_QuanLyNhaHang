@@ -22,10 +22,23 @@ class GeminiChatController extends Controller
         if (preg_match('/^(chào|hi|hello|xin chào)$/i', trim($message))) {
             return response()->json(['reply' => 'Xin chào! Tôi là botAI – trợ lý của nhà hàng. Bạn cần tư vấn món ăn gì không?']);
         }
-    // 👉 Nếu người dùng hỏi "có được ăn free không" hoặc tương tự
+    // Nếu người dùng hỏi "có được ăn free không" hoặc tương tự
     if (preg_match('/(ăn.*(miễn phí|free)|có.*(free|miễn phí))/i', $message)) {
         return response()->json(['reply' => 'Có chứ! Cứ thoải mái ăn, hôm nay có bé Tôm bao nhé 😄']);
     }
+
+    if (preg_match('/liên hệ (với )?(nhân viên|hỗ trợ|tư vấn|chăm sóc khách hàng)/i', $message)
+    || str_contains($message, 'tôi muốn liên hệ với nhân viên hỗ trợ')) {
+    return response()->json([
+        'reply' => "Cảm ơn bạn đã liên hệ với bộ phận hỗ trợ của chúng tôi! 🧡\n"
+            . "Bạn có thể liên hệ trực tiếp qua:\n"
+            . "- 📞 Điện thoại: 0123 456 789\n"
+            . "- 📧 Email: khanhtran12232003@gmail.com\n"
+            . "- 🏠 Địa chỉ: CAMPUCHIA \n\n"
+            . "Nhân viên của chúng tôi sẽ phản hồi bạn sớm nhất có thể. Cảm ơn bạn đã tin tưởng!"
+    ]);
+}
+
 
         // Nếu người dùng hỏi liên quan đến tư vấn món ăn
         $foods = DB::table('foods')->where('status', 1)->get();

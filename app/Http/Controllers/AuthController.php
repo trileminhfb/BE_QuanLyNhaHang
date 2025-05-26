@@ -143,7 +143,6 @@ class AuthController extends Controller
         $request->validate([
             'email' => 'required|email',
             'otp' => 'required|string',
-            'old_password' => 'required|string',
             'password' => 'required|string|min:6|confirmed',
         ]);
 
@@ -157,9 +156,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'OTP không hợp lệ'], 401);
         }
 
-        if (!Hash::check($request->old_password, $customer->password)) {
-            return response()->json(['message' => 'Mật khẩu cũ không đúng'], 403);
-        }
+        // Xóa kiểm tra mật khẩu cũ đi
 
         $customer->password = Hash::make($request->password);
         $customer->otp = null;

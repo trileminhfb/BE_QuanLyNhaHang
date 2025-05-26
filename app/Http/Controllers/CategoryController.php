@@ -92,20 +92,27 @@ class CategoryController extends Controller
         $category = Category::find($id);
 
         if (!$category) {
-            return response()->json(['message' => ' Không tìm thấy danh mục!'], 404);
+            return response()->json(['message' => '❌ Không tìm thấy danh mục!'], 404);
         }
 
-
+        // Lấy dữ liệu cần update
         $data = $request->only(['name', 'status', 'id_type']);
 
-        $category->update(array_filter($data));
+        // Kiểm tra status có tồn tại và có giá trị hợp lệ không
+        if (isset($data['status']) && !in_array($data['status'], [0, 1], true)) {
+            return response()->json(['message' => '❌ Giá trị status không hợp lệ, chỉ nhận 0 hoặc 1!'], 400);
+        }
+
+        $category->update(array_filter($data, function ($value) {
+            return !is_null($value);
+        }));
 
         if ($request->has('food_ids')) {
             $food_ids = $request->input('food_ids');
             DB::table('category_foods')->where('id_category', $id)->delete();
+
             if (is_array($food_ids) && !empty($food_ids)) {
                 $foodData = array_filter(array_map(function ($food_id) use ($id) {
-
                     return DB::table('foods')->where('id', $food_id)->exists() ? [
                         'id_category' => $id,
                         'id_food' => $food_id,
@@ -121,10 +128,11 @@ class CategoryController extends Controller
         }
 
         return response()->json([
-            'message'  => ' Danh mục đã được cập nhật!',
+            'message'  => '🎉 Danh mục đã được cập nhật!',
             'category' => $category,
         ], 200);
     }
+
 
     public function destroy($id)
     {

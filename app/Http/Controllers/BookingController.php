@@ -334,4 +334,21 @@ class BookingController extends Controller
             ], 500);
         }
     }
+    public function payBooking($id)
+{
+    $booking = Booking::find($id);
+    if (!$booking) {
+        return response()->json(['message' => 'Không tìm thấy đặt bàn'], 404);
+    }
+
+    // Cập nhật trạng thái đặt bàn thành 2 (đã thanh toán)
+    $booking->status = 2;
+    $booking->save();
+
+    return response()->json([
+        'message' => 'Thanh toán đặt bàn thành công',
+        'data' => $booking
+    ], 200);
+}
+
 }
