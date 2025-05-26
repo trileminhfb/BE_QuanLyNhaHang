@@ -13,27 +13,27 @@ class IngredientSeeder extends Seeder
         $ingredients = [
             [
                 'name_ingredient' => 'Thịt bò nga',
-                'image' => 'default/thịt bò nga.jpg',
+                'image' => 'default/ingredient1.png',
                 'unit' => 'Kg',
             ],
             [
                 'name_ingredient' => 'Cá thu',
-                'image' => 'default/cá thu.jpg',
+                'image' => 'default/ingredient2.png',
                 'unit' => 'Kg',
             ],
             [
                 'name_ingredient' => 'Mực khô',
-                'image' => 'default/mực khô.jpg',
+                'image' => 'default/ingredient3.png',
                 'unit' => 'Kg',
             ],
             [
                 'name_ingredient' => 'Tôm',
-                'image' => 'default/tôm.jpg',
+                'image' => 'default/ingredient4.png',
                 'unit' => 'Kg',
             ],
             [
                 'name_ingredient' => 'Ốc',
-                'image' => 'default/ốc.jpg',
+                'image' => 'default/ingredient5.png',
                 'unit' => 'Kg',
             ],
         ];
