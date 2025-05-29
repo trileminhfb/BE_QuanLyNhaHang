@@ -32,8 +32,10 @@ use App\Http\Controllers\SaleReportFoodController;
 use App\Http\Controllers\MessageController;
 use App\Models\Message;
 
-Route::middleware('auth:sanctum')->get('/test', function (Request $request) {
-    return $request->user();
+Route::get('/test', function (Request $request) {
+    return response()->json([
+        'data' =>	123
+    ]);
 });
 
 Route::prefix('admin')->group(function () {

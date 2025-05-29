@@ -335,8 +335,8 @@ class InvoiceController extends Controller
                 'amount' => (int) $invoice->total,
                 'description' => 'Thanh toán hóa đơn #' . $invoiceId . ($invoice->note ? ' - Ghi chú: ' . $invoice->note : ''),
                 'items' => $items,
-                'returnUrl' => 'http://localhost:5173/?status=success',
-                'cancelUrl' => 'http://localhost:5173/?status=error',
+                'returnUrl' => 'http://172.20.10.3:3000/?status=success',
+                'cancelUrl' => 'http://172.20.10.3:3000/?status=error',
             ];
 
             $response = $payOS->createPaymentLink($body);
